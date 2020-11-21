@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
@@ -57,14 +58,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 options.User.RequireUniqueEmail = true;
             });
 
-
-            //var builder = services.AddIdentityServer(options =>
-            //{
-            //    options.Events.RaiseErrorEvents = true;
-            //    options.Events.RaiseInformationEvents = true;
-            //    options.Events.RaiseFailureEvents = true;
-            //    options.Events.RaiseSuccessEvents = true;
-            //});
+            var builder = services.AddIdentityServer(options =>
+                {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+                })
+                .AddInMemoryApiResources(IdentityServerConfiguration.Apis)
+                .AddInMemoryClients(IdentityServerConfiguration.Clients)
+                .AddInMemoryIdentityResources(IdentityServerConfiguration.Ids)
+                .AddDeveloperSigningCredential();
 
             //services.AddCors(options =>
             //{
@@ -101,7 +105,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     }
                 });
             });
-
             services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateRequestValidator>());
         }
 
@@ -117,9 +120,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
             app.UseStaticFiles();
 
+            app.UseIdentityServer();
+
             app.UseHttpsRedirection();
 
-           // app.UseAuthentication();
+            app.UseAuthentication();
 
             app.UseRouting();
 

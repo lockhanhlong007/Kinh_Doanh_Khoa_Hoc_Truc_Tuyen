@@ -348,3 +348,7 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+/Test.ApiOne
+/Test.ApiTwo
+/Test.IdentityServer
+/Test.MvcClient
