@@ -55,7 +55,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
             builder.ApplyConfiguration(new OrderDetailConfiguration());
             builder.ApplyConfiguration(new PermissionConfiguration());
             builder.ApplyConfiguration(new PromotionConfiguration());
-            builder.ApplyConfiguration(new UserInCourseConfiguration());
+            builder.ApplyConfiguration(new ActivateCourseConfiguration());
             builder.ApplyConfiguration(new PromotionInCourseConfiguration());
             builder.HasSequence("KhoaHocSequence");
             base.OnModelCreating(builder);
@@ -81,13 +81,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
 
         public DbSet<Lesson> Lessons { get; set; }
 
-        public DbSet<Comment> LessonComments { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         public DbSet<Permission> Permissions { get; set; }
 
         public DbSet<Promotion> Promotions { get; set; }
 
-        public DbSet<UserInCourse> UserInCourses { get; set; }
+        public DbSet<ActivateCourse> ActivateCourses { get; set; }
 
         public DbSet<PromotionInCourse> PromotionInCourses { get; set; }
     }

@@ -283,6 +283,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                     PaymentMethod = table.Column<int>(nullable: false),
                     UserId = table.Column<Guid>(nullable: false),
                     Total = table.Column<long>(nullable: true),
+                    Message = table.Column<string>(nullable: true),
                     CreationTime = table.Column<DateTime>(nullable: false),
                     LastModificationTime = table.Column<DateTime>(nullable: true)
                 },
@@ -401,6 +402,32 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ActivateCourses",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    CourseId = table.Column<int>(nullable: false),
+                    Status = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivateCourses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActivateCourses_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ActivateCourses_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Lessons",
                 columns: table => new
                 {
@@ -420,32 +447,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                         name: "FK_Lessons_Courses_CourseId",
                         column: x => x.CourseId,
                         principalTable: "Courses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OrderDetails",
-                columns: table => new
-                {
-                    OrderId = table.Column<int>(nullable: false),
-                    CourseId = table.Column<int>(nullable: false),
-                    Price = table.Column<decimal>(nullable: false),
-                    PromotionPrice = table.Column<decimal>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrderDetails", x => new { x.CourseId, x.OrderId });
-                    table.ForeignKey(
-                        name: "FK_OrderDetails_Courses_CourseId",
-                        column: x => x.CourseId,
-                        principalTable: "Courses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OrderDetails_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -475,28 +476,40 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserInCourses",
+                name: "OrderDetails",
                 columns: table => new
                 {
-                    CourseId = table.Column<int>(nullable: false),
-                    UserId = table.Column<Guid>(nullable: false)
+                    OrderId = table.Column<int>(nullable: false),
+                    ActiveCourseId = table.Column<Guid>(nullable: false),
+                    Price = table.Column<decimal>(nullable: true),
+                    PromotionPrice = table.Column<decimal>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserInCourses", x => new { x.CourseId, x.UserId });
+                    table.PrimaryKey("PK_OrderDetails", x => new { x.ActiveCourseId, x.OrderId });
                     table.ForeignKey(
-                        name: "FK_UserInCourses_Courses_CourseId",
-                        column: x => x.CourseId,
-                        principalTable: "Courses",
+                        name: "FK_OrderDetails_ActivateCourses_ActiveCourseId",
+                        column: x => x.ActiveCourseId,
+                        principalTable: "ActivateCourses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserInCourses_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
+                        name: "FK_OrderDetails_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivateCourses_CourseId",
+                table: "ActivateCourses",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivateCourses_UserId",
+                table: "ActivateCourses",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Announcements_UserId",
@@ -591,11 +604,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                 name: "IX_PromotionInCourses_CourseId",
                 table: "PromotionInCourses",
                 column: "CourseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserInCourses_UserId",
-                table: "UserInCourses",
-                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -637,10 +645,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                 name: "PromotionInCourses");
 
             migrationBuilder.DropTable(
-                name: "UserInCourses");
+                name: "Announcements");
 
             migrationBuilder.DropTable(
-                name: "Announcements");
+                name: "ActivateCourses");
 
             migrationBuilder.DropTable(
                 name: "Orders");

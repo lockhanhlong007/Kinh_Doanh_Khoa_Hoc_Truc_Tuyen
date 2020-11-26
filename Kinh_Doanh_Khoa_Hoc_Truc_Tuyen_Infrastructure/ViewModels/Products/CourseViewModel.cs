@@ -1,13 +1,11 @@
 ﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
 
-namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
+namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 {
-    [Table("Courses")]
-    public class Course : IDateTracking, ISwitchable
+    public class CourseViewModel
     {
         public int Id { get; set; }
 
@@ -28,13 +26,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         public Status Status { get; set; }
 
         public int CategoryId { get; set; }
-
-        public Category Category { get; set; }
-
-        public List<Lesson> Lessons { get; set; }
-
-        public List<ActivateCourse> ActivateCourses { get; set; }
-
-        public List<PromotionInCourse> PromotionInCourses { get; set; }
     }
 }

@@ -4,6 +4,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums
 {
     public enum PaymentMethod
     {
+        // Trả hàng lúc nhận tiền
+        [Description("Cash On Delivery")]
+        CashOnDelivery,
+
         // Trả tiền qua ngân hàng nội địa
         [Description("Online Banking")]
         OnlineBanking,

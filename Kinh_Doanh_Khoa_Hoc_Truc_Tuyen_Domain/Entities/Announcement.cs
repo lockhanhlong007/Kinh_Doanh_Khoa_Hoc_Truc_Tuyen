@@ -37,14 +37,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public Guid UserId { set; get; }
 
-        public AppUser AppUser { get; set; }
-
-        public List<AnnouncementUser> AnnouncementUsers { get; set; }
-
         public DateTime CreationTime { get; set; }
 
         public DateTime? LastModificationTime { get; set; }
 
         public Status Status { set; get; }
+
+        public AppUser AppUser { get; set; }
+
+        public List<AnnouncementUser> AnnouncementUsers { get; set; }
     }
 }

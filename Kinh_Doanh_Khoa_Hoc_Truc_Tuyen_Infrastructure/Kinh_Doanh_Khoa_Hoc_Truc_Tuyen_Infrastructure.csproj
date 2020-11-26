@@ -9,4 +9,8 @@
     <PackageReference Include="FluentValidation.AspNetCore" Version="9.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.csproj" />
+  </ItemGroup>
+
 </Project>

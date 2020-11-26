@@ -89,7 +89,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 SortOrder = request.SortOrder,
                 Icon = request.Icon
             };
-            await _khoaHocDbContext.AddAsync(function);
+            await _khoaHocDbContext.Functions.AddAsync(function);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
             {
