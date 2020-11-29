@@ -26,6 +26,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private readonly RoleManager<AppRole> _roleManager;
 
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private readonly ILogger<RolesController> _logger;
 
         public RolesController(RoleManager<AppRole> roleManager, EKhoaHocDbContext khoaHocDbContext, UserManager<AppUser> userManager, ILogger<RolesController> logger)

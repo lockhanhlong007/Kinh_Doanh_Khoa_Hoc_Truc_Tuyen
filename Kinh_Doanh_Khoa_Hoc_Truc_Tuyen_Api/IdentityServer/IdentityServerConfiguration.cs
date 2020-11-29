@@ -9,7 +9,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
 {
     public class IdentityServerConfiguration
     {
-        public static IEnumerable<IdentityResource> Ids => new IdentityResource[] { new IdentityResources.OpenId(), new IdentityResources.Profile(), new IdentityResources.Email()};
+        public static IEnumerable<IdentityResource> Ids => new IdentityResource[] { new IdentityResources.OpenId(), new IdentityResources.Profile(), new IdentityResources.Email() };
 
         public static IEnumerable<ApiResource> Apis => new ApiResource[] { new ApiResource("api.khoahoc", "Khóa Học Trực Tuyến Api") };
 
@@ -19,17 +19,57 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
 
                 new Client
                 {
-                    ClientId = "client_id",
+                    ClientId = "swagger",
+                    ClientName = "Config Swagger",
                     ClientSecrets = { new Secret("secret".Sha256()) },
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
+                    AllowedScopes = new List<string>
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        "api.khoahoc"
+                    },
+                    RequireConsent = true,
+                    AllowOfflineAccess = true,
+                    AllowAccessTokensViaBrowser = true,
+                  //  RedirectUris = { "https://localhost:44342/signin-oidc" },
+                    //PostLogoutRedirectUris =  {   "http://openidclientdemocom:8001/signout-callback-oidc"}
+
+
+                    AccessTokenType = AccessTokenType.Jwt,
+                    AccessTokenLifetime = 120, //86400,
+                    IdentityTokenLifetime = 120, //86400,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    SlidingRefreshTokenLifetime = 30,
+                    RefreshTokenExpiration = TokenExpiration.Absolute,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                    AlwaysSendClientClaims = true,
+                    Enabled = true
+                },
+                new Client
+                {
+                    ClientId = "angular",
+                    ClientName = "Config angular",
+                    ClientSecrets = { new Secret("secret".Sha256()) },
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
                         "api.khoahoc"
-                    }
-                }, 
+                    },
+                    RequireConsent = true,
+                    AllowOfflineAccess = true,
+                    AllowAccessTokensViaBrowser = true
+                    //    RedirectUris =           { "https://localhost:5000/swagger/oauth2-redirect.html" },
+                    //    PostLogoutRedirectUris = { "https://localhost:5000/swagger/oauth2-redirect.html" },
+                    //    AllowedCorsOrigins =     { "https://localhost:5000" },
+                    //    RedirectUris =           { "https://localhost:5000/swagger/oauth2-redirect.html" },
+                    //    PostLogoutRedirectUris =  {   "http://openidclientdemocom:8001/signout-callback-oidc"}
+                }
                 //new Client
                 //{
                 //    ClientId = "webportal",

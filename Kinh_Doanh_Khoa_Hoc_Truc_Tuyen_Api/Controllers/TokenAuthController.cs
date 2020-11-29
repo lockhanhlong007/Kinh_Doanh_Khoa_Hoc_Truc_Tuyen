@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using IdentityModel.Client;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
@@ -16,13 +18,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     [ApiController]
     public class TokenAuthController : ControllerBase
     {
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
 
-        public TokenAuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public TokenAuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHttpClientFactory httpClientFactory)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _httpClientFactory = httpClientFactory;
         }
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
@@ -38,14 +42,36 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var user = await _userManager.FindByNameAsync(model.UserName);
             if (user == null) 
                 return NotFound(new ApiNotFoundResponse("Username không tồn tại"));
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: true);
-            if (result.Succeeded)
+            var serverClient = _httpClientFactory.CreateClient();
+
+            var discoveryDocument = await serverClient.GetDiscoveryDocumentAsync("https://localhost:44342/");
+
+            var tokenResponse = await serverClient.RequestPasswordTokenAsync(
+                new PasswordTokenRequest()
+                {
+                    Address = discoveryDocument.TokenEndpoint,
+                    ClientId = "swagger",
+                    ClientSecret = "secret",
+                    Scope = "email openid api.khoahoc offline_access",
+                    UserName = model.UserName,
+                    Password = model.Password
+                });
+            return Ok(new
             {
-                return Ok();
-            }
-            return BadRequest(result.IsLockedOut ? new ApiBadRequestResponse("Tài khoản đã bị khoá") : new ApiBadRequestResponse("Mật khẩu không đúng"));
+                access_token = tokenResponse.AccessToken,
+                refreshtoken = tokenResponse.RefreshToken,
+                scope = tokenResponse.Scope,
+                expire = tokenResponse.ExpiresIn,
+                tokenType = tokenResponse.TokenType
+
+            });
+            //var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: true);
+            //if (result.Succeeded)
+            //{
+            //    var check = User.Claims.ToList();
+            //    return Ok();
+            //}
+            //return BadRequest(result.IsLockedOut ? new ApiBadRequestResponse("Tài khoản đã bị khoá") : new ApiBadRequestResponse("Mật khẩu không đúng"));
         }
 
 

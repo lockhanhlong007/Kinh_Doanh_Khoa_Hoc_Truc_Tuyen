@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation;
@@ -69,7 +70,24 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 .AddInMemoryApiResources(IdentityServerConfiguration.Apis)
                 .AddInMemoryClients(IdentityServerConfiguration.Clients)
                 .AddInMemoryIdentityResources(IdentityServerConfiguration.Ids)
+                .AddProfileService<IdentityProfileService>()
+                .AddAspNetIdentity<AppUser>()
                 .AddDeveloperSigningCredential();
+
+            services.AddAuthentication()
+                .AddLocalApi("Bearer", option =>
+                {
+                    option.ExpectedScope = "api.khoahoc";
+                });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Bearer", policy =>
+                {
+                    policy.AddAuthenticationSchemes("Bearer");
+                    policy.RequireAuthenticatedUser();
+                });
+            });
 
             //services.AddCors(options =>
             //{
@@ -103,6 +121,31 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     {
                         Name = "Trần Bảo Long - Github",
                         Url = new Uri("https://github.com/lockhanhlong007/Kinh_Doanh_Khoa_Hoc_Truc_Tuyen")
+                    }
+                });
+
+                s.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    Description = "Please insert JWT with Bearer into field",
+                    Name = "Authorization"
+                });
+                s.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme, Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+                        },
+                        new List<string>{ "api.khoahoc" }
                     }
                 });
             });
