@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -19,6 +20,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
@@ -59,18 +61,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 options.User.RequireUniqueEmail = true;
             });
 
-            var builder = services.AddIdentityServer(options =>
-                {
-                options.Events.RaiseErrorEvents = true;
-                options.Events.RaiseInformationEvents = true;
-                options.Events.RaiseFailureEvents = true;
-                options.Events.RaiseSuccessEvents = true;
-                })
-                .AddInMemoryApiResources(IdentityServerConfiguration.Apis)
-                .AddInMemoryClients(IdentityServerConfiguration.Clients)
-                .AddInMemoryIdentityResources(IdentityServerConfiguration.Ids)
-                .AddDeveloperSigningCredential();
-
             //services.AddCors(options =>
             //{
             //    options.AddPolicy("KhoaHocPolicy", builder =>
@@ -78,7 +68,29 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             //        builder.WithOrigins(Configuration["AllowOrigins"]).AllowAnyHeader().AllowAnyMethod();
             //    });
             //});
-
+            //Config Authentication
+            services.AddAuthentication("OAuth").AddJwtBearer("OAuth", cfg =>
+            {
+                cfg.RequireHttpsMetadata = false;
+                cfg.SaveToken = true;
+                cfg.Events = new JwtBearerEvents()
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context.Request.Query.ContainsKey("access_token"))
+                        {
+                            context.Token = context.Request.Query["access_token"];
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+                cfg.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidIssuer = Configuration["Tokens:Issuer"],
+                    ValidAudience = Configuration["Tokens:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]))
+                };
+            });
 
             services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -121,15 +133,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
             app.UseStaticFiles();
 
-            app.UseIdentityServer();
-
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
 
             app.UseRouting();
 
-            // app.UseAuthorization();
+             app.UseAuthorization();
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
