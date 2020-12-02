@@ -14,7 +14,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
+        public string Scope { get; set; }
+
+        public string ClientId { get; set; }
+ 
+        public string ClientSecret { get; set; }
     }
 }

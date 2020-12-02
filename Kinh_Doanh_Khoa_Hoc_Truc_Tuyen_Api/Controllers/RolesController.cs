@@ -6,8 +6,10 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -38,8 +40,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
-        //[ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.VIEW)]
-
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
             var role = await _roleManager.FindByIdAsync(id);
@@ -56,7 +57,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost]
-        //   [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.CREATE)]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.Update)]
         [ValidationFilter]
         public async Task<IActionResult> PostRole(RoleCreateRequest request)
         {
@@ -76,7 +77,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet]
-        //[ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.View)]
         public async Task<IActionResult> GetRoles()
         {
             return Ok(await _roleManager.Roles.Select(x => new RoleViewModel
@@ -87,7 +88,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-      //  [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.View)]
         public async Task<IActionResult> GetRolesPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _roleManager.Roles;
@@ -111,7 +112,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("id")]
-        // [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.Update)]
         [ValidationFilter]
         public async Task<IActionResult> PutRole(string id, [FromBody] RoleCreateRequest roleViewModel)
         {
@@ -140,7 +141,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpDelete("{id}")]
-       // [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.DELETE)]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.Delete)]
         public async Task<IActionResult> DeleteRole(string id)
         {
             if (id.Equals("Admin"))
@@ -173,7 +174,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{roleId}/permissions")]
-       // [ClaimRequirement(FunctionCode.SYSTEM_PERMISSION, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
         public async Task<IActionResult> GetPermissionByRoleId(string roleId)
         {
             var permissions = from p in _khoaHocDbContext.Permissions
@@ -189,7 +190,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("{roleId}/permissions")]
-        // [ClaimRequirement(FunctionCode.SYSTEM_PERMISSION, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
         [ValidationFilter]
         public async Task<IActionResult> PutPermissionByRoleId(string roleId, [FromBody] UpdatePermissionRequest request)
         {

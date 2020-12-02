@@ -6,8 +6,10 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +31,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _khoaHocDbContext.Lessons.FindAsync(id);
@@ -51,7 +54,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpPost]
         [ValidationFilter]
-        //[ClaimRequirement(CourseCode.SYSTEM_Course, CommandCode.CREATE)]
+        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Create)]
         public async Task<IActionResult> PostLesson([FromForm] LessonCreateRequest request)
         {
             var dbCourse = await _khoaHocDbContext.Courses.FindAsync(request.Id);
@@ -80,6 +83,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
 
         [HttpGet]
+        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
         public async Task<IActionResult> GetLessons()
         {
             return Ok(await _khoaHocDbContext.Lessons.AsNoTracking().Select(_ => new LessonViewModel
@@ -92,7 +96,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-        // [ClaimRequirement(CourseCode.SYSTEM_Course, CommandCode.VIEW
+        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
         public async Task<IActionResult> GetLessonsPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Lessons.AsQueryable().AsNoTracking();
@@ -118,7 +122,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("{id}")]
-        //  [ClaimRequirement(CourseCode.SYSTEM_Course, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Update)]
         [ValidationFilter]
         public async Task<IActionResult> PutLesson(int id, [FromBody] LessonCreateRequest request)
         {
@@ -144,7 +148,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        //[ClaimRequirement(CourseCode.SYSTEM_Course, CommandCode.DELETE)]
+        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Delete)]
         public async Task<IActionResult> DeleteLesson(int id)
         {
             var lesson = await _khoaHocDbContext.Lessons.FindAsync(id);

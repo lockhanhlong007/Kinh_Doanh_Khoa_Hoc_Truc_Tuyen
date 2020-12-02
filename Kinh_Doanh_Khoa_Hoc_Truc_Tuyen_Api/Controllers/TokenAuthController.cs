@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using IdentityModel.Client;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -28,14 +30,22 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _signInManager = signInManager;
             _httpClientFactory = httpClientFactory;
         }
-        [HttpPost("logout")]
+        [HttpPost("Logout")]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             return Ok();
         }
 
-        [HttpPost("authenticate")]
+        [HttpGet("Hello")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
+        public IActionResult Secrect()
+        {
+            return Ok("Hello");
+        }
+
+        [HttpPost("Authenticate")]
         [AllowAnonymous]
         public async Task<IActionResult> Authenticate(LoginViewModel model)
         {
@@ -47,33 +57,26 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var discoveryDocument = await serverClient.GetDiscoveryDocumentAsync("https://localhost:44342/");
 
             var tokenResponse = await serverClient.RequestPasswordTokenAsync(
-                new PasswordTokenRequest()
+                new PasswordTokenRequest
                 {
                     Address = discoveryDocument.TokenEndpoint,
-                    ClientId = "swagger",
-                    ClientSecret = "secret",
-                    Scope = "email openid api.khoahoc offline_access",
+                    ClientId = model.ClientId,
+                    ClientSecret = model.ClientSecret,
+                    Scope = model.Scope,
                     UserName = model.UserName,
                     Password = model.Password
                 });
-            return Ok(new
+            if (tokenResponse.IsError)
             {
-                access_token = tokenResponse.AccessToken,
-                refreshtoken = tokenResponse.RefreshToken,
-                scope = tokenResponse.Scope,
-                expire = tokenResponse.ExpiresIn,
-                tokenType = tokenResponse.TokenType
+                return BadRequest(new ApiBadRequestResponse("Tài khoản hoặc mật khẩu không đúng"));
+            }
 
-            });
-            //var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: true);
-            //if (result.Succeeded)
-            //{
-            //    var check = User.Claims.ToList();
-            //    return Ok();
-            //}
-            //return BadRequest(result.IsLockedOut ? new ApiBadRequestResponse("Tài khoản đã bị khoá") : new ApiBadRequestResponse("Mật khẩu không đúng"));
+            return Ok(new
+                {
+                    tokenResponse.AccessToken,
+                    tokenResponse.ExpiresIn,
+                    tokenResponse.TokenType
+                });
         }
-
-
     }
 }

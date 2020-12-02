@@ -9,6 +9,7 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost]
-        // [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.CREATE)]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.Create)]
         [ValidationFilter]
         public async Task<IActionResult> PostUser(UserCreateRequest request)
         {
@@ -63,7 +64,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
-       // [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _userManager.FindByIdAsync(id);
@@ -87,7 +88,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet]
-       // [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
         public async Task<IActionResult> GetUsers()
         {
             var user = await _userManager.Users.Select(x => new UserViewModel
@@ -110,7 +111,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-       // [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
         public async Task<IActionResult> GetUsersPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _userManager.Users;
@@ -141,8 +142,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("{id}")]
-      //  [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.UPDATE)]
-      public async Task<IActionResult> PutUser(string id, [FromBody] UserCreateRequest request)
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.Update)]
+        public async Task<IActionResult> PutUser(string id, [FromBody] UserCreateRequest request)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -165,7 +166,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("{id}/change-password")]
-        //  [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.Update)]
         [ValidationFilter]
         public async Task<IActionResult> PutUserPassword(string id, [FromBody] UserPasswordChangeRequest request)
         {
@@ -187,8 +188,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpDelete("{id}")]
-       // [ClaimRequirement(FunctionCode.SYSTEM_USER, CommandCode.DELETE)]
-       // [ApiValidationFilter]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.Delete)]
+        [ValidationFilter]
         public async Task<IActionResult> DeleteUser(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -225,7 +226,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
        [HttpGet("{userId}/menu")]
-       public async Task<IActionResult> GetMenuByUserPermission(string userId)
+       [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
+        public async Task<IActionResult> GetMenuByUserPermission(string userId)
        {
            var user = await _userManager.FindByIdAsync(userId);
            var roles = await _userManager.GetRolesAsync(user);

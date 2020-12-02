@@ -6,8 +6,10 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +39,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
 
         [HttpGet("{entityType}/{entityId}/comments/filter")]
-        //[ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.View)]
         public async Task<IActionResult> GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex,
             int pageSize)
         {
@@ -67,7 +69,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{entityType}/{entityId}/comments/{commentId}")]
-       // [ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.View)]
         public async Task<IActionResult> GetCommentDetail(int commentId)
         {
             var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
@@ -89,7 +91,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost("{entityType}/{entityId}/comments")]
-       // [ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.CREATE)]
+        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.Create)]
         [ValidationFilter]
         public async Task<IActionResult> PostComment(int entityId, [FromBody] CommentCreateRequest request)
         {
@@ -128,7 +130,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("{entityType}/{entityId}/comments/{commentId}")]
-       // [ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.Update)]
         [ValidationFilter]
         public async Task<IActionResult> PutComment(int commentId, [FromBody] CommentCreateRequest request)
         {
@@ -153,7 +155,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpDelete("{entityType}/{entityId}/comments/{commentId}")]
-        //[ClaimRequirement(FunctionCode.CONTENT_COMMENT, CommandCode.DELETE)]
+        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.Delete)]
         [ValidationFilter]
         public async Task<IActionResult> DeleteComment(int commentId)
         {

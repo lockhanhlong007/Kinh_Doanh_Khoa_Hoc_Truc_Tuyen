@@ -6,8 +6,10 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +33,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
-        //[ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _khoaHocDbContext.Categories.FindAsync(id);
@@ -50,7 +52,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost]
-       // [ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.CREATE)]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.Create)]
         [ValidationFilter]
         public async Task<IActionResult> PostCategory([FromBody] CategoryCreateRequest request)
         {
@@ -71,7 +73,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet]
-        //[ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
         public async Task<IActionResult> GetCategories()
         {
             return Ok(await _khoaHocDbContext.Categories.Select(x => new CategoryViewModel()
@@ -84,7 +86,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-        //[ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
         public async Task<IActionResult> GetCategoriesPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Categories.AsNoTracking().AsQueryable();
@@ -111,7 +113,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         
         [HttpPut("{id}")]
         [ValidationFilter]
-        //[ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.Update)]
         public async Task<IActionResult> PutCategory(int id, [FromBody] CategoryCreateRequest request)
         {
             var category = await _khoaHocDbContext.Categories.FindAsync(id);
@@ -136,7 +138,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpDelete("{id}")]
-       // [ClaimRequirement(FunctionCode.CONTENT_CATEGORY, CommandCode.DELETE)]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.Delete)]
         public async Task<IActionResult> DeleteCategory(string id)
         {
             var category = await _khoaHocDbContext.Categories.FindAsync(id);

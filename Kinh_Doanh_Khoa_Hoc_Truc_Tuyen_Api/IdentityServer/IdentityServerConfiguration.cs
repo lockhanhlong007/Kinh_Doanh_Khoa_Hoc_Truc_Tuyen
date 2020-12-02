@@ -22,7 +22,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
                     ClientId = "swagger",
                     ClientName = "Config Swagger",
                     ClientSecrets = { new Secret("secret".Sha256()) },
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
@@ -36,16 +36,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
                     AllowAccessTokensViaBrowser = true,
                   //  RedirectUris = { "https://localhost:44342/signin-oidc" },
                     //PostLogoutRedirectUris =  {   "http://openidclientdemocom:8001/signout-callback-oidc"}
-
-
                     AccessTokenType = AccessTokenType.Jwt,
-                    AccessTokenLifetime = 120, //86400,
-                    IdentityTokenLifetime = 120, //86400,
+                    AccessTokenLifetime = 3600 * 24, //86400,
+                    IdentityTokenLifetime = 3600 * 24, //86400,
                     UpdateAccessTokenClaimsOnRefresh = true,
-                    SlidingRefreshTokenLifetime = 30,
                     RefreshTokenExpiration = TokenExpiration.Absolute,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly,
                     AlwaysSendClientClaims = true,
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                    
                     Enabled = true
                 },
                 new Client
