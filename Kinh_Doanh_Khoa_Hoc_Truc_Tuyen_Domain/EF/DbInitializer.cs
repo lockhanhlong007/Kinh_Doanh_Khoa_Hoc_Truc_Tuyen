@@ -136,9 +136,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
 
                     new Function {Id = "Products",Name = "Sản Phẩm",ParentId = null, SortOrder = 2, Url = "/products",Icon="fa-table" },
 
-                    new Function {Id = "Categories",Name = "Danh mục",ParentId ="Product", SortOrder = 1, Url = "/products/categories",Icon="fa-edit"  },
-                    new Function {Id = "Courses",Name = "Khóa Học",ParentId = "Product", SortOrder = 2, Url = "/products/knowledge-bases",Icon="fa-edit" },
-                    new Function {Id = "Comments",Name = "Bình Luận",ParentId = "Product", SortOrder = 3, Url = "/products/comments",Icon="fa-edit" },
+                    new Function {Id = "Categories",Name = "Danh mục",ParentId ="Products", SortOrder = 1, Url = "/products/categories",Icon="fa-edit"  },
+                    new Function {Id = "Courses",Name = "Khóa Học",ParentId = "Products", SortOrder = 2, Url = "/products/courses",Icon="fa-edit" },
+                    new Function {Id = "Comments",Name = "Bình Luận",ParentId = "Products", SortOrder = 3, Url = "/products/comments",Icon="fa-edit" },
 
                     new Function {Id = "Statistics",Name = "Thống kê", ParentId = null, SortOrder = 3, Url = "/statistics",Icon="fa-bar-chart-o" },
 

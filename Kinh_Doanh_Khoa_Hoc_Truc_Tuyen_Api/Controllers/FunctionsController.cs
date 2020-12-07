@@ -234,7 +234,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var commandId in request.CommandIds)
             {
-                if (await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, functionId) != null)
+                var check = await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, functionId);
+                if (check != null)
                 {
                     _logger.LogError("This command has been existed in function");
                     return BadRequest(new ApiBadRequestResponse("This command has been existed in function"));
@@ -265,11 +266,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 }
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();
-
             if (result > 0)
             {
-
-                return CreatedAtAction(nameof(GetById), new { request.CommandIds, functionId });
+                return Ok();
             }
             _logger.LogError("Add command to function failed");
             return BadRequest(new ApiBadRequestResponse("Add command to function failed"));

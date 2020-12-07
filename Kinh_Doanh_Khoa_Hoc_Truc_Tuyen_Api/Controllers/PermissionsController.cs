@@ -27,7 +27,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet]
-        [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
+       // [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
         public async Task<IActionResult> GetCommandViews()
         {
             await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
@@ -38,16 +38,19 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var query = @"SELECT f.Id,
 	                       f.Name,
 	                       f.ParentId,
-	                       sum(case when sa.Id = 'CREATE' then 1 else 0 end) as HasCreate,
-	                       sum(case when sa.Id = 'UPDATE' then 1 else 0 end) as HasUpdate,
-	                       sum(case when sa.Id = 'DELETE' then 1 else 0 end) as HasDelete,
-	                       sum(case when sa.Id = 'VIEW' then 1 else 0 end) as HasView,
-	                       sum(case when sa.Id = 'APPROVE' then 1 else 0 end) as HasApprove
+	                       sum(case when sa.Id = 'Create' then 1 else 0 end) as HasCreate,
+	                       sum(case when sa.Id = 'Update' then 1 else 0 end) as HasUpdate,
+	                       sum(case when sa.Id = 'Delete' then 1 else 0 end) as HasDelete,
+	                       sum(case when sa.Id = 'View' then 1 else 0 end) as HasView,
+	                       sum(case when sa.Id = 'ExportExcel' then 1 else 0 end) as HasExportExcel
                         from Functions f join CommandInFunctions cif on f.Id = cif.FunctionId
 		                    left join Commands sa on cif.CommandId = sa.Id
                         GROUP BY f.Id,f.Name, f.ParentId
                         order BY f.ParentId";
-            var result = await conn.QueryAsync<PermissionViewModel>(query, null, null, 120, CommandType.Text);
+            var result = await conn.QueryAsync<PermissionScreenViewModel>(query, null, null, 120, CommandType.Text);
+            
+            
+            
             return Ok(result.ToList());
         }
     }

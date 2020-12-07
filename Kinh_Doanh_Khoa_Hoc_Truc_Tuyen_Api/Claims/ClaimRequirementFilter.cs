@@ -22,6 +22,8 @@ namespace KnowledgeSpace.BackendServer.Authorization
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
+            var check = context.HttpContext.User;
+            var check2 = context.HttpContext.User.Claims;
             var permissionsClaim = context.HttpContext.User.Claims
                 .SingleOrDefault(c => c.Type == SystemConstants.Permissions);
             if (permissionsClaim != null)

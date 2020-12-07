@@ -45,7 +45,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     , o => o.MigrationsAssembly("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain")));
             //2. Setup idetntity
             services.AddIdentity<AppUser, AppRole>()
-                .AddEntityFrameworkStores<EKhoaHocDbContext>(); 
+                .AddEntityFrameworkStores<EKhoaHocDbContext>();
             services.AddTransient<DbInitializer>();
             services.Configure<IdentityOptions>(options =>
             {
@@ -62,32 +62,32 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 options.User.RequireUniqueEmail = true;
             });
 
-             services.AddIdentityServer(options =>
+            services.AddIdentityServer(options =>
                 {
-                options.Events.RaiseErrorEvents = true;
-                options.Events.RaiseInformationEvents = true;
-                options.Events.RaiseFailureEvents = true;
-                options.Events.RaiseSuccessEvents = true;
+                    options.Events.RaiseErrorEvents = true;
+                    options.Events.RaiseInformationEvents = true;
+                    options.Events.RaiseFailureEvents = true;
+                    options.Events.RaiseSuccessEvents = true;
                 })
-                .AddInMemoryApiResources(IdentityServerConfiguration.Apis)
-                .AddInMemoryClients(IdentityServerConfiguration.Clients)
-                .AddInMemoryIdentityResources(IdentityServerConfiguration.Ids)
-                .AddProfileService<IdentityProfileService>()
-                .AddAspNetIdentity<AppUser>()
-                .AddDeveloperSigningCredential();
+               .AddInMemoryApiResources(IdentityServerConfiguration.Apis)
+               .AddInMemoryClients(IdentityServerConfiguration.Clients)
+               .AddInMemoryIdentityResources(IdentityServerConfiguration.Ids)
+               .AddProfileService<IdentityProfileService>()
+               .AddAspNetIdentity<AppUser>()
+               .AddDeveloperSigningCredential();
 
-             services.AddAuthentication(options =>
-             {
-                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-             }).AddJwtBearer(o =>
-             {
-                 o.Authority = "https://localhost:44342/";
-                 o.RequireHttpsMetadata = false;
-                 o.Audience = "api.khoahoc";
-             });
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(o =>
+            {
+                o.Authority = "https://localhost:44342/";
+                o.RequireHttpsMetadata = false;
+                o.Audience = "api.khoahoc";
+            });
 
-             services.AddTransient<IProfileService, IdentityProfileService>();
+            services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
@@ -100,13 +100,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
 
 
-            //services.AddCors(options =>
-            //{
-            //    options.AddPolicy("KhoaHocPolicy", builder =>
-            //    {
-            //        builder.WithOrigins(Configuration["AllowOrigins"]).AllowAnyHeader().AllowAnyMethod();
-            //    });
-            //});
+            services.AddCors(options =>
+            {
+                options.AddPolicy("KhoaHocPolicy", builder =>
+                {
+                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
 
 
             services.Configure<ApiBehaviorOptions>(options =>
@@ -185,7 +185,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
             app.UseAuthorization();
 
-
+            app.UseCors("KhoaHocPolicy");
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();

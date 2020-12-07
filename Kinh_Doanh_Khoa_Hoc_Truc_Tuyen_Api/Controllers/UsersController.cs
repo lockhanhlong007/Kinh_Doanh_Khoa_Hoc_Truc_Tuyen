@@ -187,42 +187,35 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse(result));
         }
 
-        [HttpDelete("{id}")]
+        [HttpPost("delete-multi-items")]
         [ClaimRequirement(FunctionConstant.User, CommandConstant.Delete)]
         [ValidationFilter]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(List<string> ids)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
+            foreach (var id in ids)
             {
-                _logger.LogError($"Cannot found user with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
-
-            }
-            var adminUsers = await _userManager.GetUsersInRoleAsync(SystemConstants.Admin);
-            if (adminUsers.All(x => x.Id == Guid.Parse(id)))
-            {
-                _logger.LogError("You cannot remove the only admin user remaining.");
-                return BadRequest(new ApiBadRequestResponse("You cannot remove the only admin user remaining."));
-            }
-            var result = await _userManager.DeleteAsync(user);
-            if (result.Succeeded)
-            {
-                var userViewModel = new UserViewModel
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
                 {
-                    Id = user.Id,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    Name = user.Name,
-                    Dob = user.Dob,
-                    UserName = user.UserName,
-                    Avatar = user.Avatar ?? "/img/defaultAvatar.png",
-                    Biography = user.Biography
-                };
-                return Ok(userViewModel);
+                    _logger.LogError($"Cannot found user with id: {id}");
+                    return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+
+                }
+                var adminUsers = await _userManager.GetUsersInRoleAsync(SystemConstants.Admin);
+                if (adminUsers.All(x => x.Id == Guid.Parse(id)))
+                {
+                    _logger.LogError("You cannot remove the only admin user remaining.");
+                    return BadRequest(new ApiBadRequestResponse("You cannot remove the only admin user remaining."));
+                }
+                var result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                {
+                    _logger.LogError("Delete user failed");
+                    return BadRequest(new ApiBadRequestResponse(result));
+                }
             }
-            _logger.LogError("Delete user failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+
+            return Ok();
         }
 
        [HttpGet("{userId}/menu")]
@@ -251,5 +244,62 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                .ToListAsync();
            return Ok(data);
        }
+
+
+        [HttpGet("{userId}/roles")]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
+        public async Task<IActionResult> GetUserRoles(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {userId}"));
+            var roles = await _userManager.GetRolesAsync(user);
+            return Ok(roles);
+        }
+
+        [HttpPost("{userId}/roles")]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
+        public async Task<IActionResult> PostRolesToUserUser(string userId, [FromBody] RoleAssignRequest request)
+        {
+            if (request.RoleNames?.Length == 0)
+            {
+                return BadRequest(new ApiBadRequestResponse("Role names cannot empty"));
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {userId}"));
+            var result = await _userManager.AddToRolesAsync(user, request.RoleNames);
+            if (result.Succeeded)
+                return Ok();
+
+            return BadRequest(new ApiBadRequestResponse(result));
+        }
+
+        [HttpDelete("{userId}/roles")]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
+        public async Task<IActionResult> RemoveRolesFromUser(string userId, [FromQuery] RoleAssignRequest request)
+        {
+            if (request.RoleNames?.Length == 0)
+            {
+                return BadRequest(new ApiBadRequestResponse("Role names cannot empty"));
+            }
+            if (request.RoleNames!.Contains(SystemConstants.Admin))
+            {
+                if ((await _userManager.GetUsersInRoleAsync("Admin")).Count < 2)
+                {
+                    return BadRequest(new ApiBadRequestResponse($"Cannot remove {SystemConstants.Admin} role"));
+                }
+
+            }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {userId}"));
+            var result = await _userManager.RemoveFromRolesAsync(user, request.RoleNames);
+            if (result.Succeeded)
+                return Ok();
+
+            return BadRequest(new ApiBadRequestResponse(result));
+        }
+
     }
 }

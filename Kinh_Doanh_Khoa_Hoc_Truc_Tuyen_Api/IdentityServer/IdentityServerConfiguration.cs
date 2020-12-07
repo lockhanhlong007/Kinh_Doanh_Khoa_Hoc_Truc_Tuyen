@@ -19,8 +19,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
 
                 new Client
                 {
-                    ClientId = "swagger",
-                    ClientName = "Config Swagger",
+                    ClientId = "client_api",
+                    ClientName = "Config Identity",
                     ClientSecrets = { new Secret("secret".Sha256()) },
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                     AllowedScopes = new List<string>
