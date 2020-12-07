@@ -6,8 +6,10 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +28,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private readonly RoleManager<AppRole> _roleManager;
 
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private readonly ILogger<RolesController> _logger;
 
         public RolesController(RoleManager<AppRole> roleManager, EKhoaHocDbContext khoaHocDbContext, UserManager<AppUser> userManager, ILogger<RolesController> logger)
@@ -37,8 +40,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
-        //[ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.VIEW)]
-
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
             var role = await _roleManager.FindByIdAsync(id);
@@ -55,27 +57,26 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost]
-        //   [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.CREATE)]
-        [ValidationFilter]
-        public async Task<IActionResult> PostRole(RoleCreateRequest request)
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.Update)]
+        public async Task<IActionResult> PostRole(string name)
         {
             var role = new AppRole
             {
                 Id = Guid.NewGuid(),
-                Name = request.Name,
-                NormalizedName = request.Name.ToUpper()
+                Name = name,
+                NormalizedName = name.ToUpper()
             };
             var result = await _roleManager.CreateAsync(role);
             if (result.Succeeded)
             {
-                return CreatedAtAction(nameof(GetById), new { id = role.Id }, request);
+                return CreatedAtAction(nameof(GetById), new { id = role.Id }, new RoleViewModel());
             }
 
             return BadRequest(new ApiBadRequestResponse(result));
         }
 
         [HttpGet]
-        //[ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.View)]
         public async Task<IActionResult> GetRoles()
         {
             return Ok(await _roleManager.Roles.Select(x => new RoleViewModel
@@ -86,7 +87,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-      //  [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.View)]
         public async Task<IActionResult> GetRolesPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _roleManager.Roles;
@@ -109,22 +110,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(pagination);
         }
 
-        [HttpPut("id")]
-        // [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.UPDATE)]
-        [ValidationFilter]
-        public async Task<IActionResult> PutRole(string id, [FromBody] RoleCreateRequest roleViewModel)
+        [HttpPut("{id}")]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.Update)]
+        public async Task<IActionResult> PutRole(RoleViewModel roleViewModel)
         {
-            if ((Guid.Parse(id)) != roleViewModel.Id)
-            {
-                _logger.LogError("Role id not match");
-                return BadRequest(new ApiBadRequestResponse("Role id not match"));
-            }
-
-            var role = await _roleManager.FindByIdAsync(id);
+            var role = await _roleManager.FindByIdAsync(roleViewModel.Id.ToString());
             if (role == null)
             {
-                _logger.LogError($"Cannot find role with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot find role with id: {id}"));
+                _logger.LogError($"Cannot find role with id: {roleViewModel.Id}");
+                return NotFound(new ApiNotFoundResponse($"Cannot find role with id: {roleViewModel.Id}"));
             }
 
             role.Name = roleViewModel.Name;
@@ -138,41 +132,40 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse(result));
         }
 
-        [HttpDelete("{id}")]
-       // [ClaimRequirement(FunctionCode.SYSTEM_ROLE, CommandCode.DELETE)]
-        public async Task<IActionResult> DeleteRole(string id)
+        [HttpPost("delete-multi-items")]
+        [ClaimRequirement(FunctionConstant.Role, CommandConstant.Delete)]
+        public async Task<IActionResult> DeleteRole(List<string> ids)
         {
-            if (id.Equals("Admin"))
+            if (ids.Contains("Admin"))
             {
-                _logger.LogError($"Cannot delete role: {id}");
-                return BadRequest(new ApiBadRequestResponse($"Cannot delete role: {id}"));
+                _logger.LogError($"Cannot delete role: Admin");
+                return BadRequest(new ApiBadRequestResponse($"Cannot delete role: Admin"));
 
             }
-            var role = await _roleManager.FindByIdAsync(id);
-            if (role == null)
+            foreach (var id in ids)
             {
-                _logger.LogError($"Cannot find role with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot find role with id: {id}"));
-            }
 
-            var userInRole = (await _userManager.GetUsersInRoleAsync(role.Name)).ToList();
-            userInRole.ForEach(async u => await _userManager.RemoveFromRoleAsync(u, role.Name));
-            var result = await _roleManager.DeleteAsync(role);
-            if (result.Succeeded)
-            {
-                var roleViewModel = new RoleViewModel
+                var role = await _roleManager.FindByIdAsync(id);
+                if (role == null)
                 {
-                    Name = role.Name,
-                    Id = role.Id
-                };
-                return Ok(roleViewModel);
-            }
-            _logger.LogError("Delete role failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+                    _logger.LogError($"Cannot find role with id: {id}");
+                    return NotFound(new ApiNotFoundResponse($"Cannot find role with id: {id}"));
+                }
+
+                var userInRole = (await _userManager.GetUsersInRoleAsync(role.Name)).ToList();
+                userInRole.ForEach(async u => await _userManager.RemoveFromRoleAsync(u, role.Name));
+                var result = await _roleManager.DeleteAsync(role);
+                if (result.Succeeded)
+                {
+                    _logger.LogError("Delete role failed");
+                    return BadRequest(new ApiBadRequestResponse(result));
+                }
+            } 
+            return Ok();
         }
 
         [HttpGet("{roleId}/permissions")]
-       // [ClaimRequirement(FunctionCode.SYSTEM_PERMISSION, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
         public async Task<IActionResult> GetPermissionByRoleId(string roleId)
         {
             var permissions = from p in _khoaHocDbContext.Permissions
@@ -188,7 +181,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("{roleId}/permissions")]
-        // [ClaimRequirement(FunctionCode.SYSTEM_PERMISSION, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
         [ValidationFilter]
         public async Task<IActionResult> PutPermissionByRoleId(string roleId, [FromBody] UpdatePermissionRequest request)
         {

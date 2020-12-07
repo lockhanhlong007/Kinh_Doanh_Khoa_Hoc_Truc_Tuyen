@@ -7,8 +7,10 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _khoaHocDbContext.Functions.FindAsync(id);
@@ -52,7 +55,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
 
         [HttpGet("{functionId}/parents")]
-        //[ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetFunctionsByParentId(string functionId)
         {
             var functions = _khoaHocDbContext.Functions.Where(x => x.ParentId == functionId).OrderBy(x => x.ParentId).ThenBy(x => x.SortOrder);
@@ -68,7 +71,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost]
-        //[ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.CREATE)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.Create)]
         [ValidationFilter]
         public async Task<IActionResult> PostFunction([FromBody] FunctionCreateRequest request)
         {
@@ -89,7 +92,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 SortOrder = request.SortOrder,
                 Icon = request.Icon
             };
-            await _khoaHocDbContext.AddAsync(function);
+            await _khoaHocDbContext.Functions.AddAsync(function);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
             {
@@ -100,6 +103,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetFunctions()
         {
             return Ok(await _khoaHocDbContext.Functions.OrderBy(x => x.ParentId).ThenBy(x => x.SortOrder).Select(_ => new FunctionViewModel
@@ -114,7 +118,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-        // [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetFunctionsPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Functions.OrderBy(x => x.ParentId).ThenBy(x => x.SortOrder).AsQueryable();
@@ -142,7 +146,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPut("{id}")]
-        //  [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.Update)]
         [ValidationFilter]
         public async Task<IActionResult> PutFunction(string id, [FromBody] FunctionCreateRequest request)
         {
@@ -169,7 +173,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        //[ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.DELETE)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.Delete)]
         public async Task<IActionResult> DeleteFunction(string id)
         {
             var function = await _khoaHocDbContext.Functions.FindAsync(id);
@@ -200,7 +204,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{functionId}/commands")]
-        //  [ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.VIEW)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetCommandsInFunction(string functionId)
         {
             var query = from a in _khoaHocDbContext.Commands
@@ -223,14 +227,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost("{functionId}/commands")]
-        //[ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.CREATE)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.Create)]
         [ValidationFilter]
         public async Task<IActionResult> PostCommandsToFunction(string functionId,
             [FromBody] CommandAssignRequest request)
         {
             foreach (var commandId in request.CommandIds)
             {
-                if (await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, functionId) != null)
+                var check = await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, functionId);
+                if (check != null)
                 {
                     _logger.LogError("This command has been existed in function");
                     return BadRequest(new ApiBadRequestResponse("This command has been existed in function"));
@@ -261,18 +266,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 }
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();
-
             if (result > 0)
             {
-
-                return CreatedAtAction(nameof(GetById), new { request.CommandIds, functionId });
+                return Ok();
             }
             _logger.LogError("Add command to function failed");
             return BadRequest(new ApiBadRequestResponse("Add command to function failed"));
         }
 
         [HttpDelete("{functionId}/commands/{commandId}")]
-        //[ClaimRequirement(FunctionCode.SYSTEM_FUNCTION, CommandCode.UPDATE)]
+        [ClaimRequirement(FunctionConstant.Function, CommandConstant.Delete)]
         public async Task<IActionResult> DeleteCommandToFunction(string functionId, [FromQuery] CommandAssignRequest request)
         {
 

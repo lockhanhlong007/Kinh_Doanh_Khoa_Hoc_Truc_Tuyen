@@ -136,13 +136,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
 
                     new Function {Id = "Products",Name = "Sản Phẩm",ParentId = null, SortOrder = 2, Url = "/products",Icon="fa-table" },
 
-                    new Function {Id = "Categories",Name = "Danh mục",ParentId ="Product", SortOrder = 1, Url = "/products/categories",Icon="fa-edit"  },
-                    new Function {Id = "Courses",Name = "Khóa Học",ParentId = "Product", SortOrder = 2, Url = "/products/knowledge-bases",Icon="fa-edit" },
-                    new Function {Id = "Comments",Name = "Bình Luận",ParentId = "Product", SortOrder = 3, Url = "/products/comments",Icon="fa-edit" },
+                    new Function {Id = "Categories",Name = "Danh mục",ParentId ="Products", SortOrder = 1, Url = "/products/categories",Icon="fa-edit"  },
+                    new Function {Id = "Courses",Name = "Khóa Học",ParentId = "Products", SortOrder = 2, Url = "/products/courses",Icon="fa-edit" },
+                    new Function {Id = "Comments",Name = "Bình Luận",ParentId = "Products", SortOrder = 3, Url = "/products/comments",Icon="fa-edit" },
 
                     new Function {Id = "Statistics",Name = "Thống kê", ParentId = null, SortOrder = 3, Url = "/statistics",Icon="fa-bar-chart-o" },
 
-                    new Function {Id = "New_User",Name = "Đăng ký",ParentId = "Statistics", SortOrder = 1, Url = "/statistics/new-user",Icon = "fa-wrench"},
+                    new Function {Id = "NewUser",Name = "Đăng ký",ParentId = "Statistics", SortOrder = 1, Url = "/statistics/new-user",Icon = "fa-wrench"},
                     new Function {Id = "Revenue",Name = "Doanh thu",ParentId = "Statistics", SortOrder = 2, Url = "/statistics/revenue",Icon = "fa-wrench"},
 
                     new Function {Id = "System", Name = "Hệ thống", ParentId = null, SortOrder = 4, Url = "/systems",Icon="fa-th-list" },
@@ -164,7 +164,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     new Command {Id = "Create", Name = "Thêm"},
                     new Command {Id = "Update", Name = "Sửa"},
                     new Command {Id = "Delete", Name = "Xoá"},
-                    new Command {Id = "Export_Excel", Name = "Xuất Excel"},
+                    new Command {Id = "ExportExcel", Name = "Xuất Excel"},
                 });
                 await _applicationDbContext.SaveChangesAsync();
             }
@@ -208,13 +208,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                 {
                     new CommandInFunction
                     {
-                        CommandId = "Export_Excel",
+                        CommandId = "ExportExcel",
                         FunctionId = "Revenue"
                     },
                     new CommandInFunction
                     {
-                        CommandId = "Export_Excel",
-                        FunctionId = "New_User"
+                        CommandId = "ExportExcel",
+                        FunctionId = "NewUser"
                     }
                 };
                 await _applicationDbContext.CommandInFunctions.AddRangeAsync(exportAction);
@@ -228,17 +228,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                 var adminRole = await _roleManager.FindByNameAsync(AdminRoleName);
                 foreach (var function in functions)
                 {
-                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "CREATE"));
-                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "UPDATE"));
-                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "DELETE"));
-                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "VIEW"));
-                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "Export_Excel"));
+                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "Create"));
+                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "Update"));
+                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "Delete"));
+                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "View"));
+                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "ExportExcel"));
                 }
                 
                 var teacherRole = await _roleManager.FindByNameAsync(TeacherRoleName);
-                await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "CREATE"));
-                await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "DELETE"));
-                await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "VIEW"));
+                await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Create"));
+                await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Delete"));
+                await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "View"));
             }
             await _applicationDbContext.SaveChangesAsync();
             #endregion

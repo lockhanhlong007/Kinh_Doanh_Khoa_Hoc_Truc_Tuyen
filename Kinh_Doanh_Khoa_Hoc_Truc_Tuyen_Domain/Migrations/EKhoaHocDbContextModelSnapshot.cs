@@ -20,6 +20,30 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                 .HasAnnotation("Relational:Sequence:.KhoaHocSequence", "'KhoaHocSequence', '', '1', '1', '', '', 'Int64', 'False'")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.ActivateCourse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActivateCourses");
+                });
+
             modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.Announcement", b =>
                 {
                     b.Property<Guid>("Id")
@@ -418,6 +442,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 
@@ -436,19 +463,19 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
 
             modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.OrderDetail", b =>
                 {
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ActiveCourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Price")
+                    b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("PromotionPrice")
+                    b.Property<decimal?>("PromotionPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("CourseId", "OrderId");
+                    b.HasKey("ActiveCourseId", "OrderId");
 
                     b.HasIndex("OrderId");
 
@@ -524,21 +551,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                     b.HasIndex("CourseId");
 
                     b.ToTable("PromotionInCourses");
-                });
-
-            modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.UserInCourse", b =>
-                {
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("CourseId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserInCourses");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -642,6 +654,21 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.ActivateCourse", b =>
+                {
+                    b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.Course", "Course")
+                        .WithMany("ActivateCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.AppUser", "AppUser")
+                        .WithMany("ActivateCourses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.Announcement", b =>
                 {
                     b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.AppUser", "AppUser")
@@ -713,9 +740,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
 
             modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.OrderDetail", b =>
                 {
-                    b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.Course", "Course")
+                    b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.ActivateCourse", "ActivateCourse")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("CourseId")
+                        .HasForeignKey("ActiveCourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -758,21 +785,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Migrations
                     b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.Promotion", "Promotion")
                         .WithMany("PromotionInCourses")
                         .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.UserInCourse", b =>
-                {
-                    b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.Course", "Course")
-                        .WithMany("AppUserInCourses")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities.AppUser", "AppUser")
-                        .WithMany("AppUserInCourses")
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

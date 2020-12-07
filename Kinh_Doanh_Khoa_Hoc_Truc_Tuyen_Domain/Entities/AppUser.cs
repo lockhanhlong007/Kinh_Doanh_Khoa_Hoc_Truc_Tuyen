@@ -48,6 +48,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         public List<Announcement> Announcements { get; set; }
 
 
-        public List<UserInCourse> AppUserInCourses { get; set; }
+        public List<ActivateCourse> ActivateCourses { get; set; }
     }
 }

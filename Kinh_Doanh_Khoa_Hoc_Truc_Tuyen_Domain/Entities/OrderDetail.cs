@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 {
@@ -11,14 +12,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public int OrderId { set; get; }
 
-        public int CourseId { set; get; }
+        public Guid ActiveCourseId { set; get; }
 
-        public decimal Price { set; get; }
+        public decimal? Price { set; get; }
 
-        public decimal PromotionPrice { set; get; }
+        public decimal? PromotionPrice { set; get; }
 
         public Order Order { set; get; }
 
-        public Course Course { set; get; }
+        public ActivateCourse ActivateCourse { set; get; }
     }
 }

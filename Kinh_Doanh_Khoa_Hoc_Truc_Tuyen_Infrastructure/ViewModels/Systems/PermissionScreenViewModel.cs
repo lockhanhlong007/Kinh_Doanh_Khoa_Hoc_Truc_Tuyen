@@ -16,6 +16,6 @@
 
         public bool HasView { get; set; }
 
-        public bool HasApprove { get; set; }
+        public bool HasExportExcel { get; set; }
     }
 }

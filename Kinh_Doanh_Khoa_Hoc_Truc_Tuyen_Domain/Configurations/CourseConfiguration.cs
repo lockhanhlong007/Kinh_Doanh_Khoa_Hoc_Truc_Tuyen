@@ -17,7 +17,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Configurations
             builder.Property(x => x.Image).IsRequired();
             builder.HasOne(x => x.Category).WithMany(x => x.Courses).HasForeignKey(x => x.CategoryId);
             builder.HasMany(x => x.Lessons).WithOne(x => x.Course).HasForeignKey(x => x.CourseId);
-            builder.HasMany(x => x.OrderDetails).WithOne(x => x.Course).HasForeignKey(x => x.CourseId);
         }
     }
 }
