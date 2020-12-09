@@ -11,18 +11,6 @@
             <div class="p-grid-pad p-fluid p-grid-responsive">
                 <div class="p-field p-grid">
                     <div class="p-col-2">
-                        <span class="required">Mã duy nhất:</span>
-                    </div>
-                    <div class="p-col-6">
-                        <input type="text" pInputText formControlName="id">
-                    </div>
-                    <div class="p-col-4">
-                        <app-validation-message [entityForm]="entityForm" fieldName="id" [validationMessages]="validation_messages"></app-validation-message>
-                    </div>
-                </div>
-
-                <div class="p-field p-grid">
-                    <div class="p-col-2">
                         <span class="required">Tên:</span>
                     </div>
                     <div class="p-col-6">
@@ -38,35 +26,11 @@
                         <span>Chọn cấp cha:</span>
                     </div>
                     <div class="p-col-6">
-                        <p-dropdown [options]="rootFunctions" emptyFilterMessage="Không có dữ liệu" [style]="{'width':'100%'}" formControlName="parentId" placeholder="Chọn cấp cha" filter="true" [showClear]="true">
+                        <p-dropdown [options]="rootCategories" emptyFilterMessage="Không có dữ liệu" [style]="{'width':'100%'}" formControlName="parentId" placeholder="Chọn cấp cha" filter="true" [showClear]="true">
                         </p-dropdown>
                     </div>
                     <div class="p-col-4">
                         <app-validation-message [entityForm]="entityForm" fieldName="parentId" [validationMessages]="validation_messages"></app-validation-message>
-                    </div>
-                </div>
-
-                <div class="p-field p-grid">
-                    <div class="p-col-2">
-                        <span class="required">Url:</span>
-                    </div>
-                    <div class="p-col-6">
-                        <input type="text" pInputText [pKeyFilter]="noSpecial" formControlName="url">
-                    </div>
-                    <div class="p-col-4">
-                        <app-validation-message [entityForm]="entityForm" fieldName="url" [validationMessages]="validation_messages"></app-validation-message>
-                    </div>
-                </div>
-
-                <div class="p-field p-grid">
-                    <div class="p-col-2">
-                        <span class="required">Icon Class:</span>
-                    </div>
-                    <div class="p-col-6">
-                        <input type="text" pInputText [pKeyFilter]="noSpecial" formControlName="icon">
-                    </div>
-                    <div class="p-col-4">
-                        <app-validation-message [entityForm]="entityForm" fieldName="icon" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
 

@@ -10,7 +10,7 @@
             <div class="row">
                 <label for="keyword" class="col-md-3">Nhóm người dùng</label>
                 <div class="col-md-9">
-                    <p-dropdown [options]="roles" (onChange)="changeRole($event)" [style]="{'width':'100%'}" name="roleList" placeholder="Chọn nhóm quyền" optionLabel="name" filter="true" [showClear]="true" [(ngModel)]="selectedRole">
+                    <p-dropdown appendTo="body" [options]="roles" (onChange)="changeRole($event)" [style]="{'width':'100%'}" name="roleList" placeholder="Chọn nhóm quyền" optionLabel="name" filter="true" [showClear]="true" [(ngModel)]="selectedRole">
                     </p-dropdown>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                     </th>
             </ng-template>
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-                <tr [ttSelectableRow]="rowNode">
+                <tr [ttRow]="rowNode">
                     <td>
                         <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
                         {{rowData.name}}

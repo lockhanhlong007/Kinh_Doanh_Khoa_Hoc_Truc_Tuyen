@@ -46,10 +46,8 @@ export class RolesDetailComponent implements OnInit, OnDestroy {
     if (this.entityId) {
       this.dialogTitle = 'Cập nhật';
       this.loadFormDetails(this.entityId);
-     // this.entityForm.controls['id'].disable({ onlySelf: true });
     } else {
       this.dialogTitle = 'Thêm mới';
-     // this.entityForm.controls['id'].enable({ onlySelf: true });
     }
   }
 
@@ -68,10 +66,6 @@ export class RolesDetailComponent implements OnInit, OnDestroy {
   public saveChange() {
     this.btnDisabled = true;
     this.blockedPanel = true;
-    console.log(this.entityForm.getRawValue());
-    console.log(this.entityForm.getRawValue().value);
-    console.log(this.entityForm.getRawValue().name);
-    console.log(this.entityForm.getRawValue().name.value);
     if (this.entityId) {
       this.subscription.add(this.rolesService.update(this.entityId, this.entityForm.getRawValue().name)
         .subscribe(() => {
@@ -80,6 +74,7 @@ export class RolesDetailComponent implements OnInit, OnDestroy {
           this.btnDisabled = false;
           setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
         }, error => {
+          this.notificationService.showError(error);
           setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
         }));
     } else {
@@ -90,6 +85,7 @@ export class RolesDetailComponent implements OnInit, OnDestroy {
           this.btnDisabled = false;
           setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
         }, error => {
+          this.notificationService.showError(error);
           setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
         }));
     }

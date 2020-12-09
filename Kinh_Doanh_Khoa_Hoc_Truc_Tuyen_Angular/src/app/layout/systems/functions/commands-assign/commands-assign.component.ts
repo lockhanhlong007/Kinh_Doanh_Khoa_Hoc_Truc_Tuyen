@@ -60,7 +60,6 @@ export class CommandsAssignComponent implements OnInit {
     entity.commandIds = selectedItemIds;
 
     this.functionsService.addCommandsToFunction(this.functionId, entity).subscribe(() => {
-      this.notificationService.showSuccess(MessageConstants.Created_Ok);
       this.chosenEvent.emit(this.selectedItems);
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     });

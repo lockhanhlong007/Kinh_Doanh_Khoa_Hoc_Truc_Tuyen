@@ -31,8 +31,8 @@ export class FunctionsService extends BaseService {
           .pipe(catchError(this.handleError));
   }
 
-  delete(id) {
-      return this.http.delete(environment.ApiUrl + '/api/functions/' + id, { headers: this._sharedHeaders })
+  delete(ids: any[]) {
+      return this.http.post(`${environment.ApiUrl}/api/functions/delete-multi-items`, ids, { headers: this._sharedHeaders })
           .pipe(
               catchError(this.handleError)
           );
@@ -74,14 +74,7 @@ export class FunctionsService extends BaseService {
           );
   }
   deleteCommandsFromFunction(functionId, commandAssign: CommandAssign) {
-      let query = '';
-      for (const commandId of commandAssign.commandIds) {
-          query += 'commandIds' + '=' + commandId + '&';
-      }
-      return this.http.delete(`${environment.ApiUrl}/api/functions/${functionId}/commands?${query}addToAllFunction=${commandAssign.addToAllFunctions}`,
-          { headers: this._sharedHeaders })
-          .pipe(
-              catchError(this.handleError)
-          );
+      return this.http.post(`${environment.ApiUrl}/api/functions/${functionId}/commands/delete-items`, commandAssign,
+      { headers: this._sharedHeaders }).pipe(catchError(this.handleError));
   }
 }

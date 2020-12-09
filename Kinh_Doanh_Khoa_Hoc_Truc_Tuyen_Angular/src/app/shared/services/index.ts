@@ -5,3 +5,4 @@ export * from './users.service';
 export * from './roles.service';
 export * from './notifications.service';
 export * from './commands.service';
+export * from './categories.service';

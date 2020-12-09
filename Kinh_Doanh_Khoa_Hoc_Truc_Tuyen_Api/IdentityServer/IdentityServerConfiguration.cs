@@ -28,7 +28,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
-                        IdentityServerConstants.StandardScopes.OfflineAccess,
                         "api.khoahoc"
                     },
                     RequireConsent = true,
@@ -49,7 +48,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
                 },
                 new Client
                 {
-                    ClientId = "angular",
+                    ClientId = "client_angular",
                     ClientName = "Config angular",
                     ClientSecrets = { new Secret("secret".Sha256()) },
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
@@ -62,12 +61,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
                     },
                     RequireConsent = true,
                     AllowOfflineAccess = true,
-                    AllowAccessTokensViaBrowser = true
-                    //    RedirectUris =           { "https://localhost:5000/swagger/oauth2-redirect.html" },
-                    //    PostLogoutRedirectUris = { "https://localhost:5000/swagger/oauth2-redirect.html" },
-                    //    AllowedCorsOrigins =     { "https://localhost:5000" },
-                    //    RedirectUris =           { "https://localhost:5000/swagger/oauth2-redirect.html" },
-                    //    PostLogoutRedirectUris =  {   "http://openidclientdemocom:8001/signout-callback-oidc"}
+                    AllowAccessTokensViaBrowser = true,
+                    //  RedirectUris = { "https://localhost:44342/signin-oidc" },
+                    //PostLogoutRedirectUris =  {   "http://openidclientdemocom:8001/signout-callback-oidc"}
+                    AccessTokenType = AccessTokenType.Jwt,
+                    AccessTokenLifetime = 3600 * 24, //86400,
+                    IdentityTokenLifetime = 3600 * 24, //86400,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenExpiration = TokenExpiration.Absolute,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                    AlwaysSendClientClaims = true,
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                    Enabled = true
                 }
                 //new Client
                 //{

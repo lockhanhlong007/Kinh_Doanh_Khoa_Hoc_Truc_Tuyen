@@ -17,4 +17,12 @@ export class MessageConstants {
     public static Upload_Ok = 'Tải lên thành công';
     public static Required_Error = 'Dữ liệu không được để trống';
     public static Export_File_Ok = 'Xuất file thành công';
+    public static Created_Failed = 'Thêm mới thất bại';
+    public static Updated_Failed = 'Cập nhật thất bại';
+    public static Delete_Failed = 'Xóa thất bại';
+    public static Set_Default_Failed = 'Đặt mặc định thất bại';
+    public static Set_Is_Home_Failed = 'Đặt hiển thị trang chủ thất bại';
+    public static Set_Is_Not_Home_Failed = 'Bỏ hiển thị trang chủ thất bại';
+    public static Upload_Failed = 'Tải lên thất bại';
+    public static Export_File_Failed = 'Xuất file thất bại';
 }

@@ -58,8 +58,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetFunctionsByParentId(string functionId)
         {
-            var functions = _khoaHocDbContext.Functions.Where(x => x.ParentId == functionId).OrderBy(x => x.ParentId).ThenBy(x => x.SortOrder);
-            return Ok(await functions.Select(u => new FunctionViewModel()
+            var functions = _khoaHocDbContext.Functions.Where(x => x.Id != functionId).OrderBy(x => x.ParentId).ThenBy(x => x.SortOrder).ThenBy(x => x.SortOrder);
+            return Ok(await functions.Select(u => new FunctionViewModel
             {
                 Id = u.Id,
                 Name = u.Name,
@@ -172,35 +172,39 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Update function failed"));
         }
 
-        [HttpDelete("{id}")]
+        [HttpPost("delete-multi-items")]
         [ClaimRequirement(FunctionConstant.Function, CommandConstant.Delete)]
-        public async Task<IActionResult> DeleteFunction(string id)
+        public async Task<IActionResult> DeleteFunction(List<string> ids)
         {
-            var function = await _khoaHocDbContext.Functions.FindAsync(id);
-            if (function == null)
+            foreach (var id in ids)
             {
-                _logger.LogError($"Cannot found function with id {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found function with id {id}"));
-            }
-            var commands = _khoaHocDbContext.CommandInFunctions.Where(x => x.FunctionId == id);
-            _khoaHocDbContext.CommandInFunctions.RemoveRange(commands);
-            _khoaHocDbContext.Functions.Remove(function);
-            var result = await _khoaHocDbContext.SaveChangesAsync();
-            if (result <= 0)
-            {
-                _logger.LogError("Delete function failed");
-                return BadRequest(new ApiBadRequestResponse("Delete function failed"));
-            }
+                var function = await _khoaHocDbContext.Functions.FindAsync(id);
+                if (function == null)
+                {
+                    _logger.LogError($"Cannot found function with id {id}");
+                    return NotFound(new ApiNotFoundResponse($"Cannot found function with id {id}"));
+                }
+                var commands = _khoaHocDbContext.CommandInFunctions.Where(x => x.FunctionId == id);
+                if (commands.Any())
+                {
+                    _khoaHocDbContext.CommandInFunctions.RemoveRange(commands);
+                }
 
-            var functionViewModel = new FunctionViewModel
-            {
-                Id = function.Id,
-                ParentId = function.ParentId,
-                Url = function.Url,
-                SortOrder = function.SortOrder,
-                Name = function.Name
-            };
-            return Ok(functionViewModel);
+                var permission = _khoaHocDbContext.Permissions.Where(x => x.FunctionId.Equals(id));
+                if (permission.Any())
+                {
+                    _khoaHocDbContext.Permissions.RemoveRange(permission);
+                }
+                _khoaHocDbContext.Functions.Remove(function);
+                var result = await _khoaHocDbContext.SaveChangesAsync();
+                if (result <= 0)
+                {
+                    _logger.LogError("Delete function failed");
+                    return BadRequest(new ApiBadRequestResponse("Delete function failed"));
+                }
+
+            }
+            return Ok();
         }
 
         [HttpGet("{functionId}/commands")]
@@ -254,7 +258,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 {
                     foreach (var commandId in request.CommandIds)
                     {
-                        if (await _khoaHocDbContext.CommandInFunctions.FindAsync(request.CommandIds, function.Id) == null)
+                        if (await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, function.Id) == null)
                         {
                             await _khoaHocDbContext.CommandInFunctions.AddAsync(new CommandInFunction()
                             {
@@ -274,9 +278,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Add command to function failed"));
         }
 
-        [HttpDelete("{functionId}/commands/{commandId}")]
+        [HttpPost("{functionId}/commands/delete-items")]
         [ClaimRequirement(FunctionConstant.Function, CommandConstant.Delete)]
-        public async Task<IActionResult> DeleteCommandToFunction(string functionId, [FromQuery] CommandAssignRequest request)
+        public async Task<IActionResult> DeleteCommandToFunction(string functionId, CommandAssignRequest request)
         {
 
             foreach (var commandId in request.CommandIds)

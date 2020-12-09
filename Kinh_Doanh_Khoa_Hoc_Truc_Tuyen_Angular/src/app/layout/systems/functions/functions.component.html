@@ -58,7 +58,7 @@
                 <button style="margin-right: 5px;" pButton type="button" label="Xóa hành động" icon="fa fa-trash" class="p-button-danger" *ngIf="selectedCommandItems.length > 0" (click)="removeCommands()"></button>
             </div>
         </p-header>
-        <p-table #dt [value]="commands" selectionMode="multiple" [metaKeySelection]="true" [(selection)]="selectedCommandItems" [responsive]="true" [scrollable]="true">
+        <p-table #dt [value]="commands" [metaKeySelection]="true" [(selection)]="selectedCommandItems" [responsive]="true" [scrollable]="true">
             <ng-template pTemplate="header">
                 <tr>
                     <th style="width: 50px">

@@ -2,18 +2,18 @@ import { Component, EventEmitter, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { MessageConstants } from '../../../../shared';
-import { UtilitiesService, FunctionsService, NotificationService } from '../../../../shared/services';
+import { NotificationService } from '../../../../shared/services';
+import { CategoriesService } from '../../../../shared/services/categories.service';
 
 @Component({
-  selector: 'app-functions-detail',
-  templateUrl: './functions-detail.component.html',
-  styleUrls: ['./functions-detail.component.scss']
+  selector: 'app-categories-detail',
+  templateUrl: './categories-detail.component.html',
+  styleUrls: ['./categories-detail.component.scss']
 })
-export class FunctionsDetailComponent implements OnInit {
+export class CategoriesDetailComponent implements OnInit {
 
-  constructor(private utilityService: UtilitiesService,
-    public bsModalRef: BsModalRef,
-    private functionsService: FunctionsService,
+  constructor(public bsModalRef: BsModalRef,
+    private categoriesService: CategoriesService,
     private notificationService: NotificationService,
     private fb: FormBuilder) {
   }
@@ -24,7 +24,7 @@ export class FunctionsDetailComponent implements OnInit {
   public btnDisabled = false;
 
   saved: EventEmitter<any> = new EventEmitter();
-  public rootFunctions: any[] = [];
+  public rootCategories: any[] = [];
 
   // Validate
   noSpecial: RegExp = /^[^<>*!_~]+$/;
@@ -34,9 +34,6 @@ export class FunctionsDetailComponent implements OnInit {
       { type: 'minlength', message: 'Bạn phải nhập ít nhất 3 kí tự' },
       { type: 'maxlength', message: 'Bạn không được nhập quá 255 kí tự' }
     ],
-    'id': [
-      { type: 'required', message: 'Bạn phải nhập mã duy nhất' }
-    ],
     'sortOrder': [
       { type: 'required', message: 'Bạn phải nhập thứ tự' }
     ]
@@ -44,23 +41,19 @@ export class FunctionsDetailComponent implements OnInit {
 
   ngOnInit() {
     this.entityForm = this.fb.group({
-      'id': new FormControl('', Validators.required),
+      'id': new FormControl(),
       'parentId': new FormControl(),
       'name': new FormControl('', Validators.compose([
         Validators.required,
         Validators.maxLength(255),
         Validators.minLength(3)
       ])),
-      'url': new FormControl(),
-      'icon': new FormControl(),
       'sortOrder': new FormControl(1, Validators.required)
     });
     if (this.entityId) {
       this.dialogTitle = 'Cập nhật';
       this.loadParents(this.entityId);
       this.loadDetail(this.entityId);
-      this.entityForm.controls['id'].disable({ onlySelf: true });
-
     } else {
       this.loadParents(null);
       this.dialogTitle = 'Thêm mới';
@@ -70,21 +63,19 @@ export class FunctionsDetailComponent implements OnInit {
   loadDetail(id: any) {
     this.btnDisabled = true;
     this.blockedPanel = true;
-    this.functionsService.getDetail(id)
+    this.categoriesService.getDetail(id)
       .subscribe((response: any) => {
         this.entityForm.setValue({
           id: response.id,
           parentId: response.parentId,
           name: response.name,
-          url: response.url,
-          icon: response.icon,
           sortOrder: response.sortOrder
         });
         setTimeout(() => {
           this.btnDisabled = false;
           this.blockedPanel = false;
         }, 1000);
-      }, error => {
+      }, () => {
         setTimeout(() => {
           this.btnDisabled = false;
           this.blockedPanel = false;
@@ -93,11 +84,11 @@ export class FunctionsDetailComponent implements OnInit {
   }
 
   loadParents(id) {
-    this.functionsService.getAllByParentId(id)
+    this.categoriesService.getAllByParentId(id)
       .subscribe((response: any) => {
-        this.rootFunctions = [];
+        this.rootCategories = [];
         response.forEach(element => {
-          this.rootFunctions.push({
+          this.rootCategories.push({
             value: element.id,
             label: element.name
           });
@@ -109,15 +100,14 @@ export class FunctionsDetailComponent implements OnInit {
     this.btnDisabled = true;
     this.blockedPanel = true;
     if (this.entityId) {
-      this.functionsService.update(this.entityId, this.entityForm.getRawValue())
+      this.categoriesService.update(this.entityId, this.entityForm.getRawValue())
         .subscribe(() => {
           this.notificationService.showSuccess(MessageConstants.Updated_Ok);
+          this.saved.emit(this.entityForm.value);
           setTimeout(() => {
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
-          this.saved.emit(this.entityForm.value);
-
         }, error => {
           setTimeout(() => {
             this.notificationService.showError(error);
@@ -126,16 +116,15 @@ export class FunctionsDetailComponent implements OnInit {
           }, 1000);
         });
     } else {
-      this.functionsService.add(this.entityForm.value)
+      this.categoriesService.add(this.entityForm.value)
         .subscribe(() => {
-
           this.notificationService.showSuccess(MessageConstants.Created_Ok);
+          this.saved.emit(this.entityForm.value);
           setTimeout(() => {
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
-          this.saved.emit(this.entityForm.value);
-        }, error => {
+        }, () => {
           setTimeout(() => {
             this.notificationService.showError(MessageConstants.Created_Failed);
             this.btnDisabled = false;

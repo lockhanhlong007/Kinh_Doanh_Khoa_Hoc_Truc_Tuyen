@@ -55,13 +55,12 @@ export class LoginComponent implements OnInit {
        const client = new ClientRequest();
        client.userName = this.f.username.value;
        client.password = this.f.password.value;
-       client.clientId = 'client_api';
+       client.clientId = 'client_angular';
        client.clientSecret = 'secret';
        client.scope = 'openid email profile api.khoahoc';
        this.auThenService.login(client).subscribe(res => {
         this.auThenService.saveToken(res.accessToken);
         const check = this.auThenService.getDecodedAccessToken(res.accessToken);
-        console.log(check);
         this.router.navigate([this.returnUrl]);
        }, error => {
            this.error = error;

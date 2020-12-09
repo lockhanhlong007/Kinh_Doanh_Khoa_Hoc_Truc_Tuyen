@@ -8,3 +8,4 @@ export * from './permission-update-request.model';
 export * from './permission-screen.model';
 export * from './permission.model';
 export * from './client-request.model';
+export * from './category.model';

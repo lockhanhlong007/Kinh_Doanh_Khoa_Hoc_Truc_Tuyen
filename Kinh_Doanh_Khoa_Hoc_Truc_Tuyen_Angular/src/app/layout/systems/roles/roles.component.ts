@@ -111,6 +111,7 @@ export class RolesComponent implements OnInit, OnDestroy {
       this.selectedItems = [];
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     }, error => {
+      this.notificationService.showError(error);
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     }));
   }

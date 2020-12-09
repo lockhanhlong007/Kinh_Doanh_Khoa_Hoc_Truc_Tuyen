@@ -138,7 +138,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             if (ids.Contains("Admin"))
             {
-                _logger.LogError($"Cannot delete role: Admin");
+                _logger.LogError("Cannot delete role: Admin");
                 return BadRequest(new ApiBadRequestResponse($"Cannot delete role: Admin"));
 
             }
@@ -153,7 +153,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 }
 
                 var userInRole = (await _userManager.GetUsersInRoleAsync(role.Name)).ToList();
-                userInRole.ForEach(async u => await _userManager.RemoveFromRoleAsync(u, role.Name));
+                if (userInRole.Count > 0)
+                {
+                    userInRole.ForEach(async u => await _userManager.RemoveFromRoleAsync(u, role.Name));
+                }
+
+                var permission = _khoaHocDbContext.Permissions.Where(x => x.RoleId.Equals(Guid.Parse(id)));
+                if (permission.Any())
+                {
+                    _khoaHocDbContext.Permissions.RemoveRange(permission);
+                    await _khoaHocDbContext.SaveChangesAsync();
+                }
                 var result = await _roleManager.DeleteAsync(role);
                 if (result.Succeeded)
                 {
@@ -183,20 +193,30 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpPut("{roleId}/permissions")]
         [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
         [ValidationFilter]
-        public async Task<IActionResult> PutPermissionByRoleId(string roleId, [FromBody] UpdatePermissionRequest request)
+        public async Task<IActionResult> PutPermissionByRoleId(Guid roleId, [FromBody] UpdatePermissionRequest request)
         {
-            var newPermissions = request.Permissions.Select(p => new Permission(p.FunctionId, Guid.Parse(roleId), p.CommandId))
-                .ToList();
-            var existingPermissions = _khoaHocDbContext.Permissions.Where(x => x.RoleId.Equals(Guid.Parse(roleId)));
-            _khoaHocDbContext.Permissions.RemoveRange(existingPermissions);
-            await _khoaHocDbContext.AddRangeAsync(newPermissions);
-            var result = await _khoaHocDbContext.SaveChangesAsync();
-            if (result > 0)
+            try
             {
-                return NoContent();
+                var newPermissions = request.Permissions.Select(p => new Permission(p.FunctionId, roleId, p.CommandId)).ToList();
+                var existingPermissions = await _khoaHocDbContext.Permissions.AsNoTracking().Where(x => x.RoleId.Equals(roleId)).ToListAsync();
+                if (existingPermissions.Any())
+                {
+                    _khoaHocDbContext.Permissions.RemoveRange(existingPermissions);
+                }
+                await _khoaHocDbContext.AddRangeAsync(newPermissions);
+                var result =  await _khoaHocDbContext.SaveChangesAsync();
+                if (result > 0)
+                {
+                    return NoContent();
+                }
+                _logger.LogError("Save permission failed");
+                return BadRequest(new ApiBadRequestResponse("Save permission failed"));
             }
-            _logger.LogError("Save permission failed");
-            return BadRequest(new ApiBadRequestResponse("Save permission failed"));
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(new ApiBadRequestResponse(e.Message));
+            }
         }
     }
 }

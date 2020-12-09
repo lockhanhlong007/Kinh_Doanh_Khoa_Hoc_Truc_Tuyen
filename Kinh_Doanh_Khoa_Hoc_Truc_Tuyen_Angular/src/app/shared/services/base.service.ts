@@ -5,7 +5,6 @@ export abstract class BaseService {
     constructor() { }
 
     protected handleError(errorResponse: any) {
-        console.log('Day la handle error: ' + errorResponse);
         if (errorResponse.error.message) {
             return throwError(errorResponse.error.message || 'Server error');
         }
