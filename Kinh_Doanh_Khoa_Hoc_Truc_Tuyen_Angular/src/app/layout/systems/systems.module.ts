@@ -29,6 +29,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FunctionsDetailComponent } from './functions/functions-detail/functions-detail.component';
 import { CommandsAssignComponent } from './functions/commands-assign/commands-assign.component';
 import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
+import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
     UsersDetailComponent,
     RolesAssignComponent,
     FormatDataPipe,
+    ConvertPathPipe,
     FunctionsDetailComponent,
 
     CommandsAssignComponent],

@@ -9,3 +9,13 @@ export * from './permission-screen.model';
 export * from './permission.model';
 export * from './client-request.model';
 export * from './category.model';
+export * from './course-request.model';
+export * from './course.model';
+export * from './lessons-request.model';
+export * from './lessons.model';
+export * from './promotions-request.model';
+export * from './promotions.model';
+export * from './order-detail.model';
+export * from './oder.model';
+export * from './comments.model';
+

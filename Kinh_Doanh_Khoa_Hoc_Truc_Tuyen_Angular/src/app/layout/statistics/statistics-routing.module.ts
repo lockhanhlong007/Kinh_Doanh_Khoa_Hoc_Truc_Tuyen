@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { RevenueComponent } from './revenue/revenue.component';
 import { NewUserComponent } from './new-user/new-user.component';
+import { AuthGuard } from '../../shared';
 
 
 const routes: Routes = [
@@ -11,11 +12,19 @@ const routes: Routes = [
     },
     {
         path: 'revenue',
-        component: RevenueComponent
+        component: RevenueComponent,
+        data: {
+            functionCode: 'Revenue'
+        },
+        canActivate: [AuthGuard]
     },
     {
         path: 'new-user',
-        component: NewUserComponent
+        component: NewUserComponent,
+        data: {
+            functionCode: 'NewUser'
+        },
+        canActivate: [AuthGuard]
     }
 ];
 

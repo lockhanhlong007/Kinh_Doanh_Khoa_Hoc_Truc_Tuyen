@@ -7,17 +7,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 {
     public class PromotionCreateRequest
     {
-        public DateTime FromDate { set; get; }
+        public int Id { get; set; }
+        public string FromDate { set; get; }
 
-        public DateTime ToDate { set; get; }
+        public string ToDate { set; get; }
 
         public bool ApplyForAll { set; get; }
 
         public int? DiscountPercent { set; get; }
 
-        public decimal? DiscountAmount { set; get; }
+        public int? DiscountAmount { set; get; }
 
-        public Status Status { set; get; }
+        public bool Status { set; get; }
 
         public string Name { set; get; }
     }

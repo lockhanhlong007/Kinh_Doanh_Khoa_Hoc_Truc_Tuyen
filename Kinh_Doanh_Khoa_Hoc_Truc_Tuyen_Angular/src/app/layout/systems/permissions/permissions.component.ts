@@ -31,17 +31,19 @@ export class PermissionsComponent implements OnInit, OnDestroy {
   public selectedUpdates: string[] = [];
   public selectedDeletes: string[] = [];
   public selectedExportExcel: string[] = [];
+  public selectedApprove: string[] = [];
+
 
   public isSelectedAllViews = false;
   public isSelectedAllCreates = false;
   public isSelectedAllUpdates = false;
   public isSelectedAllDeletes = false;
   public isSelectedAllExportExcel = false;
+  public isSelectedAllApprove = false;
   constructor(
 
     private permissionsService: PermissionsService,
     private rolesService: RolesService,
-    private commandsService: CommandsService,
     private _notificationService: NotificationService,
     private _utilityService: UtilitiesService) {
   }
@@ -49,7 +51,6 @@ export class PermissionsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadAllRoles();
-    // this.loadData(this.selectedRole.id);
   }
 
   changeRole($event: any) {
@@ -102,6 +103,13 @@ export class PermissionsComponent implements OnInit, OnDestroy {
         functionId: element,
         roleId: this.selectedRole.id,
         commandId: SystemConstants.ExportExcel_Command
+      });
+    });
+    this.selectedApprove.forEach(element => {
+      listPermissions.push({
+        functionId: element,
+        roleId: this.selectedRole.id,
+        commandId: SystemConstants.Approve_Command
       });
     });
     const permissionsUpdateRequest = new PermissionUpdateRequest();
@@ -236,6 +244,26 @@ export class PermissionsComponent implements OnInit, OnDestroy {
           });
         }
       }
+    } else if (commandId === SystemConstants.Approve_Command) {
+      if (checked.checked) {
+        this.selectedApprove.push(functionId);
+        if (parentId === null) {
+          const childFunctions = this.flattenFunctions.filter(x => x.parentId === functionId).map(x => x.id);
+          this.selectedApprove.push(...childFunctions);
+        } else {
+          if (this.selectedApprove.filter(x => x === parentId).length === 0) {
+            this.selectedApprove.push(parentId);
+          }
+        }
+      } else {
+        this.selectedApprove = this.selectedApprove.filter(x => x !== functionId);
+        if (parentId === null) {
+          const childFunctions = this.flattenFunctions.filter(x => x.parentId === functionId).map(x => x.id);
+          this.selectedApprove = this.selectedApprove.filter(function (el) {
+            return !childFunctions.includes(el);
+          });
+        }
+      }
     }
   }
   fillPermissions(roleId: any) {
@@ -247,6 +275,7 @@ export class PermissionsComponent implements OnInit, OnDestroy {
         this.selectedDeletes = [];
         this.selectedViews = [];
         this.selectedExportExcel = [];
+        this.selectedApprove = [];
         response.forEach(element => {
           if (element.commandId === SystemConstants.Create_Command) {
             this.selectedCreates.push(element.functionId);
@@ -262,6 +291,9 @@ export class PermissionsComponent implements OnInit, OnDestroy {
           }
           if (element.commandId === SystemConstants.ExportExcel_Command) {
             this.selectedExportExcel.push(element.functionId);
+          }
+          if (element.commandId === SystemConstants.Approve_Command) {
+            this.selectedApprove.push(element.functionId);
           }
         });
         setTimeout(() => { this.blockedPanel = false; }, 1000);
@@ -309,6 +341,11 @@ export class PermissionsComponent implements OnInit, OnDestroy {
       this.selectedExportExcel = [];
       if (checked.checked) {
         this.selectedExportExcel.push(...this.flattenFunctions.map(x => x.id));
+      }
+    } else if (uniqueCode === SystemConstants.Approve_Command) {
+      this.selectedApprove = [];
+      if (checked.checked) {
+        this.selectedApprove.push(...this.flattenFunctions.map(x => x.id));
       }
     }
   }

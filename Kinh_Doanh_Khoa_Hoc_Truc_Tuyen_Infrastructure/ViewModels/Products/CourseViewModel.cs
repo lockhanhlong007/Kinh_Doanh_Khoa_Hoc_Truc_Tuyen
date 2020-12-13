@@ -23,8 +23,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public DateTime? LastModificationTime { get; set; }
 
-        public Status Status { get; set; }
+        public int Status { get; set; }
 
         public int CategoryId { get; set; }
+        public string CategoryName { get; set; }
     }
 }

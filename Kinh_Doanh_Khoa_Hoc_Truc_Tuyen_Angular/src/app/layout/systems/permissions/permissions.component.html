@@ -44,6 +44,11 @@
                         </p-checkbox>
                         Export Excel
                     </th>
+                    <th style="width: 160px; text-align: center">
+                        <p-checkbox (onChange)="selectAll($event,'Approve')" [(ngModel)]="isSelectedAllApprove" name="CheckAll">
+                        </p-checkbox>
+                        Approve
+                    </th>
             </ng-template>
             <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
                 <tr [ttRow]="rowNode">
@@ -76,11 +81,16 @@
                             <p-checkbox name="hasExportExcel" (onChange)="checkChanged($event,'ExportExcel',rowData.id,rowData.parentId)" [(ngModel)]="selectedExportExcel" [value]="rowData.id"></p-checkbox>
                         </ng-container>
                     </th>
+                    <th style="width: 100px; text-align: center">
+                        <ng-container *ngIf="rowData.hasApprove==true">
+                            <p-checkbox name="hasApprove" (onChange)="checkChanged($event,'Approve',rowData.id,rowData.parentId)" [(ngModel)]="selectedApprove" [value]="rowData.id"></p-checkbox>
+                        </ng-container>
+                    </th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">
                 <tr>
-                    <td colspan="6" style="text-align:center">
+                    <td colspan="7" style="text-align:center">
                         Không có dữ liệu, mời bạn chọn nhóm quyền để tải dữ liệu.
                     </td>
                 </tr>

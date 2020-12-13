@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
@@ -23,27 +27,31 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
         private ILogger<LessonsController> _logger;
+        private IStorageService _storageService;
 
-        public LessonsController(EKhoaHocDbContext khoaHocDbContext, ILogger<LessonsController> logger)
+        public LessonsController(EKhoaHocDbContext khoaHocDbContext, ILogger<LessonsController> logger, IStorageService storageService)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger ?? throw new ArgumentException(nameof(logger));
+            _storageService = storageService;
         }
 
         [HttpGet("{id}")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(int id)
         {
             var result = await _khoaHocDbContext.Lessons.FindAsync(id);
             if (result == null)
             {
-                _logger.LogError($"Cannot found Course with id {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found course with id {id}"));
+                _logger.LogError($"Cannot found lesson with id {id}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found lesson with id {id}"));
             }
 
             return Ok(new LessonViewModel
             {
                 Name = result.Name,
+                Attachment = _storageService.GetFileUrl(result.Attachment),
+                VideoPath = _storageService.GetFileUrl(result.VideoPath),
                 Status = result.Status,
                 SortOrder = result.SortOrder,
                 CourseId = result.CourseId,
@@ -57,8 +65,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Create)]
         public async Task<IActionResult> PostLesson([FromForm] LessonCreateRequest request)
         {
-            var dbCourse = await _khoaHocDbContext.Courses.FindAsync(request.Id);
-            if (dbCourse != null)
+            var dbLesson = await _khoaHocDbContext.Courses.FindAsync(request.Id);
+            if (dbLesson != null)
             {
                 _logger.LogError($"Course with id {request.Id} is existed.");
                 return BadRequest(new ApiBadRequestResponse($"Course with id {request.Id} is existed."));
@@ -71,47 +79,94 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 SortOrder = request.SortOrder,
                 CourseId = request.CourseId,
             };
+            if (request.VideoPath != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.VideoPath.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.VideoPath.OpenReadStream(), fileName, "videos");
+                lesson.VideoPath = "videos/" + fileName;
+            }
+            if (request.Attachment != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.Attachment.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.Attachment.OpenReadStream(), fileName, "files");
+                lesson.Attachment = "files/" + fileName;
+            }
             await _khoaHocDbContext.Lessons.AddAsync(lesson);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
             {
-                return CreatedAtAction(nameof(GetById), new { id = lesson.Id }, request);
+                return Ok();
             }
             _logger.LogError("Create course is failed");
             return BadRequest(new ApiBadRequestResponse("Create course is failed"));
         }
 
+        [HttpPut("approve")]
+        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Update)]
+        [ValidationFilter]
+        public async Task<IActionResult> PutLessonsApprove(List<int> input)
+        {
+            foreach (var id in input)
+            {
+                var lessons = await _khoaHocDbContext.Lessons.FindAsync(id);
+                if (lessons == null)
+                {
+                    _logger.LogError($"Cannot found lesson with id {id}");
+                    return NotFound(new ApiNotFoundResponse($"Cannot found lesson with id {id}"));
+                }
+                lessons.Status = true;
+                _khoaHocDbContext.Lessons.Update(lessons);
+            }
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
+            {
+                return NoContent();
+            }
+            _logger.LogError("Update lesson failed");
+            return BadRequest(new ApiBadRequestResponse("Update lesson failed"));
+        }
 
         [HttpGet]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public async Task<IActionResult> GetLessons()
+        public async Task<IActionResult> GetLessons(int courseId)
         {
-            return Ok(await _khoaHocDbContext.Lessons.AsNoTracking().Select(_ => new LessonViewModel
+            return Ok(await _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == courseId).OrderBy(x => x.Status).AsNoTracking().Select(_ => new LessonViewModel
             {
                 Name = _.Name,
                 Status = _.Status,
                 SortOrder = _.SortOrder,
                 CourseId = _.CourseId,
+                Attachment = _storageService.GetFileUrl(_.Attachment),
+                VideoPath = _storageService.GetFileUrl(_.VideoPath),
+                Id = _.Id,
+                CourseName = _.Course.Name
+
             }).ToListAsync());
         }
 
         [HttpGet("filter")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public async Task<IActionResult> GetLessonsPaging(string filter, int pageIndex, int pageSize)
+        public async Task<IActionResult> GetLessonsPaging(int courseId,string filter, int pageIndex, int pageSize)
         {
-            var query = _khoaHocDbContext.Lessons.AsQueryable().AsNoTracking();
+            var query = _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == courseId).OrderBy(x => x.Status).AsNoTracking();
             if (!string.IsNullOrEmpty(filter))
             {
                 query = query.Where(x => x.Name.Contains(filter));
             }
 
             var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageSize - 1) * pageSize).Take(pageSize).Select(_ => new LessonViewModel
+            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new LessonViewModel
             {
                 Name = _.Name,
                 Status = _.Status,
+                Id = _.Id,
                 SortOrder = _.SortOrder,
                 CourseId = _.CourseId,
+                Attachment = _storageService.GetFileUrl(_.Attachment),
+                VideoPath = _storageService.GetFileUrl(_.VideoPath),
+                CourseName = _.Course.Name
             }).ToListAsync();
             var pagination = new Pagination<LessonViewModel>
             {
@@ -124,7 +179,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpPut("{id}")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Update)]
         [ValidationFilter]
-        public async Task<IActionResult> PutLesson(int id, [FromBody] LessonCreateRequest request)
+        public async Task<IActionResult> PutLesson(int id, [FromForm] LessonCreateRequest request)
         {
             var lesson = await _khoaHocDbContext.Lessons.FindAsync(id);
             if (lesson == null)
@@ -137,6 +192,20 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             lesson.Status = request.Status;
             lesson.SortOrder = request.SortOrder;
             lesson.CourseId = request.CourseId;
+            if (request.VideoPath != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.VideoPath.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.VideoPath.OpenReadStream(), fileName, "videos");
+                lesson.VideoPath = "videos/" + fileName;
+            }
+            if (request.Attachment != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.Attachment.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.Attachment.OpenReadStream(), fileName, "files");
+                lesson.Attachment = "files/" + fileName;
+            }
             _khoaHocDbContext.Lessons.Update(lesson);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
@@ -147,33 +216,66 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Update lesson failed"));
         }
 
-        [HttpDelete("{id}")]
+        [HttpPost("{id}")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Delete)]
-        public async Task<IActionResult> DeleteLesson(int id)
+        public async Task<IActionResult> DeleteLesson(List<int> input)
         {
-            var lesson = await _khoaHocDbContext.Lessons.FindAsync(id);
-            if (lesson == null)
+            foreach (var id in input)
             {
-                _logger.LogError($"Cannot found lesson with id {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found lesson with id {id}"));
-            }
-            _khoaHocDbContext.Lessons.Remove(lesson);
-            var result = await _khoaHocDbContext.SaveChangesAsync();
-            if (result <= 0)
-            {
-                _logger.LogError("Delete lesson failed");
-                return BadRequest(new ApiBadRequestResponse("Delete lesson failed"));
-            }
+                var lesson = await _khoaHocDbContext.Lessons.FindAsync(id);
+                if (lesson == null)
+                {
+                    _logger.LogError($"Cannot found lesson with id {id}");
+                    return NotFound(new ApiNotFoundResponse($"Cannot found lesson with id {id}"));
+                }
+                var comments = _khoaHocDbContext.Comments.Where(x => x.EntityId == lesson.Id && x.EntityType.Equals("Lessons"));
+                if (comments.Any())
+                {
+                    _khoaHocDbContext.Comments.RemoveRange(comments);
+                }
+                _khoaHocDbContext.Lessons.Remove(lesson);
 
-            var lessonViewModel = new LessonViewModel
+            }
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
             {
-                Name = lesson.Name,
-                Status = lesson.Status,
-                SortOrder = lesson.SortOrder,
-                CourseId = lesson.CourseId
-            };
-            return Ok(lessonViewModel);
+                return Ok();
+            }
+            _logger.LogError("Delete lesson failed");
+            return BadRequest(new ApiBadRequestResponse("Delete lesson failed"));
         }
 
+
+        [HttpDelete("course-{coursesId}-lesson-{lessonId}/attachment")]
+        public async Task<IActionResult> DeleteAttachment(int coursesId, int lessonId)
+        {
+            var lesson = await _khoaHocDbContext.Lessons.FindAsync(lessonId);
+            if (lesson == null)
+                return BadRequest(new ApiBadRequestResponse($"Cannot found lesson with id {lessonId}"));
+            lesson.Attachment = "";
+            _khoaHocDbContext.Lessons.Update(lesson);
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
+            {
+                return Ok();
+            }
+            return BadRequest(new ApiBadRequestResponse("Delete File failed"));
+        }
+
+        [HttpDelete("course-{coursesId}-lesson-{lessonId}/video")]
+        public async Task<IActionResult> DeleteVideo(int coursesId, int lessonId)
+        {
+            var lesson = await _khoaHocDbContext.Lessons.FindAsync(lessonId);
+            if (lesson == null)
+                return BadRequest(new ApiBadRequestResponse($"Cannot found lesson with id {lessonId}"));
+            lesson.VideoPath = "";
+            _khoaHocDbContext.Lessons.Update(lesson);
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
+            {
+                return Ok();
+            }
+            return BadRequest(new ApiBadRequestResponse("Delete Video failed"));
+        }
     }
 }

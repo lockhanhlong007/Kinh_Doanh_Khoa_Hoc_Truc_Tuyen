@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
@@ -38,28 +39,33 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
 
 
-        [HttpGet("{entityType}/{entityId}/comments/filter")]
-        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.View)]
+        [HttpGet("{entityType}/{entityId}/filter")]
         public async Task<IActionResult> GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex,
             int pageSize)
         {
             var query = _khoaHocDbContext.Comments.AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Content.Contains(filter));
+                query = query.Where(x => x.Content.Contains(filter) || x.UserId.ToString().Contains(filter));
             }
-
+            var items = new List<CommentViewModel>();
             var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new CommentViewModel
+            await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ForEachAsync(async x =>
             {
-                Id = x.Id,
-                Content = x.Content,
-                CreationTime = x.CreationTime,
-                LastModificationTime = x.LastModificationTime,
-                EntityId = x.EntityId,
-                EntityType = x.EntityType,
-                UserId = x.UserId
-            }).ToListAsync();
+                var user = await _userManager.FindByIdAsync(x.UserId.ToString());
+                items.Add(new CommentViewModel
+                {
+                    Id = x.Id,
+                    Content = x.Content,
+                    CreationTime = x.CreationTime,
+                    LastModificationTime = x.LastModificationTime,
+                    EntityId = x.EntityId,
+                    EntityType = x.EntityType,
+                    UserId = x.UserId,
+                    OwnerUser = user?.Name + " (" + user?.Email + ")"
+                });
+            });
+
             var pagination = new Pagination<CommentViewModel>
             {
                 Items = items,
@@ -68,8 +74,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(pagination);
         }
 
-        [HttpGet("{entityType}/{entityId}/comments/{commentId}")]
-        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.View)]
+        [HttpGet("{commentId}")]
         public async Task<IActionResult> GetCommentDetail(int commentId)
         {
             var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
@@ -77,6 +82,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return NotFound(new ApiNotFoundResponse($"Cannot found comment with id: {commentId}"));
             }
+            var user = await _userManager.FindByIdAsync(comment.UserId.ToString());
             var commentViewModel = new CommentViewModel
             {
                 Id = comment.Id,
@@ -85,15 +91,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 LastModificationTime = comment.LastModificationTime,
                 EntityId = comment.EntityId,
                 EntityType = comment.EntityType,
-                UserId = comment.UserId
+                UserId = comment.UserId,
+                OwnerUser = user?.Name + " (" + user?.Email + ")",
             };
             return Ok(commentViewModel);
         }
 
-        [HttpPost("{entityType}/{entityId}/comments")]
-        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.Create)]
+        [HttpPost("{entityType}/{entityId}")]
         [ValidationFilter]
-        public async Task<IActionResult> PostComment(int entityId, [FromBody] CommentCreateRequest request)
+        public async Task<IActionResult> PostComment([FromBody] CommentCreateRequest request)
         {
             var comment = new Comment
             {
@@ -101,21 +107,21 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 EntityType = request.EntityType,
                 EntityId = request.EntityId
             };
-            if (request.EntityType.Equals("Course"))
+            if (request.EntityType.Equals("courses"))
             {
-                var course = await _khoaHocDbContext.Courses.FindAsync(entityId);
+                var course = await _khoaHocDbContext.Courses.FindAsync(request.EntityId);
                 if (course == null)
                 {
-                    return BadRequest(new ApiBadRequestResponse($"Cannot found course with id: {entityId}"));
+                    return BadRequest(new ApiBadRequestResponse($"Cannot found course with id: {request.EntityId}"));
                 }
                 await _khoaHocDbContext.Comments.AddRangeAsync(comment);
             }
             else
             {
-                var lesson = await _khoaHocDbContext.Lessons.FindAsync(entityId);
+                var lesson = await _khoaHocDbContext.Lessons.FindAsync(request.EntityId);
                 if (lesson == null)
                 {
-                    return BadRequest(new ApiBadRequestResponse($"Cannot found course with id: {entityId}"));
+                    return BadRequest(new ApiBadRequestResponse($"Cannot found lesson with id: {request.EntityId}"));
                 }
              
                 await _khoaHocDbContext.Comments.AddRangeAsync(comment);
@@ -123,14 +129,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
             {
-                return CreatedAtAction(nameof(GetCommentDetail), new { id = entityId, type = request.EntityType, commentId = comment.Id }, request);
+                return Ok();
             }
 
             return BadRequest(new ApiBadRequestResponse("Create comment failed"));
         }
 
-        [HttpPut("{entityType}/{entityId}/comments/{commentId}")]
-        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.Update)]
+        [HttpPut("{commentId}/{entityType}/{entityId}")]
         [ValidationFilter]
         public async Task<IActionResult> PutComment(int commentId, [FromBody] CommentCreateRequest request)
         {
@@ -151,31 +156,27 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NoContent();
             }
 
-            return BadRequest(new ApiBadRequestResponse($"Update comment failed"));
+            return BadRequest(new ApiBadRequestResponse("Update comment failed"));
         }
 
-        [HttpDelete("{entityType}/{entityId}/comments/{commentId}")]
-        [ClaimRequirement(FunctionConstant.Comments, CommandConstant.Delete)]
+        [HttpPost("delete-multi-items")]
         [ValidationFilter]
-        public async Task<IActionResult> DeleteComment(int commentId)
+        public async Task<IActionResult> DeleteComment(List<int> request)
         {
-            var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
-            if (comment == null)
+            foreach (var commentId in request)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found the comment with id: {commentId}"));
+                var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
+                if (comment == null)
+                {
+                    return NotFound(new ApiNotFoundResponse($"Cannot found the comment with id: {commentId}"));
+                }
+                _khoaHocDbContext.Comments.Remove(comment);
+              
             }
-            _khoaHocDbContext.Comments.Remove(comment);
             var result = await _khoaHocDbContext.SaveChangesAsync();
-            if (result <= 0) return BadRequest(new ApiBadRequestResponse($"Delete comment failed"));
-            var commentViewModel = new CommentViewModel
-            {
-                Content = comment.Content,
-                EntityType = comment.EntityType,
-                EntityId = comment.EntityId,
-                Id = comment.Id,
-                UserId = comment.UserId
-            };
-            return Ok(commentViewModel);
+            if (result > 0)
+                return Ok();
+            return BadRequest(new ApiBadRequestResponse($"Delete comment failed"));
         }
 
     }

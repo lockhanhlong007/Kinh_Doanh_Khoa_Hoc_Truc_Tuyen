@@ -7,13 +7,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 {
     [Table("Announcements")]
-    public class Announcement : ISwitchable, IDateTracking
+    public class Announcement :  IDateTracking
     {
         public Announcement()
         {
         }
 
-        public Announcement(Guid id, string title, string content, string image, Guid userId, Status status)
+        public Announcement(Guid id, string title, string content, string image, Guid userId, int status)
         {
             Id = id;
             Title = title;
@@ -41,7 +41,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public DateTime? LastModificationTime { get; set; }
 
-        public Status Status { set; get; }
+        public int Status { set; get; }
 
         public AppUser AppUser { get; set; }
 

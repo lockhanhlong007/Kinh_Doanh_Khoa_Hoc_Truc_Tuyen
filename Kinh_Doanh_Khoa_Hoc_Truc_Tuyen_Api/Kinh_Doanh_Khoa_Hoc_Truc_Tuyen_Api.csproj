@@ -46,5 +46,9 @@
     <ProjectReference Include="..\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\attachments\" />
+  </ItemGroup>
+
 
 </Project>

@@ -25,6 +25,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
 
         public DateTime? LastModificationTime { get; set; }
 
-        public Status Status { set; get; }
+        public int Status { set; get; }
     }
 }

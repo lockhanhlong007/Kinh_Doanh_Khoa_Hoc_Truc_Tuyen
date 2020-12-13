@@ -32,6 +32,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public string Message { get; set; }
 
+        public OrderStatus Status { get; set; }
+
         public DateTime CreationTime { get; set; }
 
         public DateTime? LastModificationTime { get; set; }

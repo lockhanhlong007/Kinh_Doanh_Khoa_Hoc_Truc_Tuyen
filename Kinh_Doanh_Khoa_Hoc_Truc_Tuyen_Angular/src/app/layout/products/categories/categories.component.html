@@ -7,7 +7,7 @@
                 </div>
                 <div class="p-col-6">
                     <button style="margin-right: 5px;" appPermission appFunction="Categories" appAction="Create" pButton type="button" label="Thêm" icon="fa fa-plus" (click)="showAddModal()"></button>
-                    <button style="margin-right: 5px;" appPermission appFunction="Categories" appAction="Update" pButton type="button" label="Sửa" icon="fa fa-edit" class="p-button-warning" *ngIf="selectedItems.length== 1" (click)="showEditModal()"></button>
+                    <button style="margin-right: 5px;" appPermission appFunction="Categories" appAction="Update" pButton type="button" label="Sửa" icon="fa fa-edit" class="p-button-warning" *ngIf="selectedItems.length == 1" (click)="showEditModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="Categories" appAction="Delete" pButton type="button" label="Xóa" icon="fa fa-trash" class="p-button-danger" *ngIf="selectedItems.length > 0" (click)="deleteItems()"></button>
                 </div>
             </div>
