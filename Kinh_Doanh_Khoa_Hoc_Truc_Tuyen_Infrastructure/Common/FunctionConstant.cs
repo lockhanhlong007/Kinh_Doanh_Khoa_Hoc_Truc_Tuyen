@@ -11,7 +11,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common
         Products,
         Categories,
         Courses,
-        Comments,
+        Promotions,
+        Orders,
 
 
         Statistics,

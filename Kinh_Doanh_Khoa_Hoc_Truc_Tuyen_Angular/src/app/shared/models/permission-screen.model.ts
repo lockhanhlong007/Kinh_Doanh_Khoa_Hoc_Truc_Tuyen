@@ -14,4 +14,6 @@ export class PermissionScreen {
     hasView: boolean;
 
     hasExportExcel: boolean;
+
+    hasApprove: boolean;
 }

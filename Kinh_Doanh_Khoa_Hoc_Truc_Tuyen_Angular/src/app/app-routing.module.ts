@@ -6,6 +6,9 @@ const routes: Routes = [
     {
         path: '',
         loadChildren: () => import('./layout/layout.module').then((m) => m.LayoutModule),
+        data: {
+            functionCode: 'DashBoard'
+        },
         canActivate: [AuthGuard]
     },
     { path: 'login', loadChildren: () => import('./login/login.module').then((m) => m.LoginModule) },

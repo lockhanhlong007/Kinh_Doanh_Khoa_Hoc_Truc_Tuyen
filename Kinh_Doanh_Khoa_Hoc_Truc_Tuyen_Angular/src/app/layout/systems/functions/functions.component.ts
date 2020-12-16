@@ -78,8 +78,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
 
   nodeSelect(event: any) {
-    console.log(this.selectedItems);
-    console.log(event);
     this.selectedCommandItems = [];
    this.commands = [];
     if (this.selectedItems.length === 1 && this.showCommandGrid) {
@@ -88,7 +86,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
   }
 
   nodeUnSelect(event: any) {
-    console.log(event);
     this.selectedCommandItems = [];
     this.commands = [];
     if (this.selectedItems.length === 1 && this.showCommandGrid) {
@@ -137,19 +134,23 @@ export class FunctionsComponent implements OnInit, OnDestroy {
       this.notificationService.showError(MessageConstants.Not_Choose_Any_Record);
       return;
     }
-    const id = this.selectedItems[0].data.id;
+    const ids = [];
+    this.selectedItems.map(res => {
+      ids.push(res.data.id);
+    });
     this.notificationService.showConfirmation(MessageConstants.Confirm_Delete,
-      () => this.deleteItemsConfirm(id));
+      () => this.deleteItemsConfirm(ids));
   }
 
-  deleteItemsConfirm(id: string) {
+  deleteItemsConfirm(ids: any[]) {
     this.blockedPanel = true;
-    this.functionsService.delete(id).subscribe(() => {
+    this.functionsService.delete(ids).subscribe(() => {
       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
       this.loadData();
       this.selectedItems = [];
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     }, error => {
+      this.notificationService.showError(MessageConstants.Delete_Failed);
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     });
   }
@@ -187,6 +188,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
       this.blockedPanelCommand = false;
     }, error => {
+      this.notificationService.showError(MessageConstants.Delete_Failed);
       this.blockedPanelCommand = false;
     });
   }
@@ -196,6 +198,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
       this.notificationService.showError(MessageConstants.Not_Choose_Any_Record);
       return;
     }
+    this.blockedPanelCommand = true;
     const initialState = {
       existingCommands: this.commands.map(x => x.id),
       functionId: this.selectedItems[0].data.id
@@ -209,7 +212,11 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     this.bsModalRef.content.chosenEvent.subscribe((response: any[]) => {
       this.bsModalRef.hide();
       this.loadDataCommand();
+      this.notificationService.showSuccess(MessageConstants.Created_Ok);
       this.selectedCommandItems = [];
+      setTimeout(() => { this.blockedPanel = false; }, 1000);
+    }, error => {
+      this.notificationService.showError(MessageConstants.Created_Failed);
     });
   }
 }

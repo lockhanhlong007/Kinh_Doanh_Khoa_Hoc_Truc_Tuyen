@@ -219,8 +219,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
        [HttpGet("{userId}/menu")]
-       [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
-        public async Task<IActionResult> GetMenuByUserPermission(string userId)
+       public async Task<IActionResult> GetMenuByUserPermission(string userId)
        {
            var user = await _userManager.FindByIdAsync(userId);
            var roles = await _userManager.GetRolesAsync(user);

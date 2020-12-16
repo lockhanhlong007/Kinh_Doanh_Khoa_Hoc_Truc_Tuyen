@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 {
     [Table("Lessons")]
-    public class Lesson : ISwitchable, ISortable
+    public class Lesson : ISortable, ISwitchable
     {
         public int Id { get; set; }
 
@@ -18,7 +18,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public int SortOrder { get; set; }
 
-        public Status Status { get; set; }
+        public bool Status { get; set; }
 
         public int CourseId { get; set; }
 

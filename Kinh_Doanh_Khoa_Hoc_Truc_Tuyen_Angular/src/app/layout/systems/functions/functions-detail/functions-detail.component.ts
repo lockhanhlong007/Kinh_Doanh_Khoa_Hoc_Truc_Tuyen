@@ -112,14 +112,15 @@ export class FunctionsDetailComponent implements OnInit {
       this.functionsService.update(this.entityId, this.entityForm.getRawValue())
         .subscribe(() => {
           this.notificationService.showSuccess(MessageConstants.Updated_Ok);
-          this.saved.emit(this.entityForm.value);
-
           setTimeout(() => {
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
+          this.saved.emit(this.entityForm.value);
+
         }, error => {
           setTimeout(() => {
+            this.notificationService.showError(error);
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
@@ -129,14 +130,14 @@ export class FunctionsDetailComponent implements OnInit {
         .subscribe(() => {
 
           this.notificationService.showSuccess(MessageConstants.Created_Ok);
-          this.saved.emit(this.entityForm.value);
           setTimeout(() => {
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
-
+          this.saved.emit(this.entityForm.value);
         }, error => {
           setTimeout(() => {
+            this.notificationService.showError(MessageConstants.Created_Failed);
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
@@ -144,5 +145,4 @@ export class FunctionsDetailComponent implements OnInit {
 
     }
   }
-
 }

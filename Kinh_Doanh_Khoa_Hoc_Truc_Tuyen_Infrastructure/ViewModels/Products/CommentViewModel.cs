@@ -13,6 +13,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public string EntityType { get; set; }
 
         public Guid UserId { get; set; }
+        public string OwnerUser { get; set; }
 
         public int? ReplyId { get; set; }
 

@@ -1,58 +1,16 @@
-import { ClientRequest, User } from './../models';
+import { ClientRequest } from './../models';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from './../../../environments/environment';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BaseService } from './base.service';
-import { catchError, map } from 'rxjs/operators';
-import jwtDecode, { JwtPayload } from 'jwt-decode';
+import { catchError } from 'rxjs/operators';
+import jwtDecode from 'jwt-decode';
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService extends BaseService {
   private TokenKey = 'auth-token';
-  private UserKey = 'auth-user';
-  // // Observable navItem source
-  // private _authNavStatusSource = new BehaviorSubject<boolean>(false);
-  // // Observable navItem stream
-  // authNavStatus$ = this._authNavStatusSource.asObservable();
-
-  // private manager = new UserManager(getClientSettings());
-  // private user: User | null;
-
-  // constructor() {
-  //   super();
-  //   this.manager.getUser().then(u => {
-  //     this.user = u;
-  //     this._authNavStatusSource.next(this.isAuthenticated());
-  //   });
-  // }
-  // login() {
-  //   return this.manager.signinPopup;
-  // }
-  // async completeAuthentication() {
-  //   this.user = await this.manager.signinRedirectCallback();
-  //   this._authNavStatusSource.next(this.isAuthenticated());
-  // }
-  // isAuthenticated(): boolean {
-  //   return this.user != null && !this.user.expired;
-  // }
-  // get authorizationHeaderValue(): string {
-  //   if (this.user) {
-  //     return `${this.user.token_type} ${this.user.access_token}`;
-  //   }
-  //   return null;
-  // }
-  // get name(): string {
-  //   return this.user != null ? this.user.profile.name : '';
-  // }
-  // get profile(): Profile {
-  //   return this.user != null ? this.user.profile : null;
-  // }
-  // async signout() {
-  //   await this.manager.signoutRedirect();
-  // }
-
   private _sharedHeaders = new HttpHeaders();
   constructor(private http: HttpClient) {
       super();
@@ -82,13 +40,4 @@ export class AuthService extends BaseService {
         return null;
     }
   }
-
-  // saveUser(user) {
-  //   window.sessionStorage.removeItem(this.UserKey);
-  //   window.sessionStorage.setItem(this.UserKey, JSON.stringify(user));
-  // }
-
-  // getUser() {
-  //   return JSON.parse(sessionStorage.getItem(this.UserKey));
-  // }
 }

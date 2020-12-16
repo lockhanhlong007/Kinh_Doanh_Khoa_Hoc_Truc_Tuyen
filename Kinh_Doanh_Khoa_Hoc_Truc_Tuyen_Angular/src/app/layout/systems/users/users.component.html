@@ -71,7 +71,7 @@
         </p-blockUI>
     </p-panel>
 
-    <p-panel #pnlRole *ngIf="showRoleAssign">
+    <p-panel #pnlRole *ngIf="showRoleAssign && selectedItems.length == 1">
         <p-header>
             <div class="p-col-12">
                 <button style="margin-right: 5px;" appPermission appFunction="ROLE" appAction="CREATE" pButton type="button" label="Thêm quyền" icon="fa fa-plus" *ngIf="selectedItems !=null" (click)="addUserRole()"></button>

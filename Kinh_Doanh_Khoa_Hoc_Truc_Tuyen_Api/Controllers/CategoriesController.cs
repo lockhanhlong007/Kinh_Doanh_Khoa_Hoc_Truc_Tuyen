@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +12,6 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using KnowledgeSpace.BackendServer.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpGet("{id}")]
         [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(int id)
         {
             var result = await _khoaHocDbContext.Categories.FindAsync(id);
             if (result == null)
@@ -136,27 +137,38 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             return BadRequest(new ApiBadRequestResponse("Update category failed"));
         }
-
-        [HttpDelete("{id}")]
-        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.Delete)]
-        public async Task<IActionResult> DeleteCategory(string id)
+        [HttpGet("{functionId}/parents")]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
+        public async Task<IActionResult> GetFunctionsByParentId(int id)
         {
-            var category = await _khoaHocDbContext.Categories.FindAsync(id);
-            if (category == null)
+            var categories = _khoaHocDbContext.Categories.Where(x => x.Id != id).OrderBy(x => x.ParentId).ThenBy(x => x.SortOrder).ThenBy(x => x.SortOrder);
+            return Ok(await categories.Select(u => new CategoryViewModel
             {
-                return NotFound(new ApiNotFoundResponse($"Category with id: {id} is not found"));
+                Id = u.Id,
+                Name = u.Name,
+                SortOrder = u.SortOrder,
+                ParentId = u.ParentId,
+            }).ToListAsync());
+        }
+
+        [HttpPost("delete-multi-items")]
+        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.Delete)]
+        public async Task<IActionResult> DeleteCategory(List<int> ids)
+        {
+            foreach (var id in ids)
+            {
+                var category = await _khoaHocDbContext.Categories.FindAsync(id);
+                if (category == null)
+                {
+                    return NotFound(new ApiNotFoundResponse($"Category with id: {id} is not found"));
+                }
+                _khoaHocDbContext.Categories.Remove(category);
+              
             }
-            _khoaHocDbContext.Categories.Remove(category);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
             {
-                return Ok(new CategoryViewModel()
-                {
-                    Name = category.Name,
-                    SortOrder = category.SortOrder,
-                    ParentId = category.ParentId,
-                    Id = category.Id
-                });
+                return Ok();
             }
             return BadRequest(new ApiBadRequestResponse("Delete category failed"));
         }

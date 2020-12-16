@@ -138,7 +138,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
 
                     new Function {Id = "Categories",Name = "Danh mục",ParentId ="Products", SortOrder = 1, Url = "/products/categories",Icon="fa-edit"  },
                     new Function {Id = "Courses",Name = "Khóa Học",ParentId = "Products", SortOrder = 2, Url = "/products/courses",Icon="fa-edit" },
-                    new Function {Id = "Comments",Name = "Bình Luận",ParentId = "Products", SortOrder = 3, Url = "/products/comments",Icon="fa-edit" },
+                    new Function {Id = "Promotions",Name = "Sự Kiện",ParentId = "Products", SortOrder = 3, Url = "/products/promotions",Icon="fa-edit" },
+                    new Function {Id = "Orders",Name = "Đặt Hàng",ParentId = "Products", SortOrder = 4, Url = "/products/orders",Icon="fa-edit" },
 
                     new Function {Id = "Statistics",Name = "Thống kê", ParentId = null, SortOrder = 3, Url = "/statistics",Icon="fa-bar-chart-o" },
 
@@ -164,6 +165,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     new Command {Id = "Create", Name = "Thêm"},
                     new Command {Id = "Update", Name = "Sửa"},
                     new Command {Id = "Delete", Name = "Xoá"},
+                    new Command {Id = "Approve", Name = "Duyệt"},
                     new Command {Id = "ExportExcel", Name = "Xuất Excel"},
                 });
                 await _applicationDbContext.SaveChangesAsync();
@@ -203,6 +205,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                         FunctionId = function.Id
                     };
                     await _applicationDbContext.CommandInFunctions.AddAsync(viewAction);
+
                 }
                 var exportAction = new List<CommandInFunction>
                 {
@@ -215,9 +218,29 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     {
                         CommandId = "ExportExcel",
                         FunctionId = "NewUser"
+                    },
+                    new CommandInFunction
+                    {
+                        FunctionId = "Statistics",
+                        CommandId = "ExportExcel"
                     }
                 };
                 await _applicationDbContext.CommandInFunctions.AddRangeAsync(exportAction);
+
+                var approveAction = new List<CommandInFunction>
+                {
+                    new CommandInFunction
+                    {
+                        CommandId = "Approve",
+                        FunctionId = "Courses"
+                    },
+                    new CommandInFunction
+                    {
+                        CommandId = "Approve",
+                        FunctionId = "Products"
+                    }
+                };
+                await _applicationDbContext.CommandInFunctions.AddRangeAsync(approveAction);
                 await _applicationDbContext.SaveChangesAsync();
             }
             #endregion
@@ -233,12 +256,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "Delete"));
                     await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "View"));
                     await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "ExportExcel"));
+                    await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "Approve"));
                 }
                 
                 var teacherRole = await _roleManager.FindByNameAsync(TeacherRoleName);
                 await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Create"));
                 await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Delete"));
                 await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "View"));
+                await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Update"));
             }
             await _applicationDbContext.SaveChangesAsync();
             #endregion

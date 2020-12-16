@@ -4,27 +4,48 @@ import { RouterModule, Routes } from '@angular/router';
 import { UsersComponent } from './users/users.component';
 import { RolesComponent } from './roles/roles.component';
 import { PermissionsComponent } from './permissions/permissions.component';
+import { AuthGuard } from '../../shared';
 
 const routes: Routes = [
     {
         path: '',
-        component: UsersComponent
+        component: UsersComponent,
+        data: {
+            functionCode: 'User'
+        },
+        canActivate: [AuthGuard]
     },
     {
         path: 'users',
-        component: UsersComponent
+        component: UsersComponent,
+        data: {
+            functionCode: 'User'
+        },
+        canActivate: [AuthGuard]
     },
     {
         path: 'functions',
-        component: FunctionsComponent
+        component: FunctionsComponent,
+        data: {
+            functionCode: 'Function'
+        },
+        canActivate: [AuthGuard]
     },
     {
         path: 'roles',
-        component: RolesComponent
+        component: RolesComponent,
+        data: {
+            functionCode: 'Role'
+        },
+        canActivate: [AuthGuard]
     },
     {
         path: 'permissions',
-        component: PermissionsComponent
+        component: PermissionsComponent,
+        data: {
+            functionCode: 'Permission'
+        },
+        canActivate: [AuthGuard]
     }
 ];
 

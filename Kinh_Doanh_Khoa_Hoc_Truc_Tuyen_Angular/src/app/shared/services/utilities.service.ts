@@ -40,6 +40,7 @@ export class UtilitiesService extends BaseService {
           hasUpdate: '',
           hasDelete: '',
           hasView: '',
+          hasApprove: '',
           hasExportExcel: '',
         },
         expanded: true,
@@ -54,5 +55,13 @@ export class UtilitiesService extends BaseService {
       }
     }
     return roots;
+  }
+  ToFormData(formValue: any) {
+    const formData = new FormData();
+    for (const key of Object.keys(formValue)) {
+      const value = formValue[key];
+      formData.append(key, value);
+    }
+    return formData;
   }
 }

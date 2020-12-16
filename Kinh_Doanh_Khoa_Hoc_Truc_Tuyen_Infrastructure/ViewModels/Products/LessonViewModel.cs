@@ -17,8 +17,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public int SortOrder { get; set; }
 
-        public Status Status { get; set; }
+        public bool Status { get; set; }
 
         public int CourseId { get; set; }
+        public string CourseName { get; set; }
     }
 }

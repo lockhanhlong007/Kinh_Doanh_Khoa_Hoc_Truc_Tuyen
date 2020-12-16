@@ -42,7 +42,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 	                       sum(case when sa.Id = 'Update' then 1 else 0 end) as HasUpdate,
 	                       sum(case when sa.Id = 'Delete' then 1 else 0 end) as HasDelete,
 	                       sum(case when sa.Id = 'View' then 1 else 0 end) as HasView,
-	                       sum(case when sa.Id = 'ExportExcel' then 1 else 0 end) as HasExportExcel
+	                       sum(case when sa.Id = 'ExportExcel' then 1 else 0 end) as HasExportExcel,
+                           sum(case when sa.Id = 'Approve' then 1 else 0 end) as HasApprove
                         from Functions f join CommandInFunctions cif on f.Id = cif.FunctionId
 		                    left join Commands sa on cif.CommandId = sa.Id
                         GROUP BY f.Id,f.Name, f.ParentId

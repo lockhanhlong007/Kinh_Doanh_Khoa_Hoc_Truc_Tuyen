@@ -23,20 +23,6 @@
 
                 <div class="p-field p-grid">
                     <div class="p-col-2">
-                        <span>Chọn cấp cha:</span>
-                    </div>
-                    <div class="p-col-6">
-
-                        <p-dropdown [options]="rootFunctions" emptyFilterMessage="Không có dữ liệu" [style]="{'width':'100%'}" formControlName="parentId" placeholder="Chọn cấp cha" filter="true" [showClear]="true">
-                        </p-dropdown>
-                    </div>
-                    <div class="p-col-4">
-                        <app-validation-message [entityForm]="entityForm" fieldName="parentId" [validationMessages]="validation_messages"></app-validation-message>
-                    </div>
-                </div>
-
-                <div class="p-field p-grid">
-                    <div class="p-col-2">
                         <span class="required">Tên:</span>
                     </div>
                     <div class="p-col-6">
@@ -47,6 +33,18 @@
                     </div>
                 </div>
 
+                <div class="p-field p-grid">
+                    <div class="p-col-2">
+                        <span>Chọn cấp cha:</span>
+                    </div>
+                    <div class="p-col-6">
+                        <p-dropdown [options]="rootFunctions" emptyFilterMessage="Không có dữ liệu" [style]="{'width':'100%'}" formControlName="parentId" placeholder="Chọn cấp cha" filter="true" [showClear]="true">
+                        </p-dropdown>
+                    </div>
+                    <div class="p-col-4">
+                        <app-validation-message [entityForm]="entityForm" fieldName="parentId" [validationMessages]="validation_messages"></app-validation-message>
+                    </div>
+                </div>
 
                 <div class="p-field p-grid">
                     <div class="p-col-2">
