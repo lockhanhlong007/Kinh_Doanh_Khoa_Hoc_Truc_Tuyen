@@ -3,4 +3,5 @@ export class OrderDetail {
     activeCoursesId: number;
     price: any;
     promotionPrice: any;
+    courseName: string;
 }

@@ -6,7 +6,7 @@
                     <h3>List Of Lessons</h3>
                 </div>
                 <div class="p-col-7">
-                    <button style="margin-right: 5px;" apPermission appFunction="Courses" appAction="Create" pButton type="button" label="Back" icon="fa fa-angle-left" class="p-button-success" (click)="Back()"></button>
+                    <button style="margin-right: 5px;" apPermission appFunction="Courses" appAction="View" pButton type="button" label="Back" icon="fa fa-angle-left" class="p-button-success" (click)="Back()"></button>
                     <button style="margin-right: 5px;" apPermission appFunction="Courses" appAction="Create" pButton type="button" label="Thêm" icon="fa fa-plus" (click)="showAddModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="Courses" appAction="Update" pButton type="button" label="Sửa" icon="fa fa-edit" class="p-button-warning" *ngIf="selectedItems.length== 1" (click)="showEditModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="Courses" appAction="Delete" pButton type="button" label="Xóa" icon="fa fa-trash" class="p-button-danger" *ngIf="selectedItems.length > 0" (click)="deleteItems()"></button>
@@ -53,11 +53,11 @@
                     <td style="width: 50px">
                         <p-tableCheckbox [value]=" row "></p-tableCheckbox>
                     </td>
-                    <td>{{row.name | formatData: 30}}</td>
-                    <td>{{row.videoPath | convertPath: '/' | formatData: 30}}</td>
-                    <td>{{row.attachment | convertPath: '/' | formatData: 30}}</td>
+                    <td>{{row.name | formatData: 20}}</td>
+                    <td>{{row.videoPath | convertPath: '/' | formatData: 20}}</td>
+                    <td>{{row.attachment | convertPath: '/' | formatData: 20}}</td>
                     <td style="width: 180px">{{row.sortOrder}}</td>
-                    <td>{{row.courseName | formatData: 30}}</td>
+                    <td>{{row.courseName | formatData: 20}}</td>
                     <td style="width: 180px">{{row.status | formatStatusBase}}</td>
                 </tr>
             </ng-template>

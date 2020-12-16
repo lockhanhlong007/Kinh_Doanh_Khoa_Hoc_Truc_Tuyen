@@ -21,7 +21,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TableModule } from 'primeng/table';
 import { TreeTableModule } from 'primeng/treetable';
 import { ValidationMessageModule } from '../../shared/modules/validation-message/validation-message.module';
-import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
 import { NotificationService } from '../../shared/services';
 import { CoursesDetailComponent } from './courses/courses-detail/courses-detail.component';
 import { LessonsComponent } from './courses/lessons/lessons.component';
@@ -37,31 +36,35 @@ import {EditorModule} from 'primeng/editor';
 import {FileUploadModule} from 'primeng/fileupload';
 import {InputTextareaModule} from 'primeng/inputtextarea';
 import {InputNumberModule} from 'primeng/inputnumber';
-import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
+
 import { OrdersComponent } from './orders/orders.component';
 import { OrdersDetailComponent } from './orders/orders-detail/orders-detail.component';
+import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
 import { FormatStatusBasePipe } from '../../shared/pipes/format-status-base.pipe';
 import { FormatStatusCoursesPipe } from '../../shared/pipes/format-status-courses.pipe';
+import { FormatOrderPipe } from '../../shared/pipes/format-order.pipe';
+import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
 @NgModule({
   declarations: [
     CategoriesComponent,
     CoursesComponent,
-    FormatDataPipe,
     CategoriesDetailComponent,
     CoursesDetailComponent,
     LessonsComponent,
     LessonsDetailComponent,
     CommentsComponent,
-    ConvertPathPipe,
     CommentsDetailComponent,
     PromotionsComponent,
     PromotionsDetailComponent,
     CoursesInPromotionComponent,
     ActiveCoursesComponent,
     OrdersComponent,
+    OrdersDetailComponent,
+    FormatDataPipe,
+    ConvertPathPipe,
     FormatStatusCoursesPipe,
     FormatStatusBasePipe,
-    OrdersDetailComponent,
+    FormatOrderPipe,
     ],
   imports: [
     CommonModule,

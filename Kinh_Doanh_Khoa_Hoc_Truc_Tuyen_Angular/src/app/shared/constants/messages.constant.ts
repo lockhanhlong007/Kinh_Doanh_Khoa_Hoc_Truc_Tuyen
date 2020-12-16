@@ -1,6 +1,7 @@
 export class MessageConstants {
     public static System_Error = 'Có lỗi kết nối đến máy chủ';
     public static Confirm_Delete = 'Bạn có chắc muốn xóa bản ghi này?';
+    public static Confirm_Update = 'Bạn có chắc muốn cập nhật bản ghi này?';
     public static Confirm_Set_Is_Home = 'Bạn có chắc muốn hiển thị bản ghi này tại trang chủ?';
     public static Confirm_Set_Is_Not_Home = 'Bạn có chắc muốn bỏ hiển thị bản ghi này tại trang chủ?';
     public static Confirm_Publish = 'Bạn có chắc muốn xuất bản ghi này này?';

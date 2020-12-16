@@ -52,6 +52,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
             claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
             claims.Add(new Claim(ClaimTypes.Role, string.Join(";", roles)));
             claims.Add(new Claim(SystemConstants.Permissions, JsonConvert.SerializeObject(permissions)));
+            claims.Add(new Claim("FullName", user.Name));
             context.IssuedClaims = claims;
         }
 

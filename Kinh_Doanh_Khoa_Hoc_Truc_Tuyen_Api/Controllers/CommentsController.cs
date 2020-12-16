@@ -43,30 +43,25 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex,
             int pageSize)
         {
-            var query = _khoaHocDbContext.Comments.AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsQueryable();
+            var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
                 query = query.Where(x => x.Content.Contains(filter) || x.UserId.ToString().Contains(filter));
             }
-            var items = new List<CommentViewModel>();
-            var totalRecords = await query.CountAsync();
-            await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).ForEachAsync(async x =>
-            {
-                var user = await _userManager.FindByIdAsync(x.UserId.ToString());
-                items.Add(new CommentViewModel
-                {
-                    Id = x.Id,
-                    Content = x.Content,
-                    CreationTime = x.CreationTime,
-                    LastModificationTime = x.LastModificationTime,
-                    EntityId = x.EntityId,
-                    EntityType = x.EntityType,
-                    UserId = x.UserId,
-                    OwnerUser = user?.Name + " (" + user?.Email + ")"
-                });
-            });
 
-            var pagination = new Pagination<CommentViewModel>
+            var totalRecords = await query.CountAsync();
+            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new CommentViewModel()
+            {
+                Id = x.Id,
+                Content = x.Content,
+                CreationTime = x.CreationTime,
+                LastModificationTime = x.LastModificationTime,
+                EntityId = x.EntityId,
+                EntityType = x.EntityType,
+                UserId = x.UserId,
+                OwnerUser = x.AppUser.Name + " (" + x.AppUser.Email + ")"
+            }).ToListAsync();
+                var pagination = new Pagination<CommentViewModel>
             {
                 Items = items,
                 TotalRecords = totalRecords

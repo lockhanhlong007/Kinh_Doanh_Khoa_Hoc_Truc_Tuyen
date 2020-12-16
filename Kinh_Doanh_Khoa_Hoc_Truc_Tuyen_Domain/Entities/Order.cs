@@ -30,6 +30,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public long? Total { get; set; }
 
+        public string Address { get; set; }
+
+        public string PhoneNumber { get; set; }
+
+
         public string Message { get; set; }
 
         public OrderStatus Status { get; set; }

@@ -17,16 +17,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums
         PaymentGateway,
 
         [Description("Visa")]
-        Visa,
-
-        [Description("Master Card")]
-        MasterCard,
-
-        [Description("PayPal")]
-        PayPal,
-
-        [Description("Transfer")]
-        Transfer
+        Visa
 
     }
 }

@@ -17,6 +17,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public long? Total { get; set; }
 
+        public string Address { get; set; }
+
+        public string PhoneNumber { get; set; }
+
         public string Message { get; set; }
 
         public OrderStatus Status { get; set; }
@@ -25,7 +29,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public DateTime? LastModificationTime { get; set; }
 
-        public string CreateUser { get; set; }
+        public string CreatedUser { get; set; }
 
         public List<OrderDetailViewModel> OrderDetails { set; get; }
     }

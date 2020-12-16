@@ -7,7 +7,7 @@
 </div>
 <div class="modal-body div-scroll">
     <p-panel #pnl header="Thông tin" [toggleable]="true" [collapsed]="false" styleClass="m-b-10">
-        <div class="p-grid-pad p-fluid p-grid-responsive">
+        <div *ngIf="comment" class="p-grid-pad p-fluid p-grid-responsive">
             <div class="p-field p-grid">
                 <div class="p-col-3">
                     <span class="required">Content:</span>

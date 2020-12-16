@@ -18,4 +18,5 @@ export * from './promotions.model';
 export * from './order-detail.model';
 export * from './oder.model';
 export * from './comments.model';
-
+export * from './statistic.model';
+export * from './revenue.model';

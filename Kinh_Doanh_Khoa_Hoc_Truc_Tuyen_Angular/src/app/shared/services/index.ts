@@ -10,4 +10,5 @@ export * from './commands.service';
 export * from './categories.service';
 export * from './courses.service';
 export * from './lessons.service';
+export * from './statistics.service';
 export * from './promotions.service';

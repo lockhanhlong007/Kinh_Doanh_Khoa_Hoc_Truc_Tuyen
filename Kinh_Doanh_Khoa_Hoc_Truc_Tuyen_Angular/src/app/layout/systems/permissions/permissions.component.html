@@ -2,8 +2,8 @@
     <p-panel #pnl>
         <p-header>
             <div class="p-col-12">
-                <button style="margin-right: 5px;" pButton type="button" label="Lưu lại" *ngIf="selectedRole.id" icon="fa fa-edit" class="p-button-success" (click)="savePermission()"></button>
-                <button style="margin-right: 5px;" pButton type="button" label="Tải lại" icon="fa fa-remove" class="p-button-primary" (click)="reloadData()"></button>
+                <button style="margin-right: 5px;" apPermission appFunction="Permission" appAction="Update" pButton type="button" label="Lưu lại" *ngIf="selectedRole.id" icon="fa fa-edit" class="p-button-success" (click)="savePermission()"></button>
+                <button style="margin-right: 5px;" apPermission appFunction="Permission" appAction="View" pButton type="button" label="Tải lại" icon="fa fa-remove" class="p-button-primary" (click)="reloadData()"></button>
             </div>
         </p-header>
         <p-panel header="Chọn nhóm" [toggleable]="true" [collapsed]="false" styleClass="m-b-10">

@@ -6,9 +6,9 @@ import { MessageConstants } from '../../../shared';
 import { Pagination } from '../../../shared/models';
 import { PromotionsService, NotificationService } from '../../../shared/services';
 import { Promotions } from '../../../shared/models/promotions.model';
-import { PromotionsDetailComponent } from './promotions-detail/promotions-detail.component';
 import { CoursesInPromotionComponent } from './courses-in-promotion/courses-in-promotion.component';
 import { environment } from '../../../../environments/environment';
+import { PromotionsDetailComponent } from './promotions-detail/promotions-detail.component';
 
 @Component({
   selector: 'app-promotions',
