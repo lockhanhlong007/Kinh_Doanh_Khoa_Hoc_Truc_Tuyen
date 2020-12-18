@@ -25,6 +25,14 @@ export class RevenueComponent implements OnInit, OnDestroy {
   public toDate: any;
   public isChangeChart = null;
   public isChange = false;
+  public chooseType =
+  [
+    {value: null, label: 'Choose Filter'},
+    {value: 1, label: 'One Week Ago'},
+    {value: 2, label: 'One Month Ago'},
+    {value: 3, label: 'Range'}
+  ];
+  public isChooseType = null;
   public chooseChart =
   [
     {value: null, label: 'Choose Chart'},
@@ -56,6 +64,22 @@ export class RevenueComponent implements OnInit, OnDestroy {
       clear: 'Clear'
   };
   }
+  onChangeType() {
+    this.items = null;
+    this.totalRecords = 0;
+    this.details = null;
+    this.totalDetailsRecords = 0;
+    this.fromDate = null;
+    this.toDate = null;
+    this.isChangeChart = null;
+    if (this.isChooseType === 1) {
+      this.isChange = true;
+    } else if (this.isChooseType === 2) {
+      this.isChange = true;
+    } else {
+      this.isChange = false;
+    }
+  }
   onChangeChart() {
     if (this.items && this.isChangeChart !== null) {
       this.showChart();
@@ -72,7 +96,7 @@ export class RevenueComponent implements OnInit, OnDestroy {
     this.blockedPanel = true;
     const from = this.datePipe.transform(this.fromDate, 'yyyy/MM/dd');
     const to = this.datePipe.transform(this.toDate, 'yyyy/MM/dd');
-    this.subscription.add(this.statisticsService.getRevenueDaily(from, to)
+    this.subscription.add(this.statisticsService.getRevenueDaily(this.isChooseType, from, to)
       .subscribe((response: Revenue[]) => {
         this.processLoadData(response);
       }, () => {
@@ -148,7 +172,7 @@ export class RevenueComponent implements OnInit, OnDestroy {
     this.blockedPanelDetails = true;
     const from = this.datePipe.transform(this.fromDate, 'yyyy/MM/dd');
     const to = this.datePipe.transform(this.toDate, 'yyyy/MM/dd');
-    this.statisticsService.getCountSalesDaily(from, to).subscribe((response: Revenue[]) => {
+    this.statisticsService.getCountSalesDaily(this.isChooseType, from, to).subscribe((response: Revenue[]) => {
       this.details = response;
       this.totalDetailsRecords = response.length;
       setTimeout(() => { this.blockedPanelDetails = false; }, 1000);

@@ -5,6 +5,8 @@ import { OrdersService } from '../../../../shared/services/orders.service';
 import { Order } from '../../../../shared/models/oder.model';
 import { MessageConstants } from '../../../../shared';
 import { NotificationService } from '../../../../shared/services';
+import * as fileSaver from 'file-saver';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-orders-detail',
@@ -17,6 +19,7 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private ordersService: OrdersService) {
   }
+  public backendApiUrl = environment.ApiUrl;
   public totalRecords: number;
   private subscription = new Subscription();
   public orderId: number;
@@ -44,12 +47,15 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     this.blockedPanel = true;
     this.subscription.add(this.ordersService.export(this.res)
       .subscribe((response: any) => {
-      if (response.StatusCode === 200) {
+      if (response.statusCode === 200) {
+        const url = this.backendApiUrl + '/attachments/export-files/' + response.message;
+        fileSaver.saveAs(url);
         this.notificationService.showSuccess(MessageConstants.Export_File_Ok);
-      }
         setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
+      }
+
       }, error => {
-        this.notificationService.showSuccess(MessageConstants.Export_File_Failed);
+        this.notificationService.showError(MessageConstants.Export_File_Failed);
         setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
       }));
   }

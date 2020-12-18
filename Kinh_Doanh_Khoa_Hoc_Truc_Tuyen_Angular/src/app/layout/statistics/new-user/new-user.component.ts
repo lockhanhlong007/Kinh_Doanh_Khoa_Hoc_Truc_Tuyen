@@ -23,6 +23,14 @@ export class NewUserComponent implements OnInit, OnDestroy {
   public lstCount = [];
   public isChangeChart = null;
   public isChange = false;
+  public chooseType =
+  [
+    {value: null, label: 'Choose Filter'},
+    {value: 1, label: 'One Week Ago'},
+    {value: 2, label: 'One Month Ago'},
+    {value: 3, label: 'Range'}
+  ];
+  public isChooseType = null;
   public chooseChart =
   [
     {value: null, label: 'Choose Chart'},
@@ -53,13 +61,27 @@ export class NewUserComponent implements OnInit, OnDestroy {
       clear: 'Clear'
   };
   }
+  onChangeType() {
+    this.items = null;
+    this.totalRecords = 0;
+    this.fromDate = null;
+    this.toDate = null;
+    this.isChangeChart = null;
+    if (this.isChooseType === 1) {
+      this.isChange = true;
+    } else if (this.isChooseType === 2) {
+      this.isChange = true;
+    } else {
+      this.isChange = false;
+    }
+  }
   onChangeChart() {
     if (this.items && this.isChangeChart !== null) {
       this.showChart();
     }
   }
   checkChanged() {
-    if (!this.isChange && this.fromDate && this.toDate) {
+    if (this.fromDate && this.toDate) {
       this.isChange = true;
     } else {
       this.isChange = false;
@@ -101,7 +123,7 @@ export class NewUserComponent implements OnInit, OnDestroy {
     this.blockedPanel = true;
     const from = this.datePipe.transform(this.fromDate, 'yyyy/MM/dd');
     const to = this.datePipe.transform(this.toDate, 'yyyy/MM/dd');
-    this.subscription.add(this.statisticsService.getNewRegisters(from, to)
+    this.subscription.add(this.statisticsService.getNewRegisters(this.isChooseType, from, to)
       .subscribe((response: Statistic[]) => {
         this.processLoadData(response);
       }, () => {

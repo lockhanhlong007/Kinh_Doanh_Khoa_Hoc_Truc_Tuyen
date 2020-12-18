@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
@@ -157,7 +158,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     var index = 11;
                     foreach (var detail in order.OrderDetails)
                     {
-                        if (index == 12)
+                        if (index == 21)
                         {
                             worksheet.InsertRow(index, order.OrderDetails.Count - stt);
                         }
@@ -216,7 +217,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         stt++;
                     }
 
-                    if (index > 12)
+                    if (index > 21)
                     {
                         worksheet.Cells[index + 1, 4].Value = $"{order.Total:0,0 VNĐ}";
                         var thanhTien = order.Total.ToString();
@@ -240,7 +241,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     //Save excel file to pdf file.  
                     workbook.SaveToFile(templatePdfResultDocument, FileFormat.PDF);
                 }
-                return Ok();
+                return Ok(new ApiResponse(200, resultFile));
             }
             catch (Exception e)
             {

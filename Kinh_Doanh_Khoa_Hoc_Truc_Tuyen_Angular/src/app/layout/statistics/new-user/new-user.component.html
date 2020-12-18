@@ -5,17 +5,25 @@
                 <div class="p-col-12">
                     <h3>New Users Register</h3>
                 </div>
-                <span appPermission appFunction="NewUser" appAction="View" class="p-mr-2 p-text-bold">From:</span>
-                <p-calendar appPermission appFunction="NewUser" appAction="View" class="p-mr-2" appendTo="body" [(ngModel)]="fromDate" dateFormat="dd/mm/yy" [showIcon]="true" [locale]="vi" [monthNavigator]="true" [yearNavigator]="true" (onSelect)="checkChanged()" yearRange="1900:2030"
-                    showButtonBar="true">
-                </p-calendar>
-                <span appPermission appFunction="NewUser" appAction="View" class="p-mr-2 p-text-bold">To: </span>
-                <p-calendar appPermission appFunction="NewUser" appAction="View" class="p-mr-2" appendTo="body" [(ngModel)]="toDate" dateFormat="dd/mm/yy" [showIcon]="true" [locale]="vi" [monthNavigator]="true" [yearNavigator]="true" (onSelect)="checkChanged()" yearRange="1900:2030"
-                    showButtonBar="true">
-                </p-calendar>
-                <p-dropdown appPermission appFunction="NewUser" appAction="View" *ngIf="fromDate && toDate" class="p-mr-2" [options]="chooseChart" (onChange)="onChangeChart()" [style]="{'width':'150px'}" [(ngModel)]="isChangeChart">
-                </p-dropdown>
-                <button appPermission appFunction="NewUser" appAction="View" *ngIf="isChange" pButton type="button" label="Load" icon="fa fa-eercast" class="p-mr-2 p-button-success" (click)="loadNewRegisters()"></button>
+                <div class="p-col-12">
+                    <span appPermission appFunction="NewUser" appAction="View" class="p-mr-2 p-text-bold">Chọn Kiểu Lọc:</span>
+                    <p-dropdown appPermission appFunction="NewUser" appAction="View" class="p-mr-2" [options]="chooseType" (onChange)="onChangeType()" [style]="{'width':'150px'}" [(ngModel)]="isChooseType">
+                    </p-dropdown>
+                    <!-- Pham Vi -->
+                    <span *ngIf="isChooseType === 3" appPermission appFunction="NewUser" appAction="View" class="p-mr-2 p-text-bold">From:</span>
+                    <p-calendar *ngIf="isChooseType === 3" appPermission appFunction="NewUser" appAction="View" class="p-mr-2" appendTo="body" [(ngModel)]="fromDate" dateFormat="dd/mm/yy" [showIcon]="true" [locale]="vi" [monthNavigator]="true" [yearNavigator]="true" (onSelect)="checkChanged()"
+                        yearRange="1900:2030" showButtonBar="true">
+                    </p-calendar>
+                    <span *ngIf="isChooseType === 3" appPermission appFunction="NewUser" appAction="View" class="p-mr-2 p-text-bold">To: </span>
+                    <p-calendar *ngIf="isChooseType === 3" appPermission appFunction="NewUser" appAction="View" class="p-mr-2" appendTo="body" [(ngModel)]="toDate" dateFormat="dd/mm/yy" [showIcon]="true" [locale]="vi" [monthNavigator]="true" [yearNavigator]="true" (onSelect)="checkChanged()"
+                        yearRange="1900:2030" showButtonBar="true">
+                    </p-calendar>
+                    <!-- Pham Vi -->
+                    <p-dropdown appPermission appFunction="NewUser" appAction="View" *ngIf="(isChooseType === 3 && fromDate && toDate) || isChooseType === 2 ||  isChooseType === 1" class="p-mr-2" [options]="chooseChart" (onChange)="onChangeChart()" [style]="{'width':'150px'}"
+                        [(ngModel)]="isChangeChart">
+                    </p-dropdown>
+                    <button appPermission appFunction="NewUser" appAction="View" *ngIf="isChange" pButton type="button" label="Load" icon="fa fa-eercast" class="p-mr-2 p-button-success" (click)="loadNewRegisters()"></button>
+                </div>
             </div>
         </p-header>
 
