@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
 {
@@ -17,6 +18,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
         public string Dob { get; set; }
 
         public string Biography { get; set; }
-        public string Avatar { get; set; }
+        public IFormFile Avatar { get; set; }
     }
 }

@@ -16,7 +16,7 @@ import { Subscription } from 'rxjs';
 })
 export class FunctionsComponent implements OnInit, OnDestroy {
 
-  private subscription: Subscription;
+  private subscription = new Subscription();
   private indexSelect: Number = 0;
 
   public bsModalRef: BsModalRef;
@@ -58,7 +58,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
   loadData(selectionId = null) {
     this.blockedPanel = true;
-    this.subscription = this.functionsService.getAll()
+    this.subscription.add(this.functionsService.getAll()
       .subscribe((response: any) => {
         const functionTree = this.utilitiesService.UnflatteringForTree(response);
         this.items = <TreeNode[]>functionTree;
@@ -73,7 +73,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         setTimeout(() => { this.blockedPanel = false; }, 1000);
       }, error => {
         setTimeout(() => { this.blockedPanel = false; }, 1000);
-      });
+      }));
   }
 
 
@@ -144,7 +144,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
 
   deleteItemsConfirm(ids: any[]) {
     this.blockedPanel = true;
-    this.functionsService.delete(ids).subscribe(() => {
+    this.subscription.add(this.functionsService.delete(ids).subscribe(() => {
       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
       this.loadData();
       this.selectedItems = [];
@@ -152,11 +152,11 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }, error => {
       this.notificationService.showError(MessageConstants.Delete_Failed);
       setTimeout(() => { this.blockedPanel = false; }, 1000);
-    });
+    }));
   }
   loadDataCommand() {
     this.blockedPanelCommand = true;
-    this.functionsService.getAllCommandsByFunctionId(this.selectedItems[0].data.id)
+    this.subscription.add(this.functionsService.getAllCommandsByFunctionId(this.selectedItems[0].data.id)
       .subscribe((response: any) => {
 
         this.commands = response;
@@ -166,7 +166,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
         this.blockedPanelCommand = false;
       }, error => {
         this.blockedPanelCommand = false;
-      });
+      }));
   }
 
   removeCommands() {
@@ -182,7 +182,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     this.blockedPanelCommand = true;
     const entity = new CommandAssign();
     entity.commandIds = ids;
-    this.functionsService.deleteCommandsFromFunction(this.selectedItems[0].data.id, entity).subscribe(() => {
+    this.subscription.add(this.functionsService.deleteCommandsFromFunction(this.selectedItems[0].data.id, entity).subscribe(() => {
       this.loadDataCommand();
       this.selectedCommandItems = [];
       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
@@ -190,7 +190,7 @@ export class FunctionsComponent implements OnInit, OnDestroy {
     }, error => {
       this.notificationService.showError(MessageConstants.Delete_Failed);
       this.blockedPanelCommand = false;
-    });
+    }));
   }
 
   addCommandsToFunction() {

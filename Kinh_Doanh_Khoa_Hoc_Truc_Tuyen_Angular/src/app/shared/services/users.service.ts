@@ -21,13 +21,19 @@ export class UsersService extends BaseService {
 
 }
 
-  add(entity: User) {
-    return this.http.post(`${environment.ApiUrl}/api/users`, JSON.stringify(entity), { headers: this._sharedHeaders})
+  add(entity) {
+    return this.http.post(`${environment.ApiUrl}/api/users`, entity,   {
+      reportProgress: true,
+      observe: 'events'
+    })
     .pipe(catchError(this.handleError));
   }
 
-  update(id: string, entity: User) {
-    return this.http.put(`${environment.ApiUrl}/api/users/${id}`, JSON.stringify(entity), {headers: this._sharedHeaders})
+  update(id: string, entity) {
+    return this.http.put(`${environment.ApiUrl}/api/users/${id}`, entity,   {
+      reportProgress: true,
+      observe: 'events'
+    })
     .pipe(catchError(this.handleError));
   }
 

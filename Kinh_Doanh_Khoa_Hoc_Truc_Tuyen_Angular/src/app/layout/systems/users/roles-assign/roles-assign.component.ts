@@ -1,5 +1,6 @@
-import { Component, EventEmitter, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Subscription } from 'rxjs';
 import { UsersService, RolesService } from '../../../../shared/services';
 
 @Component({
@@ -7,7 +8,7 @@ import { UsersService, RolesService } from '../../../../shared/services';
   templateUrl: './roles-assign.component.html',
   styleUrls: ['./roles-assign.component.scss']
 })
-export class RolesAssignComponent implements OnInit {
+export class RolesAssignComponent implements OnInit, OnDestroy {
   // Default
   private chosenEvent: EventEmitter<any> = new EventEmitter();
   public blockedPanel = false;
@@ -17,11 +18,14 @@ export class RolesAssignComponent implements OnInit {
   public title: string;
   public userId: string;
   public existingRoles: any[];
-
+  private subscription = new Subscription();
   constructor(
     public bsModalRef: BsModalRef,
     private usersService: UsersService,
     private rolesService: RolesService) {
+  }
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   ngOnInit() {
@@ -55,9 +59,9 @@ export class RolesAssignComponent implements OnInit {
     const assignRolesToUser = {
       roleNames: selectedNames
     };
-    this.usersService.assignRolesToUser(this.userId, assignRolesToUser).subscribe(() => {
+    this.subscription.add(this.usersService.assignRolesToUser(this.userId, assignRolesToUser).subscribe(() => {
       this.chosenEvent.emit(this.selectedItems);
       setTimeout(() => { this.blockedPanel = false; }, 1000);
-    });
+    }));
   }
 }

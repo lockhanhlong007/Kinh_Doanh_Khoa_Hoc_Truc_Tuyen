@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
@@ -30,18 +33,21 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private readonly RoleManager<AppRole> _roleManager;
 
         private readonly ILogger<UsersController> _logger;
-        public UsersController(UserManager<AppUser> userManager, EKhoaHocDbContext khoaHocDbContext, RoleManager<AppRole> roleManager, ILogger<UsersController> logger)
+
+        private readonly IStorageService _storageService;
+        public UsersController(UserManager<AppUser> userManager, EKhoaHocDbContext khoaHocDbContext, RoleManager<AppRole> roleManager, ILogger<UsersController> logger, IStorageService storageService)
         {
             _userManager = userManager;
             _khoaHocDbContext = khoaHocDbContext;
             _roleManager = roleManager;
             _logger = logger ?? throw new ArgumentException(nameof(logger));
+            _storageService = storageService;
         }
 
         [HttpPost]
         [ClaimRequirement(FunctionConstant.User, CommandConstant.Create)]
         [ValidationFilter]
-        public async Task<IActionResult> PostUser(UserCreateRequest request)
+        public async Task<IActionResult> PostUser([FromForm] UserCreateRequest request)
         {
             var user = new AppUser
             {
@@ -51,13 +57,20 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 UserName = request.UserName,
                 Name = request.Name,
                 PhoneNumber = request.PhoneNumber,
-                Avatar = request.Avatar ?? "/img/defaultAvatar.png",
                 Biography = request.Biography
             };
+            if (request.Avatar != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.Avatar.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.Avatar.OpenReadStream(), fileName, "images");
+                user.Avatar = "images/" + fileName;
+            }
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
-                return CreatedAtAction(nameof(GetById), new { id = user.Id }, request);
+                //return CreatedAtAction(nameof(GetById), new { id = user.Id }, new UserViewModel());
+                return Ok();
             }
             _logger.LogError("Create user failed");
             return BadRequest(new ApiBadRequestResponse(result));
@@ -82,7 +95,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Name = result.Name,
                 PhoneNumber = result.PhoneNumber,
                 UserName = result.UserName,
-                Avatar = result.Avatar ?? "/img/defaultAvatar.png",
+                Avatar = result.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(result.Avatar),
                 Biography = result.Biography
             });
         }
@@ -99,7 +112,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Name = x.Name,
                 Dob = x.Dob,
                 Id = x.Id,
-                Avatar = x.Avatar ?? "/img/defaultAvatar.png",
+                Avatar = x.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(x.Avatar),
                 Biography = x.Biography
             }).ToListAsync();
             if (user.Any())
@@ -130,7 +143,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Name = u.Name,
                 Dob = u.Dob,
                 Id = u.Id,
-                Avatar = u.Avatar ?? "/img/defaultAvatar.png",
+                Avatar = u.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(u.Avatar),
                 Biography = u.Biography
             }).ToListAsync();
             var pagination = new Pagination<UserViewModel>
@@ -143,7 +156,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpPut("{id}")]
         [ClaimRequirement(FunctionConstant.User, CommandConstant.Update)]
-        public async Task<IActionResult> PutUser(string id, [FromBody] UserCreateRequest request)
+        public async Task<IActionResult> PutUser(string id, [FromForm] UserCreateRequest request)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
@@ -154,7 +167,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             user.Name = request.Name;
             user.Dob = DateTime.Parse(request.Dob);
-            user.Avatar = request.Avatar ?? "/img/defaultAvatar.png";
+            if (request.Avatar != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.Avatar.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.Avatar.OpenReadStream(), fileName, "images");
+                user.Avatar = "images/" + fileName;
+            }
             user.Biography = request.Biography;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)

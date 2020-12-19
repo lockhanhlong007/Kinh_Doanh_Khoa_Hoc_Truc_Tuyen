@@ -1,6 +1,7 @@
-import { Component, EventEmitter, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Subscription } from 'rxjs';
 import { MessageConstants } from '../../../../shared';
 import { UtilitiesService, FunctionsService, NotificationService } from '../../../../shared/services';
 
@@ -9,20 +10,20 @@ import { UtilitiesService, FunctionsService, NotificationService } from '../../.
   templateUrl: './functions-detail.component.html',
   styleUrls: ['./functions-detail.component.scss']
 })
-export class FunctionsDetailComponent implements OnInit {
+export class FunctionsDetailComponent implements OnInit, OnDestroy {
 
-  constructor(private utilityService: UtilitiesService,
-    public bsModalRef: BsModalRef,
+  constructor(public bsModalRef: BsModalRef,
     private functionsService: FunctionsService,
     private notificationService: NotificationService,
     private fb: FormBuilder) {
   }
+
   public blockedPanel = false;
   public entityForm: FormGroup;
   public dialogTitle: string;
   public entityId: string;
   public btnDisabled = false;
-
+  private subscription = new Subscription();
   saved: EventEmitter<any> = new EventEmitter();
   public rootFunctions: any[] = [];
 
@@ -66,11 +67,13 @@ export class FunctionsDetailComponent implements OnInit {
       this.dialogTitle = 'Thêm mới';
     }
   }
-
+  ngOnDestroy(): void {
+   this.subscription.unsubscribe();
+  }
   loadDetail(id: any) {
     this.btnDisabled = true;
     this.blockedPanel = true;
-    this.functionsService.getDetail(id)
+    this.subscription.add(this.functionsService.getDetail(id)
       .subscribe((response: any) => {
         this.entityForm.setValue({
           id: response.id,
@@ -89,11 +92,11 @@ export class FunctionsDetailComponent implements OnInit {
           this.btnDisabled = false;
           this.blockedPanel = false;
         }, 1000);
-      });
+      }));
   }
 
   loadParents(id) {
-    this.functionsService.getAllByParentId(id)
+    this.subscription.add(this.functionsService.getAllByParentId(id)
       .subscribe((response: any) => {
         this.rootFunctions = [];
         response.forEach(element => {
@@ -102,14 +105,14 @@ export class FunctionsDetailComponent implements OnInit {
             label: element.name
           });
         });
-      });
+      }));
   }
 
   saveChange() {
     this.btnDisabled = true;
     this.blockedPanel = true;
     if (this.entityId) {
-      this.functionsService.update(this.entityId, this.entityForm.getRawValue())
+      this.subscription.add(this.functionsService.update(this.entityId, this.entityForm.getRawValue())
         .subscribe(() => {
           this.notificationService.showSuccess(MessageConstants.Updated_Ok);
           setTimeout(() => {
@@ -124,9 +127,9 @@ export class FunctionsDetailComponent implements OnInit {
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
-        });
+        }));
     } else {
-      this.functionsService.add(this.entityForm.value)
+      this.subscription.add(this.functionsService.add(this.entityForm.value)
         .subscribe(() => {
 
           this.notificationService.showSuccess(MessageConstants.Created_Ok);
@@ -141,7 +144,7 @@ export class FunctionsDetailComponent implements OnInit {
             this.btnDisabled = false;
             this.blockedPanel = false;
           }, 1000);
-        });
+        }));
 
     }
   }
