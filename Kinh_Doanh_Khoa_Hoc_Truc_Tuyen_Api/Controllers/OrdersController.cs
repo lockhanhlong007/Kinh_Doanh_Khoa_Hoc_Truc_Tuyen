@@ -124,10 +124,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var webRootFolder = _hostingEnvironment.WebRootPath;
                 var user = await _userManager.FindByIdAsync(order.UserId.ToString());
                 var resultFile = $"Bill_{user.Name}_{DateTime.Now:dd-MM-yyyy}_{order.UserId}.xlsx";
-                var resultFilePDF = $"Bill_{user.Name}_{DateTime.Now:dd-MM-yyyy}_{order.UserId}.pdf";
+                var resultFilePdf = $"Bill_{user.Name}_{DateTime.Now:dd-MM-yyyy}_{order.UserId}.pdf";
                 var templateDocument = Path.Combine(webRootFolder, "attachments\\form", "Hoa_Don_Ban_Hang_Le.xlsx");
                 var templateResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFile);
-                var templatePdfResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFilePDF);
+                var templatePdfResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFilePdf);
                 FileInfo file = new FileInfo(templateResultDocument);
 
                 if (file.Exists)
@@ -222,6 +222,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         worksheet.Cells[index + 1, 4].Value = $"{order.Total:0,0 VNĐ}";
                         var thanhTien = order.Total.ToString();
                         worksheet.Cells[index + 2, 3].Value = double.Parse(thanhTien ?? "0").ChuyenSoSangChuoi();
+                        worksheet.Cells[index + 2, 3].Style.Font.Bold = true;
                         worksheet.Cells[index + 4, 3].Value =
                             $"Ngày {order.CreationTime.Day} tháng {order.CreationTime.Month} năm {order.CreationTime.Year}";
                     }
@@ -230,6 +231,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         worksheet.Cells[23, 4].Value = $"{order.Total:0,0 VNĐ}";
                         var thanhTien = order.Total.ToString();
                         worksheet.Cells[24, 3].Value = double.Parse(thanhTien ?? "0").ChuyenSoSangChuoi();
+                        worksheet.Cells[24, 3].Style.Font.Bold = true;
                         worksheet.Cells[26, 3].Value =
                             $"Ngày {order.CreationTime.Day} tháng {order.CreationTime.Month} năm {order.CreationTime.Year}";
                     }

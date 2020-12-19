@@ -49,7 +49,7 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
       .subscribe((response: any) => {
       if (response.statusCode === 200) {
         const url = this.backendApiUrl + '/attachments/export-files/' + response.message;
-        fileSaver.saveAs(url);
+        window.open(url);
         this.notificationService.showSuccess(MessageConstants.Export_File_Ok);
         setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
       }
