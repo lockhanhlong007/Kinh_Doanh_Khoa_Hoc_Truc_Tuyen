@@ -1,15 +1,15 @@
-import { Component, EventEmitter, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Subscription } from 'rxjs';
 import { CommandAssign } from '../../../../shared/models';
 import { FunctionsService, CommandsService, NotificationService } from '../../../../shared/services';
-import { MessageConstants } from '../../../../shared/constants/messages.constant';
 
 @Component({
   selector: 'app-commands-assign',
   templateUrl: './commands-assign.component.html',
   styleUrls: ['./commands-assign.component.scss']
 })
-export class CommandsAssignComponent implements OnInit {
+export class CommandsAssignComponent implements OnInit, OnDestroy {
   public blockedPanel = false;
   public items: any[];
   public selectedItems: any[] = [];
@@ -17,12 +17,15 @@ export class CommandsAssignComponent implements OnInit {
   public functionId: string;
   public existingCommands: any[] = [];
   public addToAllFunctions = false;
+  private subscription = new Subscription();
   private chosenEvent: EventEmitter<any> = new EventEmitter();
-  private notificationService: NotificationService;
   constructor(
     public bsModalRef: BsModalRef,
     private functionsService: FunctionsService,
     private commandsService: CommandsService) {
+  }
+  ngOnDestroy(): void {
+  this.subscription.unsubscribe();
   }
 
   ngOnInit() {
@@ -31,7 +34,7 @@ export class CommandsAssignComponent implements OnInit {
 
   loadAllCommands() {
     this.blockedPanel = true;
-    this.commandsService.getAll()
+    this.subscription.add(this.commandsService.getAll()
       .subscribe((response: any) => {
         this.items = [];
 
@@ -45,7 +48,7 @@ export class CommandsAssignComponent implements OnInit {
           this.selectedItems.push(this.items[0]);
         }
         setTimeout(() => { this.blockedPanel = false; }, 1000);
-      });
+      }));
   }
 
 
@@ -59,9 +62,9 @@ export class CommandsAssignComponent implements OnInit {
     entity.addToAllFunctions = this.addToAllFunctions;
     entity.commandIds = selectedItemIds;
 
-    this.functionsService.addCommandsToFunction(this.functionId, entity).subscribe(() => {
+    this.subscription.add(this.functionsService.addCommandsToFunction(this.functionId, entity).subscribe(() => {
       this.chosenEvent.emit(this.selectedItems);
       setTimeout(() => { this.blockedPanel = false; }, 1000);
-    });
+    }));
   }
 }

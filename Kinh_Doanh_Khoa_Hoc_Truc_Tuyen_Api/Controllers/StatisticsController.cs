@@ -12,6 +12,7 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -37,8 +38,23 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpGet("new-register")]
         [ClaimRequirement(FunctionConstant.NewUser, CommandConstant.View)]
-        public async Task<IActionResult> GetNewRegisters(string dateFrom, string dateTo)
+        public async Task<IActionResult> GetNewRegisters(int key, string dateFrom, string dateTo)
         {
+            if (key == 1)
+            {
+                var now = DateTime.Now;
+                var sevenDayAgo = now.Date.AddDays(-7);
+                dateFrom = sevenDayAgo.ToString("yyyy/MM/dd");
+                dateTo = now.ToString("yyyy/MM/dd");
+            }
+            else if (key == 2)
+            {
+                var now = DateTime.Now;
+                var monthDayAgo = now.Date.AddDays(-30);
+                dateFrom = monthDayAgo.ToString("yyyy/MM/dd");
+                dateTo = now.ToString("yyyy/MM/dd");
+            }
+
             var data = await _khoaHocDbContext.Users.Where(x => x.CreationTime.Date >= DateTime.Parse(dateFrom).Date && x.CreationTime.Date <= DateTime.Parse(dateTo).Date)
                 .GroupBy(x => x.CreationTime.Date)
                 .Select(g => new DateStatisticViewModel()
@@ -53,8 +69,24 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpGet("revenue-daily")]
         [ClaimRequirement(FunctionConstant.Revenue, CommandConstant.View)]
-        public async Task<IActionResult> GetRevenueDaily(string dateFrom, string dateTo)
+        public async Task<IActionResult> GetRevenueDaily(int key, string dateFrom, string dateTo)
         {
+            if (key == 1)
+            {
+                var now = DateTime.Now;
+                var sevenDayAgo = now.Date.AddDays(-7);
+                dateFrom = sevenDayAgo.ToString("yyyy/MM/dd");
+                dateTo = now.ToString("yyyy/MM/dd");
+            }
+            else if (key == 2)
+            {
+                var now = DateTime.Now;
+                var monthDayAgo = now.Date.AddDays(-30);
+                dateFrom = monthDayAgo.ToString("yyyy/MM/dd");
+                dateTo = now.ToString("yyyy/MM/dd");
+            }
+            
+
             await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             if (conn.State == ConnectionState.Closed)
             {
@@ -68,8 +100,23 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
         [HttpGet("count-sales-daily")]
         [ClaimRequirement(FunctionConstant.Revenue, CommandConstant.View)]
-        public async Task<IActionResult> GetCountSalesDaily(string dateFrom,string dateTo)
+        public async Task<IActionResult> GetCountSalesDaily(int key, string dateFrom,string dateTo)
         {
+            if (key == 1)
+            {
+                var now = DateTime.Now;
+                var sevenDayAgo = now.Date.AddDays(-7);
+                dateFrom = sevenDayAgo.ToString("yyyy/MM/dd");
+                dateTo = now.ToString("yyyy/MM/dd");
+            }
+            else if (key == 2)
+            {
+                var now = DateTime.Now;
+                var monthDayAgo = now.Date.AddDays(-30);
+                dateFrom = monthDayAgo.ToString("yyyy/MM/dd");
+                dateTo = now.ToString("yyyy/MM/dd");
+            }
+
             await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             if (conn.State == ConnectionState.Closed)
             {

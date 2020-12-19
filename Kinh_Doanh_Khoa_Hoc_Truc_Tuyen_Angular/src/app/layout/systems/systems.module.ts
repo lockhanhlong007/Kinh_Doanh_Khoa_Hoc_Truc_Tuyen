@@ -29,9 +29,8 @@ import {MessageModule} from 'primeng/message';
 import { TreeTableModule } from 'primeng/treetable';
 import { DropdownModule } from 'primeng/dropdown';
 import { FunctionsDetailComponent } from './functions/functions-detail/functions-detail.component';
+import { SharedPipesModule } from './../../shared/pipes/shared-pipes.module';
 
-import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
-import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
 
 
 @NgModule({
@@ -44,10 +43,8 @@ import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
     UsersDetailComponent,
     RolesAssignComponent,
      FunctionsDetailComponent,
-         FormatDataPipe,
-    ConvertPathPipe,
-
-    CommandsAssignComponent],
+     CommandsAssignComponent
+  ],
   imports: [
     CommonModule,
     SystemsRoutingModule,
@@ -68,6 +65,7 @@ import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
     MessagesModule,
     TreeTableModule,
     DropdownModule,
+    SharedPipesModule,
     ModalModule.forRoot()
   ],
   providers: [

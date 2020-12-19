@@ -25,21 +25,12 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { TableModule } from 'primeng/table';
 import { TreeTableModule } from 'primeng/treetable';
 import { ValidationMessageModule } from '../../shared/modules/validation-message/validation-message.module';
-import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
-import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
-import { FormatOrderPipe } from '../../shared/pipes/format-order.pipe';
-import { FormatStatusBasePipe } from '../../shared/pipes/format-status-base.pipe';
-import { FormatStatusCoursesPipe } from '../../shared/pipes/format-status-courses.pipe';
 import { NotificationService } from '../../shared/services';
 import { ChartModule } from 'primeng/chart';
+import { SharedPipesModule } from './../../shared/pipes/shared-pipes.module';
 @NgModule({
   declarations: [NewUserComponent,
-     RevenueComponent,
-     FormatDataPipe,
-     ConvertPathPipe,
-     FormatStatusCoursesPipe,
-     FormatStatusBasePipe,
-     FormatOrderPipe
+     RevenueComponent
     ],
   imports: [
     CommonModule,
@@ -67,6 +58,7 @@ import { ChartModule } from 'primeng/chart';
     InputTextareaModule,
     RadioButtonModule,
     EditorModule,
+    SharedPipesModule,
     ModalModule.forRoot()
   ],
   providers: [

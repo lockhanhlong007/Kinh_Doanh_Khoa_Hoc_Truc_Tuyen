@@ -14,16 +14,16 @@ export class StatisticsService extends BaseService {
       super();
       this._sharedHeaders = this._sharedHeaders.set('Content-Type', 'application/json');
   }
-  getNewRegisters(dateFrom, dateTo) {
-    return this.http.get<Statistic[]>(`${environment.ApiUrl}/api/statistics/new-register?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+  getNewRegisters(key , dateFrom, dateTo) {
+    return this.http.get<Statistic[]>(`${environment.ApiUrl}/api/statistics/new-register?key=${key}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
     { headers: this._sharedHeaders }).pipe(catchError(this.handleError));
   }
-  getRevenueDaily(dateFrom, dateTo) {
-    return this.http.get<Revenue[]>(`${environment.ApiUrl}/api/statistics/revenue-daily?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+  getRevenueDaily(key , dateFrom, dateTo) {
+    return this.http.get<Revenue[]>(`${environment.ApiUrl}/api/statistics/revenue-daily?key=${key}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
     { headers: this._sharedHeaders }).pipe(catchError(this.handleError));
   }
-  getCountSalesDaily(dateFrom, dateTo) {
-    return this.http.get<Revenue[]>(`${environment.ApiUrl}/api/statistics/count-sales-daily?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+  getCountSalesDaily(key , dateFrom, dateTo) {
+    return this.http.get<Revenue[]>(`${environment.ApiUrl}/api/statistics/count-sales-daily?key=${key}&dateFrom=${dateFrom}&dateTo=${dateTo}`,
     { headers: this._sharedHeaders }).pipe(catchError(this.handleError));
   }
 }

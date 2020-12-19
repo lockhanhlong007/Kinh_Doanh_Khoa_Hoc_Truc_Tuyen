@@ -8,7 +8,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuthGuard } from './shared';
 import { LanguageTranslationModule } from './shared/modules/language-translation/language-translation.module';
-import { SharedPipesModule } from './shared/pipes/shared-pipes.module';
+
 
 @NgModule({
     imports: [
@@ -17,8 +17,7 @@ import { SharedPipesModule } from './shared/pipes/shared-pipes.module';
         BrowserAnimationsModule,
         HttpClientModule,
         LanguageTranslationModule,
-        AppRoutingModule,
-        SharedPipesModule
+        AppRoutingModule
     ],
     declarations: [AppComponent],
     providers: [AuthGuard,

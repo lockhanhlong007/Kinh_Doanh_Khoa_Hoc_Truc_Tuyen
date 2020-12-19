@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Pagination, User } from '../../../shared/models';
 import { UsersService } from '../../../shared/services/users.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
@@ -6,6 +6,7 @@ import { MessageConstants } from '../../../shared';
 import { NotificationService } from '../../../shared/services';
 import { RolesAssignComponent } from './roles-assign/roles-assign.component';
 import { UsersDetailComponent } from './users-detail/users-detail.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-users',
@@ -13,7 +14,7 @@ import { UsersDetailComponent } from './users-detail/users-detail.component';
   styleUrls: ['./users.component.css']
 })
 
-export class UsersComponent implements OnInit {
+export class UsersComponent implements OnInit, OnDestroy {
 
 // Default
 public bsModalRef: BsModalRef;
@@ -34,12 +35,15 @@ public keyword = '';
  public userRoles: any[] = [];
  public showRoleAssign = false;
  public totalUserRoleRecords: number;
-
+ private subscription = new Subscription();
  constructor(
   private modalService: BsModalService,
   private usersService: UsersService,
   private notificationService: NotificationService) {
 }
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
   ngOnInit(): void {
     this.loadData();
   }
@@ -53,29 +57,29 @@ public keyword = '';
 
   loadData(selectionId = null) {
     this.blockedPanel = true;
-    this.usersService.getAllPaging(this.keyword, this.pageIndex, this.pageSize)
-      .subscribe((response: Pagination<User>) => {
-        this.items = response.items;
-        this.pageIndex = this.pageIndex;
-        this.pageSize = this.pageSize;
-        this.totalRecords = response.totalRecords;
-        if (this.selectedItems.length === 0 && this.items.length > 0) {
-          this.selectedItems.push(this.items[0]);
-        }
-        // Nếu có là sửa thì chọn selection theo Id
-        if (selectionId != null && this.items.length > 0) {
-          this.selectedItems = this.items.filter(x => x.Id === selectionId);
-        }
+    this.subscription.add(this.usersService.getAllPaging(this.keyword, this.pageIndex, this.pageSize)
+    .subscribe((response: Pagination<User>) => {
+      this.items = response.items;
+      this.pageIndex = this.pageIndex;
+      this.pageSize = this.pageSize;
+      this.totalRecords = response.totalRecords;
+      if (this.selectedItems.length === 0 && this.items.length > 0) {
+        this.selectedItems.push(this.items[0]);
+      }
+      // Nếu có là sửa thì chọn selection theo Id
+      if (selectionId != null && this.items.length > 0) {
+        this.selectedItems = this.items.filter(x => x.Id === selectionId);
+      }
 
-        // Load data grid 02
-        if (this.showRoleAssign) {
-          this.loadUserRoles();
-        }
+      // Load data grid 02
+      if (this.showRoleAssign) {
+        this.loadUserRoles();
+      }
 
-        setTimeout(() => { this.blockedPanel = false; }, 1000);
-      }, error => {
-        setTimeout(() => { this.blockedPanel = false; }, 1000);
-      });
+      setTimeout(() => { this.blockedPanel = false; }, 1000);
+    }, error => {
+      setTimeout(() => { this.blockedPanel = false; }, 1000);
+    }));
   }
 
   pageChanged(event: any): void {
@@ -113,11 +117,12 @@ public keyword = '';
       class: 'modal-lg',
       backdrop: 'static'
     });
-    this.bsModalRef.content.saved.subscribe(() => {
+    this.subscription.add(this.bsModalRef.content.saved.subscribe(() => {
       this.bsModalRef.hide();
       this.loadData();
       this.selectedItems = [];
-    });
+      this.notificationService.showSuccess(MessageConstants.Created_Ok);
+    }));
   }
   showEditModal() {
     if (this.selectedItems.length === 0) {
@@ -135,10 +140,10 @@ public keyword = '';
       });
 
 
-    this.bsModalRef.content.saved.subscribe((response) => {
+      this.subscription.add(this.bsModalRef.content.saved.subscribe((response) => {
       this.bsModalRef.hide();
       this.loadData(response.id);
-    });
+    }));
   }
 
   deleteItems() {
@@ -157,7 +162,7 @@ public keyword = '';
 
   deleteItemsConfirm(ids: any[]) {
     this.blockedPanel = true;
-    this.usersService.delete(ids).subscribe(() => {
+    this.subscription.add(this.usersService.delete(ids).subscribe(() => {
       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
       this.loadData();
       this.selectedItems = [];
@@ -167,7 +172,7 @@ public keyword = '';
       this.notificationService.showError(error);
 
       setTimeout(() => { this.blockedPanel = false; }, 1000);
-    });
+    }));
   }
 
 
@@ -177,7 +182,7 @@ public keyword = '';
     // Nếu tồn tại selection thì thực hiện
     if (this.selectedItems != null && this.selectedItems.length > 0) {
       const userId = this.selectedItems[0].id;
-      this.usersService.getUserRoles(userId).subscribe((response: any) => {
+      this.subscription.add(this.usersService.getUserRoles(userId).subscribe((response: any) => {
         this.userRoles = response;
         this.totalUserRoleRecords = response.length;
         if (this.selectedRoleItems.length === 0 && this.userRoles.length > 0) {
@@ -186,7 +191,7 @@ public keyword = '';
         setTimeout(() => { this.blockedPanelRole = false; }, 1000);
       }, error => {
         setTimeout(() => { this.blockedPanelRole = false; }, 1000);
-      });
+      }));
     } else {
       this.selectedRoleItems = [];
       setTimeout(() => { this.blockedPanelRole = false; }, 1000);
@@ -201,7 +206,7 @@ public keyword = '';
 
   deleteRolesConfirm(roleNames) {
     this.blockedPanelRole = true;
-    this.usersService.removeRolesFromUser(this.selectedItems[0].id, roleNames).subscribe(() => {
+    this.subscription.add(this.usersService.removeRolesFromUser(this.selectedItems[0].id, roleNames).subscribe(() => {
       this.loadUserRoles();
       this.selectedRoleItems = [];
       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
@@ -209,7 +214,7 @@ public keyword = '';
     }, error => {
       this.notificationService.showError(error);
       setTimeout(() => { this.blockedPanelRole = false; }, 1000);
-    });
+    }));
   }
 
   addUserRole() {

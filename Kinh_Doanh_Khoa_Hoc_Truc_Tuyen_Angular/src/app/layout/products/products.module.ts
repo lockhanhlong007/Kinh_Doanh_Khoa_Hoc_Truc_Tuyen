@@ -36,14 +36,9 @@ import {EditorModule} from 'primeng/editor';
 import {FileUploadModule} from 'primeng/fileupload';
 import {InputTextareaModule} from 'primeng/inputtextarea';
 import {InputNumberModule} from 'primeng/inputnumber';
-
 import { OrdersComponent } from './orders/orders.component';
 import { OrdersDetailComponent } from './orders/orders-detail/orders-detail.component';
-import { ConvertPathPipe } from '../../shared/pipes/convert-path.pipe';
-import { FormatStatusBasePipe } from '../../shared/pipes/format-status-base.pipe';
-import { FormatStatusCoursesPipe } from '../../shared/pipes/format-status-courses.pipe';
-import { FormatOrderPipe } from '../../shared/pipes/format-order.pipe';
-import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
+import { SharedPipesModule } from './../../shared/pipes/shared-pipes.module';
 @NgModule({
   declarations: [
     CategoriesComponent,
@@ -59,12 +54,7 @@ import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
     CoursesInPromotionComponent,
     ActiveCoursesComponent,
     OrdersComponent,
-    OrdersDetailComponent,
-    FormatDataPipe,
-    ConvertPathPipe,
-    FormatStatusCoursesPipe,
-    FormatStatusBasePipe,
-    FormatOrderPipe,
+    OrdersDetailComponent
     ],
   imports: [
     CommonModule,
@@ -91,6 +81,7 @@ import { FormatDataPipe } from '../../shared/pipes/format-data.pipe';
     InputTextareaModule,
     RadioButtonModule,
     EditorModule,
+    SharedPipesModule,
     ModalModule.forRoot()
   ],
   providers: [

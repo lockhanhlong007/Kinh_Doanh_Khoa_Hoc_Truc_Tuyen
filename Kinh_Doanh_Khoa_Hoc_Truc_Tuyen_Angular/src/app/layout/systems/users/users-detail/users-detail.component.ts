@@ -1,22 +1,24 @@
 import { DatePipe } from '@angular/common';
-import { Component, EventEmitter, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { BsModalRef } from 'ngx-bootstrap/modal';
+import { Subscription } from 'rxjs';
 import { MessageConstants } from '../../../../shared';
-import { UsersService, NotificationService } from '../../../../shared/services';
+import { UsersService, NotificationService, UtilitiesService } from '../../../../shared/services';
 
 @Component({
   selector: 'app-users-detail',
   templateUrl: './users-detail.component.html',
   styleUrls: ['./users-detail.component.scss']
 })
-export class UsersDetailComponent implements OnInit {
+export class UsersDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     public bsModalRef: BsModalRef,
     private usersService: UsersService,
     private notificationService: NotificationService,
     private fb: FormBuilder,
+    private utilitiesService: UtilitiesService,
     private datePipe: DatePipe
     ) {}
 public blockedPanel = false;
@@ -24,7 +26,7 @@ public myRoles: string[] = [];
 public entityForm: FormGroup;
 public dialogTitle: string;
 public entityId: string;
-
+private subscription = new Subscription();
 public btnDisabled = false;
 public saveBtnName: string;
 public closeBtnName: string;
@@ -106,11 +108,13 @@ ngOnInit() {
         clear: 'Clear'
     };
 }
-
+ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+}
 loadUserDetail(id: any) {
     this.btnDisabled = true;
     this.blockedPanel = true;
-    this.usersService.getDetail(id)
+    this.subscription.add(this.usersService.getDetail(id)
         .subscribe((response: any) => {
             const dob: Date = new Date(response.dob);
             this.entityForm.setValue({
@@ -132,7 +136,7 @@ loadUserDetail(id: any) {
                 this.btnDisabled = false;
                 this.blockedPanel = false;
             }, 1000);
-        });
+        }));
 }
 
 
@@ -141,40 +145,42 @@ saveChange() {
     this.blockedPanel = true;
     const rawValues = this.entityForm.getRawValue();
      rawValues.dob = this.datePipe.transform(this.entityForm.controls['dob'].value, 'MM/dd/yyyy');
+     const formData = this.utilitiesService.ToFormData(rawValues);
     if (this.entityId) {
-        this.usersService.update(this.entityId, rawValues)
-            .subscribe(() => {
-                this.notificationService.showSuccess(MessageConstants.Updated_Ok);
-                setTimeout(() => {
-                    this.btnDisabled = false;
-                    this.blockedPanel = false;
-                }, 1000);
-                this.saved.emit(this.entityForm.value);
+        this.subscription.add(this.usersService.update(this.entityId, formData)
+            .subscribe((res: any) => {
+                if (res.status === 204) {
+                    setTimeout(() => {
+                        this.btnDisabled = false;
+                        this.blockedPanel = false;
+                    }, 1000);
+                    this.notificationService.showSuccess(MessageConstants.Updated_Ok);
+                    this.saved.emit(this.entityForm.value);
+                }
             }, error => {
                 this.notificationService.showError(error);
                 setTimeout(() => {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
                 }, 1000);
-            });
+            }));
     } else {
-        this.usersService.add(rawValues)
-            .subscribe(() => {
-                this.notificationService.showSuccess(MessageConstants.Created_Ok);
-                this.saved.emit(this.entityForm.value);
-
+        this.subscription.add(this.usersService.add(formData)
+            .subscribe((res: any) => {
+             if (res.status === 200) {
                 setTimeout(() => {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
                 }, 1000);
+                this.saved.emit(this.entityForm.value);
+             }
             }, error => {
                 this.notificationService.showError(error);
-
                 setTimeout(() => {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
                 }, 1000);
-            });
+            }));
 
     }
 }
