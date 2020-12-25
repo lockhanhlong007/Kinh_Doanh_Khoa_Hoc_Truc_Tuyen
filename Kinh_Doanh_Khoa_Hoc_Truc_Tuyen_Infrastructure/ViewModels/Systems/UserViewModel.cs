@@ -18,5 +18,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
 
         public string Biography { get; set; }
         public string Avatar { get; set; }
+        public int CountStudents { get; set; }
+
+        public int CountCourses { get; set; }
     }
 }

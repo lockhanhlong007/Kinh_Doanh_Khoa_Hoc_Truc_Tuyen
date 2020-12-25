@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Dapper;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
@@ -20,7 +22,9 @@ using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using ILogger = Serilog.ILogger;
@@ -35,26 +39,35 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private ILogger<CoursesController> _logger;
         public readonly UserManager<AppUser> _userManager;
         private readonly IStorageService _storageService;
+        private readonly IConfiguration _configuration;
 
-        public CoursesController(EKhoaHocDbContext khoaHocDbContext, ILogger<CoursesController> logger, UserManager<AppUser> userManager, IStorageService storageService)
+        public CoursesController(EKhoaHocDbContext khoaHocDbContext, ILogger<CoursesController> logger, UserManager<AppUser> userManager, IStorageService storageService, IConfiguration configuration)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger ?? throw new ArgumentException(nameof(logger));
             _userManager = userManager;
             _storageService = storageService;
+            _configuration = configuration;
         }
 
         [HttpGet("{id}")]
-        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _khoaHocDbContext.Courses.FindAsync(id);
+            await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            if (conn.State == ConnectionState.Closed)
+            {
+                await conn.OpenAsync();
+            }
+            var dynamicParameters = new DynamicParameters();
+            dynamicParameters.Add("@id", id);
+            var result = (await conn.QueryAsync<CourseViewModel>("CourseDetail", dynamicParameters, null, 120, CommandType.StoredProcedure)).FirstOrDefault();
             if (result == null)
             {
                 _logger.LogError($"Cannot found Course with id {id}");
                 return  NotFound(new ApiNotFoundResponse($"Cannot found course with id {id}"));
             }
 
+            var countStudent = _khoaHocDbContext.ActivateCourses.Include(x => x.AppUser).Count(x => x.CourseId == id && x.AppUser.UserName != result.CreatedUserName && x.Status);
             return Ok(new CourseViewModel
             {
                 Name = result.Name,
@@ -66,7 +79,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Content = result.Content,
                 CreationTime = result.CreationTime,
                 LastModificationTime = result.LastModificationTime,
-                Id = result.Id
+                CategoryName = result.CategoryName,
+                Id = result.Id,
+                DiscountAmount = result.DiscountAmount,
+                DiscountPercent = result.DiscountPercent,
+                CreatedUserName = result.CreatedUserName,
+                CountStudent = countStudent
             });
 
         }
@@ -112,26 +130,69 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
 
-        [HttpGet]
-        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public async Task<IActionResult> GetCourses()
+        [HttpGet("new-courses")]
+        public async Task<IActionResult> GetNewCourses()
         {
-            return Ok(await _khoaHocDbContext.Courses.Include(x => x.Category).AsNoTracking().Select(_ => new CourseViewModel
+            await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            if (conn.State == ConnectionState.Closed)
+            {
+                await conn.OpenAsync();
+            }
+            var courses = (await conn.QueryAsync<CourseViewModel>("NewCourses", null, null, 120, CommandType.StoredProcedure)).ToList();
+            return Ok(courses.Select(_ => new CourseViewModel
             {
                 Id = _.Id,
-                Name = _.Name,
+                Name = _.Name.formatData(30),
                 Image = _storageService.GetFileUrl(_.Image),
                 CategoryId = _.CategoryId,
                 Status = _.Status,
                 Description = _.Description,
                 Content = _.Content,
                 Price = _.Price,
-                CategoryName = _.Category.Name
-            }).ToListAsync());
+                CategoryName = _.CategoryName,
+                DiscountAmount = _.DiscountAmount,
+                DiscountPercent = _.DiscountPercent,
+                CreatedUserName = _.CreatedUserName
+            }).ToList());
         }
 
+
+        [HttpGet("related-courses/{id}")]
+        public async Task<IActionResult> GetRelatedCourses(int id)
+        {
+            var course = await _khoaHocDbContext.Courses.FindAsync(id);
+            if (course == null)
+            {
+                return NotFound(new ApiNotFoundResponse($"Cannot found course with id {id}"));
+            }
+            await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            if (conn.State == ConnectionState.Closed)
+            {
+                await conn.OpenAsync();
+            }
+            var parameters = new DynamicParameters();
+            parameters.Add("@categoryId", course.CategoryId);
+            parameters.Add("@courseId", course.Id);
+            var courses = (await conn.QueryAsync<CourseViewModel>("RelatedCourses", parameters, null, 120, CommandType.StoredProcedure)).ToList();
+            return Ok(courses.Select(_ => new CourseViewModel
+            {
+                Id = _.Id,
+                Name = _.Name.formatData(30),
+                Image = _storageService.GetFileUrl(_.Image),
+                CategoryId = _.CategoryId,
+                Status = _.Status,
+                Description = _.Description,
+                Content = _.Content,
+                Price = _.Price,
+                CategoryName = _.CategoryName,
+                DiscountAmount = _.DiscountAmount,
+                DiscountPercent = _.DiscountPercent,
+                CreatedUserName = _.CreatedUserName
+            }).ToList());
+        }
+
+
         [HttpGet("filter")]
-        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
         public async Task<IActionResult> GetCoursesPaging(string filter, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Courses.Include(x => x.Category).OrderByDescending(x => x.Status).AsQueryable();
@@ -160,7 +221,95 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var pagination = new Pagination<CourseViewModel>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
+            };
+            return Ok(pagination);
+        }
+
+        [HttpGet("client-filter")]
+        public async Task<IActionResult> GetCoursesPagingForClient(int? categoryId, long? priceMin, long? priceMax, string sortBy, string filter, int pageIndex, int pageSize)
+        {
+            List<CourseViewModel> data;
+            await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            if (conn.State == ConnectionState.Closed)
+            {
+                await conn.OpenAsync();
+            }
+            if (categoryId != null)
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("@categoryId", categoryId);
+                var category =  await _khoaHocDbContext.Categories.FindAsync(categoryId);
+                data = category.ParentId == null
+                    ? (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryParentId", parameters, null, 120,
+                        CommandType.StoredProcedure)).ToList()
+                    : (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryId", parameters, null, 120,
+                        CommandType.StoredProcedure)).ToList();
+            }
+            else
+            {
+                data = (await conn.QueryAsync<CourseViewModel>("ListCourses", null, null, 120,
+                    CommandType.StoredProcedure)).ToList();
+            }
+            var query = data.AsQueryable();
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query = query.Where(x => x.Name.Contains(filter));
+            }
+
+            foreach (var item in query)
+            {
+                if (item.DiscountPercent > 0)
+                {
+                    item.SortPrice = item.Price - (item.Price * item.DiscountPercent / 100);
+                }
+                else if (item.DiscountAmount > 0)
+                {
+                    item.SortPrice = item.DiscountAmount;
+
+                }
+                else
+                {
+                    item.SortPrice = item.Price;
+                }
+            }
+            if (priceMin != null && priceMax != null)
+            {
+                query = query.Where(x => x.SortPrice >= priceMin && x.SortPrice <= priceMax);
+            }
+            query = sortBy switch
+            {
+                "name" => query.OrderByDescending(x => x.Name),
+                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
+                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
+                _ => query.OrderByDescending(x => x.CreationTime)
+            };
+            var totalRecords = query.Count();
+            var courses = query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(c => new CourseViewModel()
+            {
+                Name = c.Name.formatData(20),
+                Status = c.Status,
+                CategoryId = c.CategoryId,
+                Price = c.Price,
+                CreationTime = c.CreationTime,
+                LastModificationTime = c.LastModificationTime,
+                Image = _storageService.GetFileUrl(c.Image),
+                Content = c.Content,
+                Description = c.Description,
+                Id = c.Id,
+                CategoryName = c.CategoryName.formatData(20),
+                DiscountAmount = c.DiscountAmount,
+                DiscountPercent = c.DiscountPercent,
+                CreatedUserName = c.CreatedUserName
+            }).ToList();
+            var pagination = new Pagination<CourseViewModel>
+            {
+                Items = courses,
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
         }

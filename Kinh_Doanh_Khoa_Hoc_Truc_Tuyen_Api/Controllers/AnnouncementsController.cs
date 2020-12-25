@@ -61,7 +61,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return new Pagination<AnnouncementViewModel>
             {
                 Items = model,
-                TotalRecords = totalRow
+                TotalRecords = totalRow,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
         }
 

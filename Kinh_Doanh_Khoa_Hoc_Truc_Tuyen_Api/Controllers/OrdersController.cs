@@ -72,7 +72,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var pagination = new Pagination<OrderViewModel>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
         }
@@ -360,7 +362,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         //    var pagination = new Pagination<OrderDetailViewModel>
         //    {
         //        Items = items,
-        //        TotalRecords = totalRecords
+        //        TotalRecords = totalRecords,
+        //        PageSize = pageSize,
+        //        PageIndex = pageIndex
         //    };
         //    return Ok(pagination);
         //}

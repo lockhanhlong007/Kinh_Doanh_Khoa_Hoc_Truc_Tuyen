@@ -19,7 +19,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public int? DiscountPercent { set; get; }
 
-        public decimal? DiscountAmount { set; get; }
+        public long? DiscountAmount { set; get; }
 
         public bool Status { set; get; }
 

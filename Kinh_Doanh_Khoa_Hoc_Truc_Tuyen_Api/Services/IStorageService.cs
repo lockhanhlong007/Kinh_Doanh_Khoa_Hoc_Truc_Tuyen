@@ -10,5 +10,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
         Task SaveFileAsync(Stream mediaBinaryStream, string fileName, string folder);
 
         Task DeleteFileAsync(string fileName);
+
+        string GetFileRoot(string fileName, string folder);
     }
 }

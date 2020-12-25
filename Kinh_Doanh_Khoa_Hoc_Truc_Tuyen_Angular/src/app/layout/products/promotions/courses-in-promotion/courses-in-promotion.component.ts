@@ -1,9 +1,10 @@
 import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
+import { MessageConstants } from '../../../../shared';
 import { environment } from '../../../../../environments/environment';
 import { Pagination, Courses } from '../../../../shared/models';
-import { PromotionsService } from '../../../../shared/services';
+import { NotificationService, PromotionsService } from '../../../../shared/services';
 
 @Component({
   selector: 'app-courses-in-promotion',
@@ -30,6 +31,7 @@ export class CoursesInPromotionComponent implements OnInit, OnDestroy {
   public backendApiUrl = environment.ApiUrl;
   public existingCourses: any[];
   constructor(public bsModalRef: BsModalRef,
+    private notificationService: NotificationService,
     private promotionsService: PromotionsService) { }
 
   ngOnInit(): void {
@@ -75,9 +77,13 @@ export class CoursesInPromotionComponent implements OnInit, OnDestroy {
     this.selectedItems.forEach(element => {
       selectedIds.push(element.id);
     });
-    this.promotionsService.postPromotionInCourses(this.promotionId, selectedIds).subscribe(() => {
+    this.subscription.add(this.promotionsService.postPromotionInCourses(this.promotionId, selectedIds).subscribe(() => {
+      this.notificationService.showSuccess(MessageConstants.Created_Ok);
       this.chosenEvent.emit(this.selectedItems);
       setTimeout(() => { this.blockedPanel = false; }, 1000);
-    });
+    }, error => {
+      this.notificationService.showError(error);
+      setTimeout(() => { this.blockedPanel = false; }, 1000);
+    }));
   }
 }

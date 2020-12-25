@@ -2,10 +2,8 @@
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels
 {
-    public class Pagination<T>
+    public class Pagination<T> : PaginationBase
     {
         public List<T> Items { get; set; }
-
-        public int TotalRecords { get; set; }
     }
 }

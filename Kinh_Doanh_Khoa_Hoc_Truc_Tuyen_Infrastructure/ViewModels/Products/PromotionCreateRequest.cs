@@ -16,7 +16,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public int? DiscountPercent { set; get; }
 
-        public int? DiscountAmount { set; get; }
+        public long? DiscountAmount { set; get; }
 
         public bool Status { set; get; }
 
