@@ -46,14 +46,14 @@
                 </tr>
             </ng-template>
             <ng-template pTemplate="summary">
-                <div style="text-align: left " class="font-weight-bold p-text-bold">
+                <div style="text-align: left" class="font-weight-bold p-text-bold">
                     Tổng số bản ghi: {{totalRecords | number}}
                 </div>
             </ng-template>
         </p-table>
         <p-footer>
-            <p-blockUI [target]="pnl " [blocked]="blockedPanel ">
-                <p-progressSpinner [style]="{width: '100px', height: '100px', position: 'absolute',top: '25%',left: '50%'} " strokeWidth="2 " animationDuration=".5s "></p-progressSpinner>
+            <p-blockUI [target]="pnl" [blocked]="blockedPanel">
+                <p-progressSpinner [style]="{width: '100px', height: '100px', position: 'absolute',top: '25%',left: '50%'}" strokeWidth="2" animationDuration=".5s"></p-progressSpinner>
             </p-blockUI>
         </p-footer>
     </p-panel>

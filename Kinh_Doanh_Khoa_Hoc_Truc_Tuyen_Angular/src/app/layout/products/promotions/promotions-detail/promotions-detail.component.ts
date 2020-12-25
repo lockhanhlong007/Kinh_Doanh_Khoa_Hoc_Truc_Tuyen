@@ -5,13 +5,14 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 import { MessageConstants } from '../../../../shared';
 import { PromotionsService, NotificationService } from '../../../../shared/services';
 import { PromotionsRequest } from '../../../../shared/models/promotions-request.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-promotions-detail',
   templateUrl: './promotions-detail.component.html',
   styleUrls: ['./promotions-detail.component.scss']
 })
-export class PromotionsDetailComponent implements OnInit {
+export class PromotionsDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     public bsModalRef: BsModalRef,
@@ -38,6 +39,7 @@ public btnDisabled = false;
 public saveBtnName: string;
 public closeBtnName: string;
 public vi: any;
+private subscription = new Subscription();
 saved: EventEmitter<any> = new EventEmitter();
 // Validate
 noSpecial: RegExp = /^[^<>*!_~]+$/;
@@ -66,6 +68,9 @@ validation_messages = {
         { type: 'min', message: 'Bạn phải nhập >= 0' },
     ]
 };
+ngOnDestroy(): void {
+ this.subscription.unsubscribe();
+}
 ngOnInit() {
     this.entityForm = this.fb.group({
         'id': new FormControl(0),
@@ -139,7 +144,7 @@ onChangeDiscount(event: any) {
 loadPromotionDetail(id: any) {
     this.btnDisabled = true;
     this.blockedPanel = true;
-    this.promotionsService.getDetail(id)
+    this.subscription.add(this.promotionsService.getDetail(id)
         .subscribe((response: any) => {
             const toDate: Date = new Date(response.toDate);
             const fromDate: Date = new Date(response.fromDate);
@@ -170,7 +175,7 @@ loadPromotionDetail(id: any) {
                 this.btnDisabled = false;
                 this.blockedPanel = false;
             }, 1000);
-        });
+        }));
 }
 
 
@@ -193,7 +198,7 @@ saveChange() {
     if (this.entityId) {
         promotion.id = Number(this.entityId);
         promotion.status = rawValues.status;
-        this.promotionsService.update(promotion)
+        this.subscription.add(this.promotionsService.update(promotion)
             .subscribe(() => {
                 this.notificationService.showSuccess(MessageConstants.Updated_Ok);
                 setTimeout(() => {
@@ -207,14 +212,13 @@ saveChange() {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
                 }, 1000);
-            });
+            }));
     } else {
         promotion.status = rawValues.status === '' ? true : false;
-        this.promotionsService.add(promotion)
+        this.subscription.add(this.promotionsService.add(promotion)
             .subscribe(() => {
                 this.notificationService.showSuccess(MessageConstants.Created_Ok);
                 this.saved.emit(this.entityForm.value);
-
                 setTimeout(() => {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
@@ -225,7 +229,7 @@ saveChange() {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
                 }, 1000);
-            });
+            }));
 
     }
 }

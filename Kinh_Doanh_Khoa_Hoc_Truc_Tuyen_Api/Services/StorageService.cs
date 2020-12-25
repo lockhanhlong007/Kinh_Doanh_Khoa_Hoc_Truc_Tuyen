@@ -37,5 +37,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
                 await Task.Run(() => File.Delete(filePath));
             }
         }
+
+        public string GetFileRoot(string fileName, string folder)
+        {
+            return Path.Combine(_userContentFolder, folder + "\\" + fileName);
+        }
     }
 }

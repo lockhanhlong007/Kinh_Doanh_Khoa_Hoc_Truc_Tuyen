@@ -22,7 +22,7 @@ export class LessonsComponent implements OnInit, OnDestroy {
    * Paging
    */
   public pageIndex = 1;
-  public pageSize = 5;
+  public pageSize = 100;
   public totalRecords: number;
   public keyword = '';
   public items: any[];

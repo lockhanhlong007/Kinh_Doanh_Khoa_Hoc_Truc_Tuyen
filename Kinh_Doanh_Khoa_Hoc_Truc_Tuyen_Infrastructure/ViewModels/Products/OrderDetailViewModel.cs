@@ -10,9 +10,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public Guid ActiveCourseId { set; get; }
 
-        public decimal? Price { set; get; }
+        public long? Price { set; get; }
 
-        public decimal? PromotionPrice { set; get; }
+        public long? PromotionPrice { set; get; }
 
         public string CourseName { get; set; }
     }

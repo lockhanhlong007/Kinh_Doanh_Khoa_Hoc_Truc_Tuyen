@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
@@ -66,10 +67,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 await _storageService.SaveFileAsync(request.Avatar.OpenReadStream(), fileName, "images");
                 user.Avatar = "images/" + fileName;
             }
+            else
+            {
+                user.Avatar = "images/defaultAvatar.png";
+            }
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
-                //return CreatedAtAction(nameof(GetById), new { id = user.Id }, new UserViewModel());
                 return Ok();
             }
             _logger.LogError("Create user failed");
@@ -97,6 +101,38 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 UserName = result.UserName,
                 Avatar = result.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(result.Avatar),
                 Biography = result.Biography
+            });
+        }
+
+        [HttpGet("course-{id}")]
+        public async Task<IActionResult> GetByCourseId(int id)
+        {
+            var course = await _khoaHocDbContext.Courses.FindAsync(id);
+            if (course == null)
+            {
+                _logger.LogError($"Cannot found course with id: {id}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found course with id: {id}"));
+            }
+            var result = await _userManager.FindByNameAsync(course.CreatedUserName);
+            if (result == null)
+            {
+                _logger.LogError($"Cannot found user with userName: {course.CreatedUserName}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with userName: {course.CreatedUserName}"));
+            }
+            var countStudents = _khoaHocDbContext.ActivateCourses.Include(x => x.Course).Count(x => x.Course.CreatedUserName.Equals(result.UserName) && x.Id != result.Id && x.Status);
+            var countCourses = _khoaHocDbContext.Courses.Count(x => x.CreatedUserName.Equals(result.UserName));
+            return Ok(new UserViewModel
+            {
+                Dob = result.Dob,
+                Email = result.Email,
+                Id = result.Id,
+                Name = result.Name,
+                PhoneNumber = result.PhoneNumber,
+                UserName = result.UserName,
+                Avatar = result.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(result.Avatar),
+                Biography = result.Biography,
+                CountCourses = countCourses,
+                CountStudents = countStudents
             });
         }
 
@@ -149,7 +185,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var pagination = new Pagination<UserViewModel>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
         }
@@ -173,6 +211,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
                 await _storageService.SaveFileAsync(request.Avatar.OpenReadStream(), fileName, "images");
                 user.Avatar = "images/" + fileName;
+            }
+            else
+            {
+                user.Avatar = "images/defaultAvatar.png";
             }
             user.Biography = request.Biography;
             var result = await _userManager.UpdateAsync(user);

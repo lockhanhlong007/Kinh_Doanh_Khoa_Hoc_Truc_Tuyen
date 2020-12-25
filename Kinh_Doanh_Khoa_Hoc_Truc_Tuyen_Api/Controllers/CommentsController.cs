@@ -35,13 +35,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _userManager = userManager;
         }
 
-
-
-
-
         [HttpGet("{entityType}/{entityId}/filter")]
-        public async Task<IActionResult> GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex,
-            int pageSize)
+        public async Task<IActionResult> GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsQueryable();
             if (!string.IsNullOrEmpty(filter))
@@ -64,9 +59,78 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var pagination = new Pagination<CommentViewModel>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
+                };
+            return Ok(pagination);
+        }
+
+        [HttpGet("{entityType}/{entityId}/client-pag")]
+        public async Task<IActionResult> GetCommentsPagingForClient(int entityId, string entityType, string sortType, int pageIndex, int pageSize)
+        {
+            var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsQueryable();
+            if (!string.IsNullOrEmpty(sortType))
+            {
+                if (sortType == "new")
+                {
+                    query = query.OrderByDescending(x => x.CreationTime);
+                }
+                else
+                {
+                    query = query.OrderBy(x => x.CreationTime);
+                }
+            }
+
+            var totalRecords = await query.CountAsync();
+            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new CommentViewModel()
+            {
+                Id = x.Id,
+                Content = x.Content,
+                CreationTime = x.CreationTime,
+                LastModificationTime = x.LastModificationTime,
+                EntityId = x.EntityId,
+                EntityType = x.EntityType,
+                UserId = x.UserId,
+                OwnerUser = x.AppUser.Name + " (" + x.AppUser.Email + ")"
+            }).ToListAsync();
+            var pagination = new Pagination<CommentViewModel>
+            {
+                Items = items,
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
+        }
+
+        [HttpGet("{entityType}/{entityId}/client")]
+        public async Task<IActionResult> GetCommentsForClient(int entityId, string entityType, string sortType)
+        {
+            var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsQueryable();
+            if (!string.IsNullOrEmpty(sortType))
+            {
+                if (sortType == "new")
+                {
+                    query = query.OrderByDescending(x => x.CreationTime);
+                }
+                else
+                {
+                    query = query.OrderBy(x => x.CreationTime);
+                }
+            }
+            var items = await query.Select(x => new CommentViewModel()
+            {
+                Id = x.Id,
+                Content = x.Content,
+                CreationTime = x.CreationTime,
+                LastModificationTime = x.LastModificationTime,
+                EntityId = x.EntityId,
+                EntityType = x.EntityType,
+                UserId = x.UserId,
+                OwnerUser = x.AppUser.Name + " (" + x.AppUser.Email + ")"
+            }).ToListAsync();
+            return Ok(items);
         }
 
         [HttpGet("{commentId}")]

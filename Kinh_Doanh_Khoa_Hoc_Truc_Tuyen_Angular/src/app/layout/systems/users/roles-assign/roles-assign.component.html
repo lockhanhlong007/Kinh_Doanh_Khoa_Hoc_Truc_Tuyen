@@ -12,11 +12,11 @@
                 <th style="width: 50px">
                     <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                 </th>
-                <th [pSortableColumn]=" 'id' ">Id
-                    <p-sortIcon [field]=" 'id' "></p-sortIcon>
+                <th [pSortableColumn]="'id'">Id
+                    <p-sortIcon [field]=" 'id'"></p-sortIcon>
                 </th>
-                <th [pSortableColumn]=" 'name' ">Name
-                    <p-sortIcon [field]=" 'name' "></p-sortIcon>
+                <th [pSortableColumn]="'name'">Name
+                    <p-sortIcon [field]="'name'"></p-sortIcon>
                 </th>
             </tr>
         </ng-template>
@@ -31,7 +31,7 @@
         </ng-template>
     </p-table>
 </div>
-<div class="modal-footer ">
-    <button type="submit " class="btn btn-success " *ngIf="selectedItems.length> 0" (click)="chooseRoles()">Chọn</button> &nbsp;
+<div class="modal-footer">
+    <button type="submit" class="btn btn-success" *ngIf="selectedItems.length> 0" (click)="chooseRoles()">Chọn</button> &nbsp;
     <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">Đóng</button>
 </div>

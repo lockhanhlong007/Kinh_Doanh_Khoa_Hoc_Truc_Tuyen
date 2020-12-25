@@ -105,7 +105,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var pagination = new Pagination<RoleViewModel>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
         }

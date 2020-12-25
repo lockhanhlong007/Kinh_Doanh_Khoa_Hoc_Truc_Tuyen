@@ -14,10 +14,13 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using KnowledgeSpace.BackendServer.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Xabe.FFmpeg;
+
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -29,11 +32,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private ILogger<LessonsController> _logger;
         private IStorageService _storageService;
 
-        public LessonsController(EKhoaHocDbContext khoaHocDbContext, ILogger<LessonsController> logger, IStorageService storageService)
+        public LessonsController(IWebHostEnvironment webHostEnvironment,EKhoaHocDbContext khoaHocDbContext, ILogger<LessonsController> logger, IStorageService storageService)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger ?? throw new ArgumentException(nameof(logger));
             _storageService = storageService;
+            FFmpeg.SetExecutablesPath(Path.Combine(webHostEnvironment.WebRootPath, "ffmpeg", "bin"));
         }
 
         [HttpGet("{id}")]
@@ -85,6 +89,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
                 await _storageService.SaveFileAsync(request.VideoPath.OpenReadStream(), fileName, "videos");
                 lesson.VideoPath = "videos/" + fileName;
+                var pathToVideoFile = _storageService.GetFileRoot(fileName, "videos");
+                var mediaInfo = await FFmpeg.GetMediaInfo(pathToVideoFile);
+                lesson.Times = $@"{mediaInfo.VideoStreams.First().Duration:hh\:mm\:ss}";
             }
             if (request.Attachment != null)
             {
@@ -128,11 +135,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Update lesson failed"));
         }
 
-        [HttpGet]
-        [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public async Task<IActionResult> GetLessons(int courseId)
+        [HttpGet("course-{id}")]
+        public async Task<IActionResult> GetLessons(int id)
         {
-            return Ok(await _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == courseId).OrderBy(x => x.Status).AsNoTracking().Select(_ => new LessonViewModel
+            return Ok(await _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == id).OrderBy(x => x.Status).AsNoTracking().Select(_ => new LessonViewModel
             {
                 Name = _.Name,
                 Status = _.Status,
@@ -141,11 +147,48 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Attachment = _storageService.GetFileUrl(_.Attachment),
                 VideoPath = _storageService.GetFileUrl(_.VideoPath),
                 Id = _.Id,
-                CourseName = _.Course.Name
-
+                CourseName = _.Course.Name,
+                Times = _.Times
             }).ToListAsync());
         }
+        
+        [HttpGet("course-{id}/detail")]
+        public IActionResult GetLessonsByCourseId(int id, int? lessonId)
+        {
+            var data = new LessonViewModel();
+            if (lessonId == null)
+            {
+                var query = _khoaHocDbContext.Lessons.Include(x => x.Course)
+                    .FirstOrDefault(x => x.CourseId == id && x.SortOrder == 1 && x.Status);
+                if (query == null) return Ok(data);
+                data.Name = query.Name;
+                data.Status = query.Status;
+                data.SortOrder = query.SortOrder;
+                data.CourseId = query.CourseId;
+                data.Attachment = _storageService.GetFileUrl(query.Attachment);
+                data.VideoPath = _storageService.GetFileUrl(query.VideoPath);
+                data.Id = query.Id;
+                data.CourseName = query.Course.Name;
+                data.Times = query.Times;
+            }
+            else
+            {
+                var query = _khoaHocDbContext.Lessons.Include(x => x.Course)
+                    .FirstOrDefault(x => x.CourseId == id && x.Id == lessonId && x.Status);
+                if (query == null) return Ok(data);
+                data.Name = query.Name;
+                data.Status = query.Status;
+                data.SortOrder = query.SortOrder;
+                data.CourseId = query.CourseId;
+                data.Attachment = _storageService.GetFileUrl(query.Attachment);
+                data.VideoPath = _storageService.GetFileUrl(query.VideoPath);
+                data.Id = query.Id;
+                data.CourseName = query.Course.Name;
+                data.Times = query.Times;
+            }
 
+            return Ok(data);
+        }
         [HttpGet("filter")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
         public async Task<IActionResult> GetLessonsPaging(int courseId,string filter, int pageIndex, int pageSize)
@@ -171,7 +214,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var pagination = new Pagination<LessonViewModel>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
         }
@@ -198,6 +243,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
                 await _storageService.SaveFileAsync(request.VideoPath.OpenReadStream(), fileName, "videos");
                 lesson.VideoPath = "videos/" + fileName;
+                var pathToVideoFile = _storageService.GetFileRoot(fileName, "videos");
+                var mediaInfo = await FFmpeg.GetMediaInfo(pathToVideoFile);
+                lesson.Times = $@"{mediaInfo.VideoStreams.First().Duration:hh\:mm\:ss}";
             }
             if (request.Attachment != null)
             {

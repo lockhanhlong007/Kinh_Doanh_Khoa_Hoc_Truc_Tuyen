@@ -113,7 +113,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var pagination = new Pagination<PromotionCreateRequest>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
         }
@@ -209,11 +211,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var promotion = await _khoaHocDbContext.Promotions.FindAsync(promotionId);
             if (promotion == null)
                 return NotFound(new ApiNotFoundResponse($"Cannot found promotion with id: {promotionId}"));
+            var existingPromotion = _khoaHocDbContext.Promotions.Include(x => x.PromotionInCourses)
+                .Where(x => x.ToDate >= promotion.FromDate　&& x.Id != promotionId).ToList();
             foreach (var promotionCourses in request.Select(id => new PromotionInCourse() {CourseId = id, PromotionId = promotionId}))
             {
+                if (existingPromotion.Any(x => x.PromotionInCourses.Any(pic => pic.CourseId == promotionCourses.CourseId)))
+                {
+                    var detail = await _khoaHocDbContext.Courses.FindAsync(promotionCourses.CourseId);
+                    return BadRequest(new ApiBadRequestResponse($"Can't not add course(Id: {detail.Id} - Name: {detail.Name}) in promotion(Id: {promotion.Id})"));
+                }
                 await _khoaHocDbContext.PromotionInCourses.AddAsync(promotionCourses);
             }
-
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
@@ -246,7 +254,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var pagination = new Pagination<CourseViewModel>
             {
                 Items = items,
-                TotalRecords = totalRecords
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
             };
             return Ok(pagination);
         }

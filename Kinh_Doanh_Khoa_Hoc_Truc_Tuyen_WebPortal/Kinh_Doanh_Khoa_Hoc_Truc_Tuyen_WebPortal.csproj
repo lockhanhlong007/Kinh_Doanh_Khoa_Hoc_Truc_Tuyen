@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="jQuery" Version="3.5.1" />
+    <PackageReference Include="jQuery.Validation" Version="1.19.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.9" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
   </ItemGroup>
@@ -13,6 +15,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.csproj" />
     <ProjectReference Include="..\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure\Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Implements\" />
+    <Folder Include="wwwroot\lib\google-analytics\" />
   </ItemGroup>
 
 </Project>

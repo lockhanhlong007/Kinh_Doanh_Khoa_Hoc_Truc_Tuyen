@@ -85,7 +85,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     this.blockedPanelCourses = true;
     if (this.selectedItems != null && this.selectedItems.length > 0) {
       const promotionId = this.selectedItems[0].id;
-      this.promotionsService.getPromotionCourses(promotionId).subscribe((response: any) => {
+      this.subscription.add(this.promotionsService.getPromotionCourses(promotionId).subscribe((response: any) => {
         this.courses = response;
         this.totalCoursesRecords = response.length;
         if (this.selectedCourseItems.length === 0 && this.courses.length > 0) {
@@ -94,7 +94,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
         setTimeout(() => { this.blockedPanelCourses = false; }, 1000);
       }, () => {
         setTimeout(() => { this.blockedPanelCourses = false; }, 1000);
-      });
+      }));
     } else {
       this.selectedCourseItems = [];
       setTimeout(() => { this.blockedPanelCourses = false; }, 1000);
@@ -123,11 +123,11 @@ export class PromotionsComponent implements OnInit, OnDestroy {
       class: 'modal-lg',
       backdrop: 'static'
     });
-    this.bsModalRef.content.saved.subscribe(() => {
+    this.subscription.add(this.bsModalRef.content.saved.subscribe(() => {
       this.bsModalRef.hide();
       this.loadData();
       this.selectedItems = [];
-    });
+    }));
   }
   showEditModal() {
   if (this.selectedItems.length === 0) {
@@ -143,10 +143,10 @@ export class PromotionsComponent implements OnInit, OnDestroy {
       class: 'modal-lg',
       backdrop: 'static'
     });
-  this.bsModalRef.content.saved.subscribe((response) => {
+    this.subscription.add(this.bsModalRef.content.saved.subscribe((response) => {
     this.bsModalRef.hide();
     this.loadData(response.id);
-  });
+  }));
 
   }
 
@@ -193,11 +193,11 @@ export class PromotionsComponent implements OnInit, OnDestroy {
         class: 'modal-lg',
         backdrop: 'static'
       });
-    this.bsModalRef.content.chosenEvent.subscribe(() => {
+      this.subscription.add(this.bsModalRef.content.chosenEvent.subscribe(() => {
       this.bsModalRef.hide();
       this.loadCourses();
       this.selectedCourseItems = [];
-    });
+    }));
   }
 
   removeCoursesInPromotion() {
@@ -211,7 +211,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     selectedCourses.map(res => {
       Ids.push(res.id);
     });
-    this.promotionsService.removePromotionInCourses(this.selectedItems[0].id, Ids).subscribe(() => {
+    this.subscription.add(this.promotionsService.removePromotionInCourses(this.selectedItems[0].id, Ids).subscribe(() => {
       this.loadCourses();
       this.selectedCourseItems = [];
       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
@@ -219,7 +219,7 @@ export class PromotionsComponent implements OnInit, OnDestroy {
     }, error => {
       this.notificationService.showError(error);
       setTimeout(() => { this.blockedPanelCourses = false; }, 1000);
-    });
+    }));
   }
 
 

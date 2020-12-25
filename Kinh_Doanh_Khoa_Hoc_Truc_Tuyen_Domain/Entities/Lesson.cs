@@ -22,6 +22,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public int CourseId { get; set; }
 
+        public string Times { get; set; }
+
         public Course Course { get; set; }
     }
 }

@@ -11,5 +11,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common
         public const string Token = "Token";
         public const string BaseAddress = "BaseAddress";
         public const string Bearer = "Bearer";
+        public class ProductSettings
+        {
+            public const int NumberOfProducts = 6;
+        }
     }
+
 }
