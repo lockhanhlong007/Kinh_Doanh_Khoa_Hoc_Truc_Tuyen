@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -45,7 +46,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     , o => o.MigrationsAssembly("Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain")));
             //2. Setup idetntity
             services.AddIdentity<AppUser, AppRole>()
-                .AddEntityFrameworkStores<EKhoaHocDbContext>();
+                .AddEntityFrameworkStores<EKhoaHocDbContext>().AddDefaultTokenProviders();
             services.AddTransient<DbInitializer>();
             services.Configure<IdentityOptions>(options =>
             {
@@ -75,18 +76,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                .AddProfileService<IdentityProfileService>()
                .AddAspNetIdentity<AppUser>()
                .AddDeveloperSigningCredential();
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
             {
+                o.SaveToken = true;
                 o.Authority = "https://localhost:44342/";
                 o.RequireHttpsMetadata = false;
                 o.Audience = "api.khoahoc";
             });
-
             services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddTransient<IStorageService, StorageService>();
             services.AddAuthorization(options =>
@@ -97,9 +97,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     policy.RequireAuthenticatedUser();
                 });
             });
-
-
-
 
             services.AddCors(options =>
             {

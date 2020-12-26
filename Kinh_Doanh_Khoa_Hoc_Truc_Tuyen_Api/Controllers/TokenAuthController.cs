@@ -4,11 +4,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IdentityModel.Client;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
-using KnowledgeSpace.BackendServer.Authorization;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -71,12 +72,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return BadRequest(new ApiBadRequestResponse("Tài khoản hoặc mật khẩu không đúng"));
             }
 
-            return Ok(new
-                {
-                    tokenResponse.AccessToken,
-                    tokenResponse.ExpiresIn,
-                    tokenResponse.TokenType
-                });
+
+            return Ok(new TokenResponseFromServer()
+            {
+                AccessToken = tokenResponse.AccessToken,
+                RefreshToken = tokenResponse.RefreshToken,
+                ExpiresIn = tokenResponse.ExpiresIn,
+                TokenType = tokenResponse.TokenType
+            });
         }
     }
 }

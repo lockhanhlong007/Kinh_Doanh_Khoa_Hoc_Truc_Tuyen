@@ -44,179 +44,93 @@
 
                         <!--====== List ======-->
                         <ul class="ah-list ah-list--design1 ah-list--link-color-secondary">
-                            <li class="My_dropdown" data-tooltip="tooltip" data-placement="left" title="Notice">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li class="has-dropdown" data-tooltip="tooltip" data-placement="left" title="Announcement">
 
-                                <a><i class="far fa-bell"></i></a>
+                                    <a><i class="far fa-bell"></i></a>
 
-                                <!--====== Dropdown ======-->
+                                    <!--====== Dropdown ======-->
 
-                                <span class="js-menu-toggle"></span>
-                                <ul class="My_dropdown-content" style="width:450px">
-                                    <li>
+                                    <span class="js-menu-toggle"></span>
+                                    <ul style="width: 500px;right: 55px;padding: 0; margin: 0">
+                                        <li style="border-bottom: 1px solid #f7f7f7">
+                                            <a style="display:inline-flex;align-items: center;" href="signup.html">
+                                                <div class="description__img-wrap">
+                                                    <img class="u-img-fluid" style="width: auto;" src="~/assets/images/product/electronic/product3.jpg" alt="">
+                                                </div>
+                                                <div class="description-title" style="display: grid; white-space: initial; text-align: justify;font-size: 12px;font-weight: 600">
+                                                    Tiki miễn phí giao tiêu chuẩn cho đơn hàng từ 250k, áp dụng phí 19k cho đơn hàng dưới 250k.
+                                                    Thay đổi áp dụng cho khách hàng không phải là thành viên TikiNOW.
+                                                    <span class="manage-o__text-2 u-c-silver" style="line-height: 1.9; text-align: justify;font-size: 12px;font-weight: 600">
+                                                        29/2/2021
+                                                    </span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li style="border-bottom: 1px solid #f7f7f7">
+                                            <a style="display:inline-flex;align-items: center;" href="signup.html">
+                                                <div class="description__img-wrap">
+                                                    <img class="u-img-fluid" style="width: auto;" src="~/assets/images/product/electronic/product3.jpg" alt="">
+                                                </div>
+                                                <div class="description-title" style="display: grid; white-space: initial; text-align: justify;font-size: 12px;font-weight: 600">
+                                                    Tiki miễn phí giao tiêu chuẩn cho đơn hàng từ 250k, áp dụng phí 19k cho đơn hàng dưới 250k.
+                                                    Thay đổi áp dụng cho khách hàng không phải là thành viên TikiNOW.
+                                                    <span class="manage-o__text-2 u-c-silver" style="line-height: 1.9; text-align: justify;font-size: 12px;font-weight: 600">
+                                                        29/2/2021
+                                                    </span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li style="text-align:center;align-items: center;">
+                                            <a href="signup.html">
+                                                <span class="description-title" style="text-align:center;align-items: center; line-height: 1.9; text-align: justify; font-size: 12px; font-weight: 600">
+                                                    Xem Tất Cả
+                                                </span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <!--====== End - Dropdown ======-->
+                                </li>
+                                <li class="has-dropdown" data-tooltip="tooltip" data-placement="left" title="@User.Identity.Name">
 
-                                        <a href="dashboard.html">
-                                            <i class="fas fa-user-circle u-s-m-r-6"></i>
+                                    <a><i class="far fa-user-circle"></i></a>
 
-                                            <span>Account</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a style="display:inline-flex;align-items: center;" class="u-s-m-r-6" href="signup.html">
-                                            <div class="description__img-wrap">
+                                    <!--====== Dropdown ======-->
 
-                                                <img class="u-img-fluid" src="~/assets/images/product/electronic/product3.jpg" alt="">
-                                            </div>
-                                            <span style="margin-left: 10px;">Tiki miễn phí giao tiêu chuẩn cho đơn hàng từ 250k, áp dụng phí 19k cho đơn hàng dưới 250k. Thay đổi áp dụng cho khách hàng không phải là thành viên TikiNOW.</span>
-                                            <span>
-                                                29/2/2021
-                                            </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a style="display:inline-flex;align-items: center;" class="u-s-m-r-6" href="signup.html">
-                                            <div class="description__img-wrap">
+                                    <span class="js-menu-toggle"></span>
+                                    <ul style="width:120px">
+                                        <li>
 
-                                                <img class="u-img-fluid" src="~/assets/images/product/electronic/product3.jpg" alt="">
-                                            </div>
-                                            <span style="margin-left: 10px;">Tiki miễn phí giao tiêu chuẩn cho đơn hàng từ 250k, áp dụng phí 19k cho đơn hàng dưới 250k. Thay đổi áp dụng cho khách hàng không phải là thành viên TikiNOW.</span>
-                                            <span>
-                                                29/2/2021
-                                            </span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a style="display:inline-flex;align-items: center;" class="u-s-m-r-6" href="signup.html">
-                                            <div class="description__img-wrap">
+                                            <a href="dashboard.html">
+                                                <i class="fas fa-user-circle u-s-m-r-6"></i>
 
-                                                <img class="u-img-fluid" src="~/assets/images/product/electronic/product3.jpg" alt="">
-                                            </div>
-                                            <span style="margin-left: 10px;">Tiki miễn phí giao tiêu chuẩn cho đơn hàng từ 250k, áp dụng phí 19k cho đơn hàng dưới 250k. Thay đổi áp dụng cho khách hàng không phải là thành viên TikiNOW.</span>
-                                            <span>
-                                                29/2/2021
-                                            </span>
-                                        </a>
-                                    </li>
-                                    <li style="text-align: center;">
-                                        <a href="dash-my-notification.html">Xem Tất Cả</a>
-                                    </li>
+                                                <span>Account</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <form style="display: block;padding: 8px 20px;color: #333333;font-size: 12px;font-weight: 600;background-color: white;" method="post" asp-controller="Account" asp-action="Logout">
+                                                <button style="background-color: white;margin: 0;padding: 0;border: 0;font-weight: 600;" type="submit">
+                                                    <i class="fas fa-lock-open u-s-m-r-6"></i>
+                                                    Sign Out
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                    <!--====== End - Dropdown ======-->
+                                </li>
+                            }
+                            else
+                            {
+                                <li data-tooltip="tooltip" data-placement="left" title="Sign In">
 
+                                    <a href="/login.html"><i class="fas fa-user-tie"></i></a>
+                                </li>
+                                <li data-tooltip="tooltip" data-placement="left" title="Sign Up">
 
-                                </ul>
-                                <!--====== End - Dropdown ======-->
-                            </li>
-                            <li class="has-dropdown" data-tooltip="tooltip" data-placement="left" title="Account">
-
-                                <a><i class="far fa-user-circle"></i></a>
-
-                                <!--====== Dropdown ======-->
-
-                                <span class="js-menu-toggle"></span>
-                                <ul style="width:120px">
-                                    <li>
-
-                                        <a href="dashboard.html">
-                                            <i class="fas fa-user-circle u-s-m-r-6"></i>
-
-                                            <span>Account</span>
-                                        </a>
-                                    </li>
-                                    <li>
-
-                                        <a href="signup.html">
-                                            <i class="fas fa-user-plus u-s-m-r-6"></i>
-
-                                            <span>Signup</span>
-                                        </a>
-                                    </li>
-                                    <li>
-
-                                        <a href="signin.html">
-                                            <i class="fas fa-lock u-s-m-r-6"></i>
-
-                                            <span>Signin</span>
-                                        </a>
-                                    </li>
-                                    <li>
-
-                                        <a href="signup.html">
-                                            <i class="fas fa-lock-open u-s-m-r-6"></i>
-
-                                            <span>Signout</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                                <!--====== End - Dropdown ======-->
-                            </li>
-                            <li class="has-dropdown" data-tooltip="tooltip" data-placement="left" title="Settings">
-
-                                <a><i class="fas fa-user-cog"></i></a>
-
-                                <!--====== Dropdown ======-->
-
-                                <span class="js-menu-toggle"></span>
-                                <ul style="width:120px">
-
-                                    <li class="has-dropdown has-dropdown--ul-right-100">
-
-                                        <a>Language<i class="fas fa-angle-down u-s-m-l-6"></i></a>
-
-                                        <!--====== Dropdown ======-->
-
-                                        <span class="js-menu-toggle"></span>
-                                        <ul style="width:120px">
-                                            <li>
-
-                                                <a class="u-c-brand">ENGLISH</a>
-                                            </li>
-                                            <li>
-
-                                                <a>ARABIC</a>
-                                            </li>
-                                            <li>
-
-                                                <a>FRANCAIS</a>
-                                            </li>
-                                            <li>
-
-                                                <a>ESPANOL</a>
-                                            </li>
-                                        </ul>
-                                        <!--====== End - Dropdown ======-->
-                                    </li>
-                                    <li class="has-dropdown has-dropdown--ul-right-100">
-
-                                        <a>Currency<i class="fas fa-angle-down u-s-m-l-6"></i></a>
-
-                                        <!--====== Dropdown ======-->
-
-                                        <span class="js-menu-toggle"></span>
-                                        <ul style="width:225px">
-                                            <li>
-
-                                                <a class="u-c-brand">$ - US DOLLAR</a>
-                                            </li>
-                                            <li>
-
-                                                <a>£ - BRITISH POUND STERLING</a>
-                                            </li>
-                                            <li>
-
-                                                <a>€ - EURO</a>
-                                            </li>
-                                        </ul>
-                                        <!--====== End - Dropdown ======-->
-                                    </li>
-                                </ul>
-                                <!--====== End - Dropdown ======-->
-                            </li>
-                            <li data-tooltip="tooltip" data-placement="left" title="Contact">
-
-                                <a href="tel:+0900901904"><i class="fas fa-phone-volume"></i></a>
-                            </li>
-                            <li data-tooltip="tooltip" data-placement="left" title="Mail">
-
-                                <a href="mailto:contact@domain.com"><i class="far fa-envelope"></i></a>
-                            </li>
+                                    <a href="/register.html"><i class="fas fa-user-plus"></i></a>
+                                </li>
+                            }
                         </ul>
                         <!--====== End - List ======-->
                     </div>

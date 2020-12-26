@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -10,6 +11,7 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
@@ -51,9 +53,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
             claims.Add(new Claim(ClaimTypes.Name, user.UserName));
             claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
             claims.Add(new Claim(ClaimTypes.Role, string.Join(";", roles)));
+
             claims.Add(new Claim(SystemConstants.Permissions, JsonConvert.SerializeObject(permissions)));
             claims.Add(new Claim("FullName", user.Name));
             context.IssuedClaims = claims;
+
+
+            //var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("0123456789ABCDEF"));
+            //var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            //context.
         }
 
         public async Task IsActiveAsync(IsActiveContext context)

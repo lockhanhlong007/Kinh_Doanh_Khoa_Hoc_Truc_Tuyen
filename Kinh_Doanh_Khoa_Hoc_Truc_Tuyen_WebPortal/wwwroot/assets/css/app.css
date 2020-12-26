@@ -78,7 +78,21 @@ body {
 .config {
     overflow: hidden;
 }
+.text-warning {
+    color: #c09853;
+}
 
+.text-error {
+    color: #b94a48;
+}
+
+.text-info {
+    color: #3a87ad;
+}
+
+.text-success {
+    color: #468847;
+}
 /**
  * Basic styles for headings and paragraph
  */
@@ -5927,17 +5941,19 @@ label:after {
     justify-content: space-between;
 }
 
-.lesson-list > li > div > a:nth-child(1) {
-    font-size: 14px;
-    font-weight: 600;
-    text-align: justify;
-}
+    .lesson-list > li > div > a:nth-child(1) {
+        font-size: 14px;
+        font-weight: 600;
+        text-align: justify;
+        color: #333333;
+    }
 
     .lesson-list > li > div > a:nth-child(2) {
         width: auto;
         height: auto;
         margin: 0;
         text-align: right;
+        color: #333333;
     }
 
 .lesson-list > li > div > a:hover {
@@ -7753,14 +7769,28 @@ label:after {
     visibility: hidden;
 }
 
-    .has-dropdown > ul > li > a {
-        display: block;
-        padding: 8px 20px;
-        color: #333333;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
+.has-dropdown > ul > li > a {
+    display: block;
+    padding: 8px 20px;
+    color: #333333;
+    font-size: 12px;
+    font-weight: 600;
+}
+.custom_dropdown {
+    display: block;
+    padding: 8px 20px;
+    color: #333333;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: white;
+}
+.custom_dropdown:nth-child(n) {
+    background-color: white;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-weight: 600;
+}
 .has-dropdown--ul-left-100 > ul {
     left: 100%;
 }
@@ -7888,6 +7918,9 @@ label:after {
                 display: block;
             }
 
+            .has-dropdown > ul > li {
+                display: block;
+            }
     .ah-list > li > ul > li > a {
         padding: 8px 36px;
     }
