@@ -5,8 +5,10 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -16,75 +18,197 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
     public class BaseApiClient : IBaseApiClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
-
         private readonly IConfiguration _configuration;
-
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public BaseApiClient(IHttpClientFactory httpClientFactory,
-            IHttpContextAccessor httpContextAccessor,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor)
         {
+            _httpClientFactory = httpClientFactory;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
-            _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<TResponse> GetAsync<TResponse>(string url)
+        public async Task<List<T>> GetListAsync<T>(string url, bool requiredLogin = false)
         {
-            var sessions = _httpContextAccessor
-                .HttpContext
-                .Session
-                .GetString(SystemConstants.Token);
-            var client = _httpClientFactory.CreateClient();
+            var client = _httpClientFactory.CreateClient("BackendApi");
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
-            var response = await client.GetAsync(url);
-            var body = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
+            if (requiredLogin)
             {
-                TResponse myDeserializedObjList = (TResponse)JsonConvert.DeserializeObject(body, typeof(TResponse));
-                return myDeserializedObjList;
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
-            return JsonConvert.DeserializeObject<TResponse>(body);
-        }
-
-        public async Task<List<T>> GetListAsync<T>(string url)
-        {
-            var sessions = _httpContextAccessor
-               .HttpContext
-               .Session
-               .GetString(SystemConstants.Token);
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
-
             var response = await client.GetAsync(url);
             var body = await response.Content.ReadAsStringAsync();
+            var data = (List<T>)JsonConvert.DeserializeObject(body, typeof(List<T>));
+            return data;
+        }
+
+        public async Task<T> GetAsync<T>(string url, bool requiredLogin = false)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.GetAsync(url);
+            var body = await response.Content.ReadAsStringAsync();
+            var data = JsonConvert.DeserializeObject<T>(body);
+            return data;
+        }
+
+        public async Task<string> GetStringAsync(string url, bool requiredLogin = false)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.GetAsync(url);
+            var body = await response.Content.ReadAsStringAsync();
+            var data = body;
+            return data;
+        }
+
+
+        public async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest requestContent, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            StringContent httpContent = null;
+            if (requestContent != null)
+            {
+                var json = JsonConvert.SerializeObject(requestContent);
+                httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.PostAsync(url, httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+
             if (response.IsSuccessStatusCode)
             {
-                var data = (List<T>)JsonConvert.DeserializeObject(body, typeof(List<T>));
-                return data;
+                return JsonConvert.DeserializeObject<TResponse>(body);
             }
             throw new Exception(body);
         }
 
-        public async Task<bool> Delete(string url)
-        {
-            var sessions = _httpContextAccessor
-               .HttpContext
-               .Session
-               .GetString(SystemConstants.Token);
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.DeleteAsync(url);
+        public async Task<bool> PostReturnBooleanAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            StringContent httpContent = null;
+            if (requestContent != null)
+            {
+                var json = JsonConvert.SerializeObject(requestContent);
+                httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.PostAsync(url, httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+
             if (response.IsSuccessStatusCode)
             {
                 return true;
             }
-            return false;
+            throw new Exception(body);
+        }
+
+        public async Task<bool> PostForFileAsync<TResponse>(string url, MultipartFormDataContent requestContent, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.PostAsync(url, requestContent);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            throw new Exception(body);
+        }
+
+        public async Task<bool> PutForFileAsync<TResponse>(string url, MultipartFormDataContent requestContent, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.PutAsync(url, requestContent);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            throw new Exception(body);
+        }
+
+
+        public async Task<bool> PutAsync<TRequest, TResponse>(string url, TRequest requestContent, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            HttpContent httpContent = null;
+            if (requestContent != null)
+            {
+                var json = JsonConvert.SerializeObject(requestContent);
+                httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.PutAsync(url, httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                return true;
+
+            throw new Exception(body);
+        }
+        public async Task<bool> Delete(string url, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                //var token = _httpContextAccessor.HttpContext.Session.GetString(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.DeleteAsync(url);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                return true;
+
+            throw new Exception(body);
         }
     }
 }

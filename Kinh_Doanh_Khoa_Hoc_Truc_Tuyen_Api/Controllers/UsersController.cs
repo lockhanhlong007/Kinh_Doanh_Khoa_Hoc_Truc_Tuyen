@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
@@ -13,7 +14,6 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using KnowledgeSpace.BackendServer.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -46,10 +46,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost]
-        [ClaimRequirement(FunctionConstant.User, CommandConstant.Create)]
         [ValidationFilter]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> PostUser([FromForm] UserCreateRequest request)
         {
+            var check112 = await _userManager.FindByNameAsync("tesst31");
+            if (check112 != null)
+            {
+                await _userManager.DeleteAsync(check112);
+            }
             var user = new AppUser
             {
                 Id = Guid.NewGuid(),
@@ -74,6 +79,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    try
+                    {
+                        var userCheck = await _userManager.FindByNameAsync(request.UserName);
+                        await _userManager.AddToRoleAsync(userCheck, "Student");
+                    }
+                    catch (Exception e)
+                    {
+                        return BadRequest(new ApiBadRequestResponse(e.Message));
+                    }
+                }
                 return Ok();
             }
             _logger.LogError("Create user failed");
@@ -81,7 +98,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
-        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _userManager.FindByIdAsync(id);
@@ -103,6 +119,75 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Biography = result.Biography
             });
         }
+
+        [HttpGet("user-{userName}")]
+        public async Task<IActionResult> GetByUserName(string userName)
+        {
+            var result = await _userManager.FindByNameAsync(userName);
+            if (result == null)
+            {
+                _logger.LogError($"Cannot found user with userName: {userName}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with userName: {userName}"));
+            }
+
+            return Ok(new UserViewModel
+            {
+                Dob = result.Dob,
+                Email = result.Email,
+                Id = result.Id,
+                Name = result.Name,
+                PhoneNumber = result.PhoneNumber,
+                UserName = result.UserName,
+                Avatar = result.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(result.Avatar),
+                Biography = result.Biography
+            });
+        }
+
+
+
+
+        [HttpGet("email-token-user-{id}")]
+        public async Task<IActionResult> GetEmailConfirmationToken(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    _logger.LogError($"Cannot found user with id: {id}");
+                    return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+                }
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                return Ok(code);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiBadRequestResponse(e.Message));
+            }
+
+        }
+
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> GetEmailConfirmation([FromBody]ConfirmEmailRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null)
+            {
+                _logger.LogError($"Cannot found user with id: {request.UserId}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.UserId}"));
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, request.Code);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new ApiBadRequestResponse(result));
+            }
+
+            return Ok();
+
+        }
+
 
         [HttpGet("course-{id}")]
         public async Task<IActionResult> GetByCourseId(int id)
@@ -194,6 +279,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpPut("{id}")]
         [ClaimRequirement(FunctionConstant.User, CommandConstant.Update)]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> PutUser(string id, [FromForm] UserCreateRequest request)
         {
             var user = await _userManager.FindByIdAsync(id);

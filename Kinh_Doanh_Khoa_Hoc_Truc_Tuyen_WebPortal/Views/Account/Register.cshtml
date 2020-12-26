@@ -1,0 +1,97 @@
+﻿@model RegisterRequest
+<!--====== Section 1 ======-->
+<div class="u-s-p-y-30">
+
+    <!--====== Section Content ======-->
+    <div class="section__content">
+        <div class="container">
+            <div class="breadcrumb">
+                <div class="breadcrumb__wrap">
+                    <ul class="breadcrumb__list">
+                        <li class="has-separator">
+                            <a href="/">Home</a>
+                        </li>
+                        <li class="is-marked">
+
+                            <a href="#">Sign up</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Section 1 ======-->
+<!--====== Section 2 ======-->
+<div class="u-s-p-b-30">
+    <!--====== Section Content ======-->
+    <div class="section__content">
+        <div class="container">
+            <div class="row row--center">
+                <div class="col-lg-6 col-md-8 u-s-m-b-30">
+                    <div class="l-f-o">
+                        <div class="l-f-o__pad-box">
+                            <h1 class="u-s-m-b-30" style="text-align: center; align-items: center; font-size: 35px; line-height: 30px; color: black">Sign Up</h1>
+                            <form class="l-f-o__form" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" enctype="multipart/form-data">
+                                <div asp-validation-summary="All" class="text-error u-s-m-b-15"></div>
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label" for="reg-username">User Name <sup>*</sup></label>
+                                    <input class="input-text input-text--primary-style" name="UserName" type="text" asp-for="UserName" id="reg-username" placeholder="Enter UserName">
+                                    <span asp-validation-for="UserName" class="text-error"></span>
+                                </div>
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label" for="reg-fname">Full Name <sup>*</sup></label>
+                                    <input class="input-text input-text--primary-style" name="Name" type="text" asp-for="Name" id="reg-fname" placeholder="Full Name">
+                                    <span asp-validation-for="Name" class="text-error"></span>
+                                </div>
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label" for="reg-email">Email <sup>*</sup></label>
+                                    <input class="input-text input-text--primary-style" name="Email" type="email" asp-for="Email" id="reg-email" placeholder="Enter Email">
+                                    <span asp-validation-for="Email" class="text-error"></span>
+                                </div>
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label" for="reg-dob">Date Of Birth <sup>*</sup></label>
+                                    <input class="input-text input-text--primary-style" name="Dob" type="date" asp-for="Dob" id="reg-dob" placeholder="Enter Date Of Birth">
+                                    <span asp-validation-for="Dob" class="text-error"></span>
+                                </div>
+                                <div class="u-s-m-b-30">
+
+                                    <label class="gl-label" for="reg-password">Password <sup>*</sup></label>
+                                    <input class="input-text input-text--primary-style" name="Password" type="password" asp-for="Password" id="reg-password" placeholder="Enter Password">
+                                    <span asp-validation-for="Password" class="text-error"></span>
+                                    </div>
+                                <div class="u-s-m-b-30">
+
+                                    <label class="gl-label" for="reg-confirm-password">Confirm Password <sup>*</sup></label>
+                                    <input class="input-text input-text--primary-style" name="ConfirmPassword" type="password" asp-for="ConfirmPassword" id="reg-confirm-password" placeholder="Enter Confirm Password">
+                                    <span asp-validation-for="ConfirmPassword" class="text-error"></span>
+                                </div>
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label" for="reg-phone-number">Phone Number <sup>*</sup></label>
+                                    <input type="text" asp-for="PhoneNumber" name="PhoneNumber" class="input-text input-text--primary-style" id="reg-phone-number" placeholder="Enter Phone Number"/>
+                                    <span asp-validation-for="PhoneNumber" class="text-error"></span>
+                                </div>
+                                <div class="u-s-m-b-30">
+                                    <label class="gl-label" for="reg-avatar">Avatar <sup>*</sup></label>
+                                    <input type="file" asp-for="Avatar" name="Avatar" class="input-text" id="reg-avatar"/>
+                                </div>
+                                @*<div class="u-s-m-b-30">
+                                    <recaptcha />
+                                    <span class="text-error" id="recaptchaErrorMessage"></span>
+                                </div>*@
+                                <div class="u-s-m-b-15">
+                                    <button class="btn btn--e-transparent-brand-b-2" type="submit">CREATE</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section Content ======-->
+</div>
+<!--====== End - Section 2 ======-->
+@*@section Scripts {
+    <recaptcha-script validation-message-element-id="recaptchaErrorMessage" />
+}*@

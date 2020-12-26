@@ -1,11 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+using Microsoft.AspNetCore.Mvc;
 
-namespace KnowledgeSpace.BackendServer.Authorization
+namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims
 {
     public class ClaimRequirementAttribute : TypeFilterAttribute
     {
