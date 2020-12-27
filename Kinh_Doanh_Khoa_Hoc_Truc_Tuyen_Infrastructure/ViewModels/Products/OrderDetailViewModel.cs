@@ -15,5 +15,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public long? PromotionPrice { set; get; }
 
         public string CourseName { get; set; }
+
+        public string CourseImage { get; set; }
     }
 }

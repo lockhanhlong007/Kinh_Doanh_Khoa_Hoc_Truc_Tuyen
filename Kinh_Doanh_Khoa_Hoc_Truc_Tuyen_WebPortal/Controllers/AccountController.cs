@@ -9,8 +9,10 @@ using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
@@ -36,8 +38,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IBaseApiClient _apiClient;
         private readonly IConfiguration _configuration;
-
-
         private readonly IEmailSender _emailSender;
 
         public AccountController(IBaseApiClient apiClient,
@@ -47,6 +47,236 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _emailSender = emailSender;
+        }
+
+
+        [HttpGet]
+        [Route("my-profile.html")]
+        public async Task<IActionResult> AccountDetail()
+        {
+            var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{User.GetUserId()}");
+            var account = new AccountDetailViewModel();
+            account.AccountViewModel = new AccountViewModel
+            {
+                Name = user.Name,
+                Email = user.Email,
+                UserName = user.UserName,
+                Dob = user.Dob,
+                PhoneNumber = user.PhoneNumber,
+                Id = user.Id
+            };
+            account.Image = user.Avatar;
+            account.NameDash = "My Profile";
+            return View(account);
+        }
+
+        [HttpGet]
+        [Route("my-announcement.html")]
+        public async Task<IActionResult> MyAnnouncement(int? pageSize, string filterBy = "true", int page = 1)
+        {
+            pageSize ??= 4;
+            var announce = await _apiClient.GetAsync<Pagination<AnnouncementViewModel>>($"/api/orders/private-paging/filter-{filterBy}?userId={User.GetUserId()}&pageSize={pageSize}&pageIndex={page}&filter={filterBy}");
+            var data = new MyAnnouncementViewModel();
+            data.FilterType = filterBy;
+            data.NameDash = "My Announcements";
+            data.AnnouncementViewModels = announce;
+            return View(data);
+        }
+
+        [HttpGet]
+        [Route("my-courses.html")]
+        public async Task<IActionResult> MyCourses(int? pageSize, int page = 1)
+        {
+            pageSize ??= 3;
+            var data = new MyCoursesViewModel();
+            data.PageSize = pageSize;
+            data.CourseViewModels = await _apiClient.GetAsync<Pagination<CourseViewModel>>($"/api/courses/my-courses/user-{User.GetUserId()}?userId={User.GetUserId()}&pageIndex={page}&pageSize={pageSize}");
+            data.NameDash = "My Courses";
+            return View(data);
+        }
+        [HttpGet]
+        [Route("active-course.html")]
+        public IActionResult ActiveCourse()
+        {
+            var data = new ActiveCourseViewModel();
+            data.NameDash = "Active Course";
+            return View(data);
+        }
+
+        [HttpPost]
+        [Route("active-course.html")]
+        public async Task<IActionResult> ActiveCourse(ActiveCourseViewModel request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    ModelState.AddModelError("", "Mã kích hoạt không thể để trống");
+                    request.NameDash = "Active Course";
+                    return View(request);
+                }
+
+                var active = new ActiveCourseRequest
+                {
+                    Code = request.Code,
+                    UserId = User.GetUserId()
+                };
+                await _apiClient.PutAsync<ActiveCourseRequest,bool>($"/api/courses/user-active-course", active);
+                return RedirectToAction(nameof(ActiveCourseConfirmation));
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("",
+                    e.Message.Equals("false")
+                        ? "Mã kích hoạt này đã được sử dụng rồi"
+                        : "Không tìm thấy mã kích hoạt này");
+                request.NameDash = "Active Course";
+                return View(request);
+            }
+        }
+
+        [HttpGet]
+        [Route("active-course-confirm.html")]
+        public IActionResult ActiveCourseConfirmation()
+        {
+            var data = new ActiveCourseViewModel();
+            data.NameDash = "Active Course";
+            return View(data);
+        }
+
+        [HttpGet]
+        [Route("manage-orders.html")]
+        public async Task<IActionResult> ManageOrder(int? pageSize, string sortBy = "all", int page = 1)
+        {
+            pageSize ??= 3;
+            var order = await _apiClient.GetAsync<Pagination<OrderViewModel>>($"/api/orders/account-{User.GetUserId()}-orders?userId={User.GetUserId()}&pageSize={pageSize}&pageIndex={page}&sortBy={sortBy}");
+            var data = new ManageOrderViewModel();
+            data.SortType = sortBy;
+            data.NameDash = "My Order";
+            data.OrderViewModels = order;
+            return View(data);
+        }
+
+        [HttpGet]
+        [Route("track-order-detail.html")]
+        public async Task<IActionResult> TrackOrderDetail(int orderId)
+        {
+            var order = await _apiClient.GetAsync<OrderViewModel>($"/api/orders/{orderId}/user-{User.GetUserId()}");
+            var data = new TrackOrderDetailViewModel();
+            data.NameDash = "Track Order";
+            data.OrderViewModel = order;
+            return View(data);
+        }
+
+        [HttpGet]
+        [Route("my-edit-profile.html")]
+        public async Task<IActionResult> EditAccountDetail()
+        {
+            var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{User.GetUserId()}");
+            var account = new AccountDetailViewModel();
+            account.AccountViewModel = new AccountViewModel
+            {
+                Name = user.Name,
+                Email = user.Email,
+                UserName = user.UserName,
+                Dob = user.Dob,
+                PhoneNumber = user.PhoneNumber,
+                Id = user.Id,
+            };
+            account.Image = user.Avatar;
+            account.NameDash = "My Profile";
+            return View(account);
+        }
+
+        [HttpPost]
+        [Route("my-edit-profile.html")]
+        public async Task<IActionResult> EditAccountDetail(AccountDetailViewModel request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(request);
+            }
+            var user = new UserViewModel();
+            user.Name = request.AccountViewModel.Name;
+            user.Dob = request.AccountViewModel.Dob;
+            user.Email = request.AccountViewModel.Email;
+            user.PhoneNumber = request.AccountViewModel.PhoneNumber;
+            user.UserName = request.AccountViewModel.UserName;
+            await _apiClient.PutAsync<UserViewModel, bool>($"/api/users/information-{User.GetUserId()}", user);
+            return RedirectToAction(nameof(AccountDetail));
+        }
+
+        [HttpPost]
+        [Route("my-edit-avatar.html")]
+        public async Task<IActionResult> EditAvatar(IFormFile file)
+        {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction(nameof(EditAccountDetail));
+            }
+
+            var requestContent = new MultipartFormDataContent();
+            if (file != null)
+            {
+                byte[] data;
+                using (var br = new BinaryReader(file.OpenReadStream()))
+                {
+                    data = br.ReadBytes((int)file.OpenReadStream().Length);
+                }
+                ByteArrayContent bytes = new ByteArrayContent(data);
+                requestContent.Add(bytes, "Avatar", file.FileName);
+            }
+            requestContent.Add(new StringContent(User.GetUserId()), "Id");
+            await _apiClient.PutForFileAsync<bool>($"/api/users/{User.GetUserId()}/change-avatar", requestContent);
+            return RedirectToAction(nameof(EditAccountDetail));
+        }
+
+        [HttpGet]
+        [Route("change-my-password.html")]
+        public IActionResult EditAccountPassword()
+        {
+            var account = new ChangePasswordViewModel();
+            account.Id = User.GetUserId();
+            account.NameDash = "My Profile";
+            return View(account);
+        }
+
+        [HttpPost]
+        [Route("change-my-password.html")]
+        public async Task<IActionResult> EditAccountPassword(ChangePasswordViewModel request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    request.NameDash = "My Profile";
+                    return View(request);
+                }
+                var checkPassword = new AccountPasswordCheckRequest
+                {
+                    Password = request.OldPassword,
+                    Id = request.Id
+                };
+                await _apiClient.PostAsync<AccountPasswordCheckRequest, bool>(
+                        $"/api/users/{request.Id}/check-password", checkPassword, true);
+                var data = new UserPasswordChangeRequest();
+                data.NewPassword = request.NewPassword;
+                data.CurrentPassword = request.OldPassword;
+                data.Id = request.Id;
+
+                var result = await _apiClient.PutAsync<UserPasswordChangeRequest, bool>($"/api/users/{data.Id}/change-password", data, true);
+                return RedirectToAction(nameof(AccountDetail));
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError("",
+                    e.Message.Equals("false") ? "Mật Khẩu Hiện Tại Không Đúng Với Hệ Thống" : "Đổi Mật Khẩu Thất Bại");
+                request.NewPassword = null;
+                request.ConfirmNewPassword = null;
+                request.OldPassword = null;
+                request.NameDash = "My Profile";
+                return View(request);
+            }
         }
 
         [HttpGet]
@@ -133,7 +363,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-      //  [ValidateRecaptcha]
+        [ValidateRecaptcha]
         [Route("register.html")]
         public async Task<IActionResult> Register(RegisterRequest registerRequest, string returnUrl = null)
         {
@@ -161,55 +391,25 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 requestContent.Add(new StringContent(registerRequest.Name), "Name");
                 requestContent.Add(new StringContent(registerRequest.Dob.ToString("yyyy/MM/dd")), "Dob");
                 await _apiClient.PostForFileAsync<bool>("/api/users",requestContent,false);
-                //var loginViewModel = new LoginViewModel()
-                //{
-                //    ClientId = _configuration["Authorization:ClientId"],
-                //    ClientSecret = _configuration["Authorization:ClientSecret"],
-                //    Scope = _configuration["Authorization:Scope"],
-                //    Password = registerRequest.Password,
-                //    UserName = registerRequest.UserName
-                //};
-                //var result = await _apiClient.PostAsync<LoginViewModel, TokenResponseFromServer>($"/api/TokenAuth/Authenticate", loginViewModel, false);
-                //var principal = ValidateToken(result);
-                //var authProperties = new AuthenticationProperties
-                //{
-                //    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
-                //    IsPersistent = false
-                //};
-                //HttpContext.Session.SetString("access_token", result.AccessToken);
-                //await HttpContext.SignInAsync(
-                //    CookieAuthenticationDefaults.AuthenticationScheme,
-                //    principal,
-                //    authProperties);
                 var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/user-{registerRequest.UserName}");
-                var code = await _apiClient.GetStringAsync($"/api/users/email-token-user-{user.Id.ToString()}");
+                var code = await _apiClient.GetStringAsync($"/api/users/token-user-{user.Id.ToString()}");
                 var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
                 await _emailSender.SendEmailConfirmationAsync(registerRequest.Email, callbackUrl);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction(nameof(RegisterConfirmation));
             }
             catch (Exception e)
             {
-                var check = JsonConvert.DeserializeObject<ApiBadRequestResponse>(e.Message);
-                if (check.Errors.Any())
-                {
-                    foreach (var checkError in check.Errors)
-                    {
-                        ModelState.AddModelError("", checkError);
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Đăng ký thất bại");
-                }
-            
+                ModelState.AddModelError("", "Đăng ký thất bại");
                 return View();
             }
         }
-          [HttpGet]
-          public IActionResult AccessDenied()
-          {
-              return View();
-          }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult RegisterConfirmation()
+        {
+            return View();
+        }
 
         [HttpGet]
         [AllowAnonymous]
@@ -225,7 +425,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{userId}'.");
             }
 
-            var result = await _apiClient.PostReturnBooleanAsync<ConfirmEmailRequest>($"/api/users/confirm-email",new ConfirmEmailRequest
+            var result = await _apiClient.PostReturnBooleanAsync($"/api/users/confirm-email",new ConfirmEmailRequest
             {
                 Code = code,
                 UserId = userId
@@ -247,25 +447,23 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         [Route("reset-password.html")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            //if (ModelState.IsValid)
-            //{
-            //    var user = await _userManager.FindByEmailAsync(model.Email);
-            //    if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
-            //    {
-            //        // Don't reveal that the user does not exist or is not confirmed
-            //        return RedirectToAction(nameof(ForgotPasswordConfirmation));
-            //    }
-
-            //    // For more information on how to enable account confirmation and password reset please
-            //    // visit https://go.microsoft.com/fwlink/?LinkID=532713
-            //    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            //    var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, token, Request.Scheme);
-            //    await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-            //       $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
-            //    return RedirectToAction(nameof(ForgotPasswordConfirmation));
-            //}
-
-            ////If we got this far, something failed, redisplay form
+            if (ModelState.IsValid)
+            {
+                var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/email-{model.Email}");
+                if (user == null || !(user.ConfirmEmail))
+                {
+                    // Don't reveal that the user does not exist or is not confirmed
+                    return RedirectToAction(nameof(ForgotPasswordConfirmation));
+                }
+                // For more information on how to enable account confirmation and password reset please
+                // visit https://go.microsoft.com/fwlink/?LinkID=532713
+                var token = await _apiClient.GetStringAsync($"/api/users/{model.Email}-reset-password-token");
+                var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, token, Request.Scheme);
+                await _emailSender.SendEmailAsync(model.Email, "Reset Password",
+                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+                return RedirectToAction(nameof(ForgotPasswordConfirmation));
+            }
+            //If we got this far, something failed, redisplay form
             return View(model);
         }
 
@@ -294,28 +492,38 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return View(model);
-            //}
-            //var user = await _userManager.FindByIdAsync(model.UserId.ToString());
-            //if (user == null)
-            //{
-            //    // Don't reveal that the user does not exist
-            //    return RedirectToAction(nameof(ResetPasswordConfirmation));
-            //}
-            //var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
-            //if (result.Succeeded)
-            //{
-            //    return RedirectToAction(nameof(ResetPasswordConfirmation));
-            //}
-            //AddErrors(result);
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{model.UserId}");
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return RedirectToAction(nameof(ResetPasswordConfirmation));
+            }
+            var result = await _apiClient.PostReturnBooleanAsync($"/api/users/reset-password-confirm", new ResetPasswordRequest
+            {
+                Password = model.Password,
+                Token = model.Token,
+                UserId = model.UserId.ToString()
+            }, false);
+            if (result)
+            {
+                return RedirectToAction(nameof(ResetPasswordConfirmation));
+            }
             return View();
         }
 
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
         {
             return View();
         }
@@ -338,6 +546,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
+        
         private ClaimsPrincipal ValidateToken(TokenResponseFromServer result)
         {
             var stream = result.AccessToken;

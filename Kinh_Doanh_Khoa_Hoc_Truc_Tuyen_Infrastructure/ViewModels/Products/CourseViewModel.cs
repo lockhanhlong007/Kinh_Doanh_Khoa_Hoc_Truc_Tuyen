@@ -36,6 +36,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public string CreatedUserName { get; set; }
 
+        public string CreatedName { get; set; }
+
         public int CountStudent { get; set; }
 
         public List<CommentViewModel> CommentViewModels { get; set; }

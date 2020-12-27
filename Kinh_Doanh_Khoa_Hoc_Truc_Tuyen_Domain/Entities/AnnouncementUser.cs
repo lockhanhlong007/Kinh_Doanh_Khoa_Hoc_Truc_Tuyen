@@ -10,7 +10,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         {
         }
 
-        public AnnouncementUser(int id, Guid announcementId, Guid userId, bool? hasRead)
+        public AnnouncementUser(int id, Guid announcementId, Guid userId, bool hasRead)
         {
             Id = id;
             AnnouncementId = announcementId;
@@ -22,7 +22,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public Guid UserId { get; set; }
 
-        public bool? HasRead { get; set; }
+        public bool HasRead { get; set; }
 
         public Guid AnnouncementId { get; set; }
 

@@ -8,16 +8,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums
         [Description("Cash On Delivery")]
         CashOnDelivery,
 
-        // Trả tiền qua ngân hàng nội địa
-        [Description("Online Banking")]
-        OnlineBanking,
-
         // Trả tiền qua Ví điện tử
         [Description("Payment Gateway")]
-        PaymentGateway,
-
-        [Description("Visa")]
-        Visa
-
+        PaymentGateway
     }
 }

@@ -22,7 +22,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
             RuleFor(x => x.UserName).NotEmpty().WithMessage("User name is required");
 
             RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required")
-                .MinimumLength(5).WithMessage("Password is at least 6 characters");
+                .MinimumLength(6).WithMessage("Password is at least 6 characters");
 
             RuleFor(x => x).Custom((request, context) =>
             {
