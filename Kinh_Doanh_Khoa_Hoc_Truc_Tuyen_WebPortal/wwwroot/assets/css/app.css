@@ -5128,6 +5128,16 @@ label:after {
     border-radius: 32px;
 }
 
+.badge--cancelled {
+    background-color: #bbe1ff;
+    color: #fa059e;
+}
+
+.badge--returned {
+    background-color: #b9f4a5;
+    color: #c31d1a;
+}
+
 .badge--processing {
     background-color: rgba(49, 133, 252, 0.14);
     color: #3185fc;

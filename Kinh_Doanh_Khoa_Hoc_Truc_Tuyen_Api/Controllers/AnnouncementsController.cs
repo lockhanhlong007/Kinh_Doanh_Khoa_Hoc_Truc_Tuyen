@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +15,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Spire.Xls;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -29,35 +31,54 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger ?? throw new ArgumentException(nameof(logger));
         }
-        #region Mobile
-        [HttpGet("{filter}")]
-        public async Task<Pagination<AnnouncementViewModel>> GetAllUnReadPaging(bool filter,Guid userId, int pageIndex, int pageSize)
+
+        [HttpGet("private-paging/filter-{filter}")]
+        public async Task<Pagination<AnnouncementViewModel>> GetAllUnReadPaging(string filter, Guid userId, int pageIndex, int pageSize)
         {
-            var query = from x in _khoaHocDbContext.Announcements.AsNoTracking()
-                join y in _khoaHocDbContext.AnnouncementUsers.AsNoTracking()
-                    on x.Id equals y.AnnouncementId
-                    into xy
-                from announceUser in xy.DefaultIfEmpty()
-                where announceUser.HasRead == false && (announceUser.UserId == null || announceUser.UserId == userId)
-                select x;
-            if (filter)
+            IQueryable<Announcement> query;
+            if (filter.Equals("false"))
             {
-                query = query.Where(x => x.EntityType.Equals("public")).AsNoTracking();
+                query = from x in _khoaHocDbContext.Announcements.AsNoTracking()
+                        join y in _khoaHocDbContext.AnnouncementUsers.AsNoTracking()
+                            on x.Id equals y.AnnouncementId
+                            into xy
+                        from announceUser in xy.DefaultIfEmpty()
+                        where x.Status == 1 && announceUser.UserId == userId
+                        orderby !announceUser.HasRead descending, x.CreationTime descending
+                        select x;
+            }
+            else
+            {
+                query = from x in _khoaHocDbContext.Announcements.AsNoTracking()
+                        join y in _khoaHocDbContext.AnnouncementUsers.AsNoTracking()
+                            on x.Id equals y.AnnouncementId
+                            into xy
+                        from announceUser in xy.DefaultIfEmpty()
+                        where announceUser.HasRead == false && x.Status == 1 && announceUser.UserId == userId
+                        orderby !announceUser.HasRead descending, x.CreationTime descending
+                        select x;
+            }
+            var lstAnnounce = new List<AnnouncementViewModel>();
+            var items = query.Skip(pageSize * (pageIndex - 1)).Take(pageSize);
+            foreach (var announcement in items)
+            {
+                var announceViewModel = new AnnouncementViewModel();
+                announceViewModel.UserId = announcement.UserId;
+                announceViewModel.Status = announcement.Status;
+                announceViewModel.EntityType = announcement.EntityType;
+                announceViewModel.CreationTime = announcement.CreationTime;
+                announceViewModel.LastModificationTime = announcement.LastModificationTime;
+                announceViewModel.Content = announcement.Content;
+                announceViewModel.EntityId = announcement.EntityId;
+                announceViewModel.Title = announcement.Title;
+                announceViewModel.Image = announcement.Image;
+                announceViewModel.Id = announcement.Id;
+                announceViewModel.TmpHasRead = announcement.AnnouncementUsers
+                    .FirstOrDefault(x => x.AnnouncementId == announcement.Id)!.HasRead;
+                lstAnnounce.Add(announceViewModel);
             }
             var totalRow = query.Count();
-            var model = await query.OrderByDescending(x => x.CreationTime).Skip(pageSize * (pageIndex - 1)).Take(pageSize).Select(x => new AnnouncementViewModel()
-            {
-                UserId = x.UserId,
-                Status = x.Status,
-                EntityType = x.EntityType,
-                CreationTime = x.CreationTime,
-                LastModificationTime = x.LastModificationTime,
-                Content = x.Content,
-                EntityId = x.EntityId,
-                Title = x.Title,
-                Image = x.Image,
-                Id = x.Id
-            }).ToListAsync();
+            var model = lstAnnounce;
             return new Pagination<AnnouncementViewModel>
             {
                 Items = model,
@@ -67,14 +88,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             };
         }
 
-        [HttpGet]
+        [HttpGet("private-no-paging")]
         public List<AnnouncementViewModel> GetAllUnRead(Guid userId) =>
             (from _ in _khoaHocDbContext.Announcements.AsNoTracking()
-                join __ in _khoaHocDbContext.AnnouncementUsers.AsNoTracking()
-              on _.Id equals __.AnnouncementId
-                 into ___
+             join __ in _khoaHocDbContext.AnnouncementUsers.AsNoTracking()
+           on _.Id equals __.AnnouncementId
+              into ___
              from ____ in ___.DefaultIfEmpty()
-             where ____.HasRead == false && (____.UserId == null || ____.UserId == userId)
+             where ____.HasRead == false && ____.UserId == userId && _.EntityType.Equals("private")
              orderby _.CreationTime descending
              select new { _, ____ }).ToList().Select(_ => new AnnouncementViewModel
              {
@@ -90,7 +111,21 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                  EntityType = _._.EntityType,
              }).ToList();
 
-
+        [HttpGet("public-no-paging")]
+        public List<AnnouncementViewModel> GetAllUnReadPublic() =>
+            _khoaHocDbContext.Announcements.Where(x => x.Status == 0).OrderByDescending(x => x.CreationTime).ToList().Select(_ => new AnnouncementViewModel
+            {
+                Status = _.Status,
+                UserId = _.UserId,
+                CreationTime = _.CreationTime,
+                Title = _.Title,
+                Content = _.Content,
+                LastModificationTime = _.LastModificationTime,
+                Id = _.Id,
+                Image = _.Image,
+                EntityId = _.EntityId,
+                EntityType = _.EntityType,
+            }).ToList();
 
         [HttpPost]
         public async Task<bool> MarkAsRead(string announceId, Guid userId)
@@ -109,9 +144,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public AnnouncementViewModel GetDetailAnnouncement(Guid id, Guid receiveId) => _khoaHocDbContext.Announcements.AsNoTracking()
+        public AnnouncementViewModel GetDetailAnnouncement(Guid announceId, Guid receiveId) => _khoaHocDbContext.Announcements.AsNoTracking()
                    .Join(_khoaHocDbContext.AnnouncementUsers.AsNoTracking(), _ => _.Id, _ => _.AnnouncementId, (_, __) => new { _, __ })
-                   .Where(_ => _._.Id.Equals(id) && _.__.UserId == receiveId).ToList().Select(_ => new AnnouncementViewModel
+                   .Where(_ => _._.Id.Equals(announceId) && _.__.UserId == receiveId).ToList().Select(_ => new AnnouncementViewModel
                    {
                        Id = _._.Id,
                        Title = _._.Title,
@@ -125,7 +160,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                        EntityId = _._.EntityId
                    }).FirstOrDefault();
 
-
-        #endregion Mobile
     }
 }

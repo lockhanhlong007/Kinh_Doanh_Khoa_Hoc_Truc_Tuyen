@@ -1,13 +1,12 @@
 ﻿using System;
+using Microsoft.AspNetCore.Http;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
 {
-    public class UserPasswordChangeRequest
+    public class AccountChangeAvatarRequest
     {
         public string Id { get; set; }
 
-        public string CurrentPassword { get; set; }
-
-        public string NewPassword { get; set; }
+        public IFormFile Avatar { get; set; }
     }
 }

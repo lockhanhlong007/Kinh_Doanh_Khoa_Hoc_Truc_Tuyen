@@ -1,0 +1,104 @@
+﻿@using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums
+@model MyAnnouncementViewModel
+<!--====== Section 1 ======-->
+<div class="u-s-p-y-30">
+
+    <!--====== Section Content ======-->
+    <div class="section__content">
+        <div class="container">
+            <div class="breadcrumb">
+                <div class="breadcrumb__wrap">
+                    <ul class="breadcrumb__list">
+                        <li class="has-separator">
+
+                            <a href="/">Home</a>
+                        </li>
+                        <li class="is-marked">
+
+                            <a href="#">My Announcements</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--====== End - Section 1 ======-->
+<!--====== Section 2 ======-->
+<div class="u-s-p-b-30">
+
+    <!--====== Section Content ======-->
+    <div class="section__content">
+        <div class="dash">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-3 col-md-12">
+
+                        <!--====== Dashboard Features ======-->
+                        @await Component.InvokeAsync("DashboardFeatures", Model.NameDash)
+                        <!--====== End - Dashboard Features ======-->
+                    </div>
+                    <div class="col-lg-9 col-md-12">
+                        <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
+                            <div class="dash__pad-2">
+                                <h1 class="dash__h1 u-s-m-b-15">My Announcements</h1>
+
+                                <form class="m-order u-s-m-b-30" method="get">
+                                    <div class="m-order__select-wrapper">
+                                        <label class="u-s-m-r-8" for="my-announce-filter">Filter:</label>
+                                        <select class="select-box select-box--primary-style" id="my-announce-filter" name="filterBy" asp-for="FilterType"
+                                                onchange="this.form.submit()" asp-items="Model.FilterTypes"></select>
+                                    </div>
+                                </form>
+                                <div class="m-order__list">
+                                    @foreach (var modelAnnouncementViewModel in Model.AnnouncementViewModels.Items)
+                                    {
+                                        <div class="m-order__get">
+                                            <div class="manage-o__description">
+                                                <div class="description__container">
+                                                    <div class="description__img-wrap">
+                                                        @{
+                                                            var img = "https://localhost:44342" + modelAnnouncementViewModel.Image;
+                                                        }
+                                                        <img class="u-img-fluid" src="@img" style="min-height: 90px;background-repeat: no-repeat;background-position: center;background-size: cover;" alt="">
+                                                    </div>
+                                                    <div style="margin-left: 12px">
+                                                        <div class="description-title" style="text-align: justify; align-items: center; margin-left: 0">
+                                                            @modelAnnouncementViewModel.Title
+                                                        </div>
+                                                        <div class="manage-o__text-2 u-c-secondary" style="text-align: justify; align-items: center">
+                                                            Content: @modelAnnouncementViewModel.Content
+                                                        </div>
+                                                        <div class="manage-o__text u-c-silver" style="text-align: justify; align-items: center">
+                                                            Ngày tạo: @modelAnnouncementViewModel.CreationTime
+                                                        </div>
+                                                    
+                                                    </div>
+                                                </div>
+                                                @if (!modelAnnouncementViewModel.TmpHasRead)
+                                                {
+                                                    <div class="dash__link dash__link--brand">
+
+                                                        <a href="#">Checked</a>
+                                                    </div>
+                                                }
+                                                
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="u-s-p-y-30">
+                                    <!--====== Pagination ======-->
+                                    @await Component.InvokeAsync("Pager", Model.AnnouncementViewModels)
+                                    <!--====== End - Pagination ======-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--====== End - Section Content ======-->
+</div>
+<!--====== End - Section 2 ======-->

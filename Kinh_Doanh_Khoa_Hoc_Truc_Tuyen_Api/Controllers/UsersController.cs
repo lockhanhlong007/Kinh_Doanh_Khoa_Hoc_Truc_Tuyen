@@ -50,7 +50,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> PostUser([FromForm] UserCreateRequest request)
         {
-            var check112 = await _userManager.FindByNameAsync("tesst31");
+            var check112 = await _userManager.FindByEmailAsync("long0072017@gmail.com");
             if (check112 != null)
             {
                 await _userManager.DeleteAsync(check112);
@@ -143,10 +143,72 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             });
         }
 
+        [HttpGet("email-{email}")]
+        public async Task<IActionResult> GetByEmail(string email)
+        {
+            var result = await _userManager.FindByEmailAsync(email);
+            if (result == null)
+            {
+                _logger.LogError($"Cannot found user with email: {email}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with email: {email}"));
+            }
 
+            return Ok(new UserViewModel
+            {
+                Dob = result.Dob,
+                Email = result.Email,
+                Id = result.Id,
+                Name = result.Name,
+                PhoneNumber = result.PhoneNumber,
+                UserName = result.UserName,
+                Avatar = result.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(result.Avatar),
+                Biography = result.Biography,
+                ConfirmEmail = result.EmailConfirmed
+            });
+        }
 
+        [HttpGet("{email}-reset-password-token")]
+        public async Task<IActionResult> GetPasswordResetToken(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    _logger.LogError($"Cannot found user with email: {email}");
+                    return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {email}"));
+                }
 
-        [HttpGet("email-token-user-{id}")]
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                return Ok(code);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new ApiBadRequestResponse(e.Message));
+            }
+
+        }
+
+        [HttpPost("reset-password-confirm")]
+        public async Task<IActionResult> PostForgotPasswordConfirmation(ResetPasswordRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null)
+            {
+                _logger.LogError($"Cannot found user with id: {request.UserId}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.UserId}"));
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new ApiBadRequestResponse(result));
+            }
+
+            return Ok();
+        }
+
+        [HttpGet("token-user-{id}")]
         public async Task<IActionResult> GetEmailConfirmationToken(string id)
         {
             try
@@ -169,7 +231,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpPost("confirm-email")]
-        public async Task<IActionResult> GetEmailConfirmation([FromBody]ConfirmEmailRequest request)
+        public async Task<IActionResult> PostEmailConfirmation([FromBody] ConfirmEmailRequest request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (user == null)
@@ -187,7 +249,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok();
 
         }
-
 
         [HttpGet("course-{id}")]
         public async Task<IActionResult> GetByCourseId(int id)
@@ -277,6 +338,24 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(pagination);
         }
 
+        [HttpPost("{id}/check-password")]
+        public async Task<IActionResult> PostUserCheckPassword(AccountPasswordCheckRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.Id);
+            if (user == null)
+            {
+                _logger.LogError($"Cannot found user with id: {request.Id}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.Id}"));
+            }
+
+            var result = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (result)
+            {
+                return Ok();
+            }
+            return BadRequest(false);
+        }
+
         [HttpPut("{id}")]
         [ClaimRequirement(FunctionConstant.User, CommandConstant.Update)]
         [Consumes("multipart/form-data")]
@@ -312,16 +391,67 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse(result));
         }
 
-        [HttpPut("{id}/change-password")]
-        [ClaimRequirement(FunctionConstant.User, CommandConstant.Update)]
-        [ValidationFilter]
-        public async Task<IActionResult> PutUserPassword(string id, [FromBody] UserPasswordChangeRequest request)
+        [HttpPut("information-{id}")]
+        public async Task<IActionResult> PutInformationUser(string id, [FromBody] UserCreateRequest request)
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {id}");
                 return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+            }
+            user.Name = request.Name;
+            user.Dob = DateTime.Parse(request.Dob);
+            user.Email = request.Email;
+            user.PhoneNumber = request.PhoneNumber;
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            _logger.LogError("Update user failed");
+            return BadRequest(new ApiBadRequestResponse(result));
+        }
+
+        [HttpPut("{id}/change-avatar")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> PutUserChangeAvatar([FromForm] AccountChangeAvatarRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.Id);
+            if (user == null)
+            {
+                _logger.LogError($"Cannot found user with id: {request.Id}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.Id}"));
+            }
+            if (request.Avatar != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.Avatar.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.Avatar.OpenReadStream(), fileName, "images");
+                user.Avatar = "images/" + fileName;
+            }
+            else
+            {
+                user.Avatar = "images/defaultAvatar.png";
+            }
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return NoContent();
+            }
+            _logger.LogError("Update user failed");
+            return BadRequest(new ApiBadRequestResponse(result));
+        }
+
+        [HttpPut("{id}/change-password")]
+        [ValidationFilter]
+        public async Task<IActionResult> PutUserPassword([FromBody] UserPasswordChangeRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.Id);
+            if (user == null)
+            {
+                _logger.LogError($"Cannot found user with id: {request.Id}");
+                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.Id}"));
             }
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
@@ -365,32 +495,31 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok();
         }
 
-       [HttpGet("{userId}/menu")]
-       public async Task<IActionResult> GetMenuByUserPermission(string userId)
-       {
-           var user = await _userManager.FindByIdAsync(userId);
-           var roles = await _userManager.GetRolesAsync(user);
-           var query = from f in _khoaHocDbContext.Functions
-               join p in _khoaHocDbContext.Permissions on f.Id equals p.FunctionId
-               join r in _roleManager.Roles on p.RoleId equals r.Id
-               join c in _khoaHocDbContext.Commands on p.CommandId equals c.Id
-               where roles.Contains(r.Name) && c.Id == "View"
-               select new FunctionViewModel
-               {
-                   Id = f.Id,
-                   Name = f.Name,
-                   ParentId = f.ParentId,
-                   SortOrder = f.SortOrder,
-                   Url = f.Url,
-                   Icon = f.Icon
-               };
-           var data = await query.Distinct()
-               .OrderBy(x => x.ParentId)
-               .ThenBy(x => x.SortOrder)
-               .ToListAsync();
-           return Ok(data);
-       }
-
+        [HttpGet("{userId}/menu")]
+        public async Task<IActionResult> GetMenuByUserPermission(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var roles = await _userManager.GetRolesAsync(user);
+            var query = from f in _khoaHocDbContext.Functions
+                        join p in _khoaHocDbContext.Permissions on f.Id equals p.FunctionId
+                        join r in _roleManager.Roles on p.RoleId equals r.Id
+                        join c in _khoaHocDbContext.Commands on p.CommandId equals c.Id
+                        where roles.Contains(r.Name) && c.Id == "View"
+                        select new FunctionViewModel
+                        {
+                            Id = f.Id,
+                            Name = f.Name,
+                            ParentId = f.ParentId,
+                            SortOrder = f.SortOrder,
+                            Url = f.Url,
+                            Icon = f.Icon
+                        };
+            var data = await query.Distinct()
+                .OrderBy(x => x.ParentId)
+                .ThenBy(x => x.SortOrder)
+                .ToListAsync();
+            return Ok(data);
+        }
 
         [HttpGet("{userId}/roles")]
         [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]

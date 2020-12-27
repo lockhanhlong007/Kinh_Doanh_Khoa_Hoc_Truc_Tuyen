@@ -129,7 +129,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Create course is failed"));
         }
 
-
         [HttpGet("new-courses")]
         public async Task<IActionResult> GetNewCourses()
         {
@@ -190,7 +189,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 CreatedUserName = _.CreatedUserName
             }).ToList());
         }
-
 
         [HttpGet("filter")]
         public async Task<IActionResult> GetCoursesPaging(string filter, int pageIndex, int pageSize)
@@ -506,6 +504,69 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             _logger.LogError("Update active course failed");
             return BadRequest(new ApiBadRequestResponse("Update active course failed"));
+        }
+
+        [HttpPut("user-active-course")]
+        public async Task<IActionResult> PutActiveCourseForUser(ActiveCourseRequest request)
+        {
+            var key = _khoaHocDbContext.ActivateCourses.FirstOrDefault(x =>
+                x.Id == Guid.Parse(request.Code) && x.UserId == Guid.Parse(request.UserId));
+            if (key == null)
+            {
+                return NotFound(new ApiNotFoundResponse($"Cannot found code: {request.Code}"));
+            }
+            if (key.Status)
+            {
+                return BadRequest(false);
+            }
+            key.Status = true;
+            _khoaHocDbContext.ActivateCourses.Update(key);
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
+            {
+                return Ok();
+            }
+
+            return BadRequest(false);
+        }
+
+        [HttpGet("my-courses/user-{userId}")]
+        public async Task<IActionResult> GetCoursesByUserPaging(string userId, int pageIndex, int pageSize)
+        {
+            var items = new List<CourseViewModel>();
+            var query = _khoaHocDbContext.ActivateCourses.Include(x => x.Course)
+                .AsNoTracking()
+                .Where(x => x.UserId.Equals(Guid.Parse(userId)) && x.Status);
+            var totalRecords = await query.CountAsync();
+            var result = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+            foreach (var activateCourse in result)
+            {
+                var course = activateCourse.Course;
+                var category = _khoaHocDbContext.Categories.FirstOrDefault(x => x.Id == activateCourse.Course.CategoryId);
+                var user = await _userManager.FindByNameAsync(activateCourse.Course.CreatedUserName);
+                items.Add(new CourseViewModel
+                {
+                    Name = course.Name,
+                    Status = course.Status,
+                    LastModificationTime = course.LastModificationTime,
+                    CategoryId = course.CategoryId,
+                    CategoryName = category?.Name,
+                    CreationTime = course.CreationTime,
+                    Image = _storageService.GetFileUrl(course.Image),
+                    Content = course.Content,
+                    CreatedName = user.Name,
+                    Id = course.Id,
+                    Description = course.Description
+                });
+            }
+            var pagination = new Pagination<CourseViewModel>
+            {
+                Items = items,
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
+            };
+            return Ok(pagination);
         }
 
         [HttpDelete("{id}/image")]

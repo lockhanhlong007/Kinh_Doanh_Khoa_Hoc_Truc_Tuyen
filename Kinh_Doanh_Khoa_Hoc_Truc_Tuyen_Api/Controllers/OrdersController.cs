@@ -1,9 +1,8 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
@@ -15,11 +14,9 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -34,11 +31,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly EKhoaHocDbContext _khoaHocDbContext;
         private ILogger<OrdersController> _logger;
+        private readonly IStorageService _storageService;
         private readonly UserManager<AppUser> _userManager;
         public OrdersController(IWebHostEnvironment webHostEnvironment,EKhoaHocDbContext khoaHocDbContext, ILogger<OrdersController> logger, IStorageService storageService, UserManager<AppUser> userManager, IWebHostEnvironment hostingEnvironment)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger;
+            _storageService = storageService;
             _userManager = userManager;
             _hostingEnvironment = hostingEnvironment;
         }
@@ -69,6 +68,65 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Total = x.Total
             }).ToListAsync();
 
+            var pagination = new Pagination<OrderViewModel>
+            {
+                Items = items,
+                TotalRecords = totalRecords,
+                PageSize = pageSize,
+                PageIndex = pageIndex
+            };
+            return Ok(pagination);
+        }
+
+        [HttpGet("account-{userId}-orders")]
+        public async Task<IActionResult> GetOrdersForClientPaging(string userId,string sortBy, int pageIndex, int pageSize)
+        {
+            var lstOrderViewModels = new List<OrderViewModel>();
+            var query = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).AsNoTracking().Where(x => x.UserId == Guid.Parse(userId));
+            query = sortBy switch
+            {
+                "15daysAgo" => query.Where(x => x.CreationTime.Date <= (DateTime.Now.Date.AddDays(-15))),
+                "30daysAgo" => query.Where(x => x.CreationTime.Date <= (DateTime.Now.Date.AddDays(-30))),
+                "6monthsAgo" => query.Where(x => x.CreationTime.Date <= (DateTime.Now.Date.AddMonths(-6))),
+                "1yearAgo" => query.Where(x => x.CreationTime.Date <= (DateTime.Now.Date.AddYears(-1))),
+                _ => query
+            };
+            var totalRecords = query.Count();
+            query = query.OrderByDescending(x => x.CreationTime).Skip((pageIndex - 1) * pageSize).Take(pageSize);
+            foreach (var item in query)
+            {
+                var user = await _userManager.FindByIdAsync(item.UserId.ToString());
+                var lstOrderDetailViewModel = new List<OrderDetailViewModel>();
+                foreach (var orderDetail in item.OrderDetails)
+                {
+                    var orderDetailViewModel = new OrderDetailViewModel();
+                    var course = _khoaHocDbContext.ActivateCourses.Include(y => y.Course).FirstOrDefault(y => y.Id == orderDetail.ActiveCourseId)?.Course;
+                    orderDetailViewModel.ActiveCourseId = orderDetail.ActiveCourseId;
+                    orderDetailViewModel.Price = orderDetail.Price;
+                    orderDetailViewModel.PromotionPrice = orderDetail.PromotionPrice;
+                    orderDetailViewModel.OrderId = orderDetail.OrderId;
+                    orderDetailViewModel.CourseName = course?.Name;
+                    orderDetailViewModel.CourseImage = _storageService.GetFileUrl(course?.Image);
+                    lstOrderDetailViewModel.Add(orderDetailViewModel);
+                }
+                var orderViewModel = new OrderViewModel();
+                orderViewModel.Id = item.Id;
+                orderViewModel.UserId = item.UserId;
+                orderViewModel.CreationTime = item.CreationTime;
+                orderViewModel.LastModificationTime = item.LastModificationTime;
+                orderViewModel.Status = item.Status;
+                orderViewModel.Message = item.Message;
+                orderViewModel.Address = item.Address;
+                orderViewModel.PhoneNumber = item.PhoneNumber ?? user.PhoneNumber;
+                orderViewModel.CreatedUser = user.Name + "(" + user.Email + ")";
+                orderViewModel.PaymentMethod = item.PaymentMethod;
+                orderViewModel.Total = item.Total;
+                orderViewModel.ImageUser = _storageService.GetFileUrl(user.Avatar);
+                orderViewModel.OrderDetails = lstOrderDetailViewModel;
+                lstOrderViewModels.Add(orderViewModel);
+            }
+
+            var items = lstOrderViewModels;
             var pagination = new Pagination<OrderViewModel>
             {
                 Items = items,
@@ -114,9 +172,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             return BadRequest(new ApiBadRequestResponse("Update status order failed"));
         }
-
-
-
 
         [HttpPost("export-excel")]
         public async Task<IActionResult> PostExportOrder(OrderViewModel order)
@@ -287,6 +342,84 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Total = order.Total,
                 OrderDetails = orderDetailViewModel
             };
+            return Ok(orderViewModel);
+        }
+
+        [HttpGet("{id}/user-{userId}")]
+        public async Task<IActionResult> GetDetailByUserId(int id,string userId)
+        {
+            var order = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.Id == id && x.UserId == Guid.Parse(userId));
+            if (order == null)
+            {
+                return NotFound(new ApiNotFoundResponse($"Cannot found order with id: {id}"));
+            }
+            var user = await _userManager.FindByIdAsync(order.UserId.ToString());
+            var lstOrderDetailViewModel = new List<OrderDetailViewModel>();
+            foreach (var orderDetail in order.OrderDetails)
+            {
+                var orderDetailViewModel = new OrderDetailViewModel();
+                var course = _khoaHocDbContext.ActivateCourses.Include(y => y.Course).FirstOrDefault(y => y.Id == orderDetail.ActiveCourseId)?.Course;
+                orderDetailViewModel.ActiveCourseId = orderDetail.ActiveCourseId;
+                orderDetailViewModel.Price = orderDetail.Price;
+                orderDetailViewModel.PromotionPrice = orderDetail.PromotionPrice;
+                orderDetailViewModel.OrderId = orderDetail.OrderId;
+                orderDetailViewModel.CourseName = course?.Name;
+                orderDetailViewModel.CourseImage = _storageService.GetFileUrl(course?.Image);
+                lstOrderDetailViewModel.Add(orderDetailViewModel);
+            }
+            var orderViewModel = new OrderViewModel
+            {
+                Id = order.Id,
+                Address = order.Address,
+                PhoneNumber = order.PhoneNumber ?? user.PhoneNumber,
+                UserId = order.UserId,
+                CreationTime = order.CreationTime,
+                LastModificationTime = order.LastModificationTime,
+                Status = order.Status,
+                Message = order.Message,
+                CreatedUser = user?.Name + "(" + user?.Email + ")",
+                PaymentMethod = order.PaymentMethod,
+                Total = order.Total,
+                OrderDetails = lstOrderDetailViewModel
+            };
+            return Ok(orderViewModel);
+        }
+
+        [HttpGet("check-{id}/user-{userId}")]
+        public IActionResult GetCheckDetailByUserId(int id, string userId)
+        {
+            var order = _khoaHocDbContext.Orders.FirstOrDefault(x => x.Id == id && x.UserId == Guid.Parse(userId));
+            if (order == null)
+            {
+                return NotFound(new ApiNotFoundResponse($"Cannot found order with id: {id}"));
+            }
+            return Ok(order);
+        }
+
+
+
+        [HttpGet("user-{id}")]
+        public async Task<IActionResult> GetOrders(string id)
+        {
+            var data = _khoaHocDbContext.Orders.Where(x => x.UserId == Guid.Parse(id));
+            if (!data.Any())
+            {
+                return Ok(new List<OrderDetailViewModel>());
+            }
+
+            var orderViewModel = await data.Select(x => new OrderViewModel
+            {
+                Status = x.Status,
+                Message = x.Message,
+                LastModificationTime = x.LastModificationTime,
+                CreationTime = x.CreationTime,
+                UserId = x.UserId,
+                Total = x.Total,
+                PaymentMethod = x.PaymentMethod,
+                Address = x.Address,
+                PhoneNumber = x.PhoneNumber,
+                Id = x.Id,
+            }).ToListAsync();
             return Ok(orderViewModel);
         }
 

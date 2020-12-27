@@ -73,12 +73,12 @@
                                 </div>
                                 <div class="u-s-m-b-30">
                                     <label class="gl-label" for="reg-avatar">Avatar <sup>*</sup></label>
-                                    <input type="file" asp-for="Avatar" name="Avatar" class="input-text" id="reg-avatar"/>
+                                    <input type="file" accept="image/*" asp-for="Avatar" name="Avatar" class="input-text" id="reg-avatar"/>
                                 </div>
-                                @*<div class="u-s-m-b-30">
+                                <div class="u-s-m-b-30">
                                     <recaptcha />
                                     <span class="text-error" id="recaptchaErrorMessage"></span>
-                                </div>*@
+                                </div>
                                 <div class="u-s-m-b-15">
                                     <button class="btn btn--e-transparent-brand-b-2" type="submit">CREATE</button>
                                 </div>
@@ -92,6 +92,6 @@
     <!--====== End - Section Content ======-->
 </div>
 <!--====== End - Section 2 ======-->
-@*@section Scripts {
+@section Scripts {
     <recaptcha-script validation-message-element-id="recaptchaErrorMessage" />
-}*@
+}

@@ -31,6 +31,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public string CreatedUser { get; set; }
 
-        public List<OrderDetailViewModel> OrderDetails { set; get; }
+        public string ImageUser { get; set; }
+
+        public List<OrderDetailViewModel> OrderDetails { set; get; } = new List<OrderDetailViewModel>();
     }
 }

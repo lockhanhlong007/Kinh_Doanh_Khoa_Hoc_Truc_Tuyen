@@ -1,15 +1,16 @@
-﻿using FluentValidation;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using FluentValidation;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
 {
-    public class UserCreateRequestValidator : AbstractValidator<UserCreateRequest>
+    public class AccountViewModelRequestValidator : AbstractValidator<AccountViewModel>
     {
-        public UserCreateRequestValidator()
+        public AccountViewModelRequestValidator()
         {
             RuleFor(x => x.UserName).NotEmpty().WithMessage("User name is required");
-            RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required").MinimumLength(6).WithMessage("Password has to at least 6 characters")
-                .Matches(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").WithMessage("Password is not match complexity rules.");
             RuleFor(x => x.Email).NotEmpty().WithMessage("Email is required")
                 .Matches(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$").WithMessage("Email format is not match");
 
