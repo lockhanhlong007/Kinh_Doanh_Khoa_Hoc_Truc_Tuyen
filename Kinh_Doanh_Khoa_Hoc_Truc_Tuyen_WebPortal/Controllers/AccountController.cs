@@ -71,16 +71,26 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         }
 
         [HttpGet]
-        [Route("my-announcement.html")]
-        public async Task<IActionResult> MyAnnouncement(int? pageSize, string filterBy = "true", int page = 1)
+        [Route("my-announcements.html")]
+        public async Task<IActionResult> MyAnnouncements(int? pageSize, string filterBy = "true", int page = 1)
         {
             pageSize ??= 4;
-            var announce = await _apiClient.GetAsync<Pagination<AnnouncementViewModel>>($"/api/orders/private-paging/filter-{filterBy}?userId={User.GetUserId()}&pageSize={pageSize}&pageIndex={page}&filter={filterBy}");
+            var announce = await _apiClient.GetAsync<Pagination<AnnouncementViewModel>>($"/api/announcements/private-paging/filter?userId={User.GetUserId()}&pageSize={pageSize}&pageIndex={page}&filter={filterBy}");
             var data = new MyAnnouncementViewModel();
+            data.TmpPage = page;
             data.FilterType = filterBy;
             data.NameDash = "My Announcements";
             data.AnnouncementViewModels = announce;
             return View(data);
+        }
+
+        [HttpGet]
+        [Route("check-my-announcement.html")]
+        public async Task<IActionResult> CheckMyAnnouncement(string announceId, int? pageSize, string filterBy = "true", int page = 1)
+        {
+            pageSize ??= 4;
+            await _apiClient.PostReturnBooleanAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest {AnnounceId = announceId, UserId = User.GetUserId()}, true);
+            return RedirectToAction(nameof(MyAnnouncements), new{ pageSize , filterBy , page });
         }
 
         [HttpGet]

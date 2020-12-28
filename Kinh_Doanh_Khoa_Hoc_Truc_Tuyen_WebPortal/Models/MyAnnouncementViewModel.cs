@@ -14,6 +14,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models
         public Pagination<AnnouncementViewModel> AnnouncementViewModels { get; set; }
         public string FilterType { get; set; }
 
+        public int TmpPage { get; set; }
+
         public List<SelectListItem> FilterTypes { get; } = new List<SelectListItem>
         {
             new SelectListItem(){Value = "true",Text = "Tất cả"},
