@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 
@@ -22,7 +23,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
         [HttpGet]
         [Route("courses.html")]
-        public async Task<IActionResult> Index(int? categoryId,long? priceMin, long? priceMax, int? pageSize, string filter = null, string sortBy = null, int page = 1)
+        public async Task<IActionResult> Index(int? categoryId, long? priceMin, long? priceMax, int? pageSize, string filter = null, string sortBy = null, int page = 1)
         {
             var courseCatalog = new CourseCatalogViewModel();
             pageSize ??= 3;
@@ -38,14 +39,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
         [HttpGet]
         [Route("courses-{id}.html")]
-        public async Task<IActionResult> Detail(int id, int? pageSize, string sortBy = "new", int page = 1)
+        public async Task<IActionResult> Detail(int id)
         {
             var detail = new CourseDetailClientViewModel();
-            pageSize ??= 5;
-            detail.SortType = sortBy;
             detail.CourseViewModel = await _apiClient.GetAsync<CourseViewModel>($"/api/courses/{id}");
             detail.LessonViewModels = await _apiClient.GetListAsync<LessonViewModel>($"/api/lessons/course-{id}");
-            detail.CommentViewModels = await _apiClient.GetAsync<Pagination<CommentViewModel>>($"/api/comments/courses/{id}/client-pag?entityId={id}" + "&entityType=courses" + $"&pageSize={pageSize}" + $"&sortBy={sortBy}" + $"&pageIndex={page}");
+            detail.CommentViewModels = await _apiClient.GetListAsync<CommentViewModel>($"/api/comments/courses/client?entityId={id}&entityType=courses");
             detail.RelatedCourses = await _apiClient.GetListAsync<CourseViewModel>($"/api/courses/related-courses/{id}");
             detail.UserViewModel = await _apiClient.GetAsync<UserViewModel>($"/api/users/course-{id}");
             return View(detail);
@@ -53,15 +52,69 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
         [HttpGet]
         [Route("lessons-with-courses-{id}.html")]
-        public async Task<IActionResult> Lessons(int id, int? lessonId,string sortBy = "new")
+        public async Task<IActionResult> Lessons(int id, int? lessonId)
         {
             var data = new LessonsCatalogViewModel();
-            data.SortType = sortBy;
             data.CourseViewModel = await _apiClient.GetAsync<CourseViewModel>($"/api/courses/{id}");
             data.LessonViewModels = await _apiClient.GetListAsync<LessonViewModel>($"/api/lessons/course-{id}");
             data.LessonViewModel = await _apiClient.GetAsync<LessonViewModel>($"/api/lessons/course-{id}/detail?id={id}&lessonId={lessonId}");
-            data.CommentViewModels = await _apiClient.GetListAsync<CommentViewModel>($"/api/comments/courses/{id}/client?sortBy={sortBy}&entityId={id}&entityType=lessons");
+            data.CommentViewModels = await _apiClient.GetListAsync<CommentViewModel>($"/api/comments/lessons/client?entityId={lessonId}&entityType=lessons");
             return View(data);
         }
+
+        #region Ajax Method
+
+        [HttpGet]
+        public async Task<IActionResult> GetCommentById(int id, string entityType, int pageIndex = 1, int pageSize = 3)
+        {
+            var data = await _apiClient.GetAsync<Pagination<CommentViewModel>>(
+                $"/api/comments/{entityType}/{id}/hierarchical?entityId={id}&entityType={entityType}&pageIndex={pageIndex}&pageSize={pageSize}");
+            return Ok(data);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRepliedCommentById(int id, string entityType, int rootCommentId, int pageIndex = 1, int pageSize = 3)
+        {
+            var data = await _apiClient.GetAsync<Pagination<CommentViewModel>>(
+                $"/api/comments/{entityType}/{id}/root-{rootCommentId}/replied?entityId={id}&entityType={entityType}&pageIndex={pageIndex}&pageSize={pageSize}");
+            return Ok(data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddNewComment([FromForm] CommentCreateRequest request)
+        {
+            request.UserId = User.GetUserId();
+            var result = await _apiClient.PostAsync<CommentCreateRequest,CommentViewModel>(
+                $"/api/comments/courses/{request.EntityId}", request);
+            result.OwnerUser = User.GetFullName() + " (" + User.GetEmail() + ")";
+            if (result != null)
+                return Ok(result);
+            return BadRequest();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> EditComment([FromForm] CommentCreateRequest request)
+        {
+            request.UserId = User.GetUserId();
+            var result = await _apiClient.PutReturnBooleanAsync(
+                $"/api/comments/{request.Id}/courses/{request.EntityId}", request);
+            if (result)
+                return Ok();
+            return BadRequest();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteComment(int id)
+        {
+            var result = await _apiClient.Delete(
+                $"/api/comments/delete-single-comment?id={id}");
+            if (result)
+                return Ok();
+            return BadRequest();
+        }
+        
+        #endregion
+
+
     }
 }

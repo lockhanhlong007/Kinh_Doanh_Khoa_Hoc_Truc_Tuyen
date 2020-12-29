@@ -1,4 +1,5 @@
 ﻿@using System.Globalization
+@using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
 @model CourseDetailClientViewModel
 @{
     var env = "https://localhost:44342";
@@ -12,6 +13,10 @@
         products.initialize();
     </script>
 }
+<input type="hidden" id="hid_course_id" value="@Model.CourseViewModel.Id" />
+<input type="hidden" id="hid_current_login_id" value="@User.GetUserId()" />
+<input type="hidden" id="hid_current_login_name" value="@User.Identity.Name" />
+<input type="hidden" id="hid_number_of_comments" value="@Model.CommentViewModels.Count" />
 <!--====== Section 1 ======-->
 <div class="u-s-p-t-30">
     <div class="container">
@@ -99,7 +104,7 @@
                     <div class="u-s-m-b-15">
                         <div class="pd-detail__rating gl-rating-style">
                             <span class="pd-detail__review u-s-m-l-4">
-                                <a data-click-scroll="#view-review">@Model.CommentViewModels.TotalRecords Reviews</a>
+                                <a data-click-scroll="#view-review">@Model.CommentViewModels.Count Reviews</a>
                             </span>
                         </div>
                     </div>
@@ -157,7 +162,7 @@
                             <li class="nav-item">
                                 <a class="nav-link" id="view-review" data-toggle="tab" href="#pd-rev">
                                     Bình Luận
-                                    <span>(@Model.CommentViewModels.TotalRecords)</span>
+                                    <span id="span-count-comments">(@Model.CommentViewModels.Count)</span>
                                 </a>
                             </li>
                         </ul>
@@ -274,62 +279,50 @@
                         <!--====== Tab 4 ======-->
                         <div class="tab-pane" id="pd-rev">
                             <div class="pd-tab__rev">
-                                <div class="u-s-m-b-30">
-                                    <div class="pd-tab__rev-score">
-                                        <div class="u-s-m-b-8">
-                                            <h2>@Model.CommentViewModels.TotalRecords Bình Luận</h2>
-                                        </div>
-                                        <div class="u-s-m-b-8">
-                                            <h4><a href="#">Bạn cần đăng nhập để có thể bình luận!</a></h4>
-                                        </div>
-
-                                        <span class="gl-text">Hãy nói cho chúng tôi biết cảm nghĩ của bạn về khóa học này!</span>
-                                    </div>
-                                </div>
-                                <div class="u-s-m-b-60">
-                                    <form class="pd-tab__rev-f2">
-                                        <div class="rev-f2__group">
-                                            <div class="u-s-m-b-10">
-                                                <textarea class="text-area text-area--primary-style" placeholder="Bình Luận" id="reviewer-text"></textarea>
+                                @if (!User.Identity.IsAuthenticated)
+                                {
+                                    <div class="u-s-m-b-30">
+                                        <div class="pd-tab__rev-score">
+                                            <div class="u-s-m-b-8">
+                                                <h2 id="number-comments-non-login">@Model.CommentViewModels.Count Bình Luận</h2>
                                             </div>
+                                            <div class="u-s-m-b-8">
+                                                <h4><a href="/login.html">Bạn cần đăng nhập để có thể bình luận!</a></h4>
+                                            </div>
+
+                                            <span class="gl-text">Hãy nói cho chúng tôi biết cảm nghĩ của bạn về khóa học này!</span>
                                         </div>
-                                        <div class="u-s-m-b-15">
-                                            <button class="btn btn--e-brand-shadow" type="submit">GỬI</button>
-                                        </div>
-                                    </form>
-                                </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="u-s-m-b-60">
+                                        <form class="pd-tab__rev-f2" action="/Courses/AddNewComment" method="post" id="comment-form">
+                                            <input type="hidden" name="entityId" value="@Model.CourseViewModel.Id" />
+                                            <input type="hidden" name="entityType" value="courses" />
+                                            <div class="rev-f2__group">
+                                                <div class="u-s-m-b-10">
+                                                    <textarea class="text-area text-area--primary-style" name="content" placeholder="Bình Luận" id="reviewer-text"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="u-s-m-b-15">
+                                                <button class="btn btn--e-brand-shadow" type="submit">Gửi</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                }
                                 <div class="u-s-m-b-30">
                                     <form class="pd-tab__rev-f1">
                                         <div class="rev-f1__group">
                                             <div class="u-s-m-b-15">
-                                                <h2>@Model.CommentViewModels.TotalRecords Bình Luận</h2>
-                                            </div>
-                                            <div class="u-s-m-b-15">
-                                                <select name="sortBy" data-id="@Model.CourseViewModel.Id" class="select-box select-box--primary-style" id="sort-review" asp-for="SortType" asp-items="Model.SortTypes"></select>
+                                                <h2 id="number-comments">@Model.CommentViewModels.Count Bình Luận</h2>
                                             </div>
                                         </div>
-                                        <div class="rev-f1__review">
-                                            @foreach (var item in Model.CommentViewModels.Items)
-                                            {
-                                                <div class="review-o u-s-m-b-15">
-                                                    <div class="review-o__info u-s-m-b-8">
-
-                                                        <span class="review-o__name">@item.OwnerUser</span>
-
-                                                        <span class="review-o__date">@item.CreationTime</span>
-                                                    </div>
-                                                    <p class="review-o__text">@item.Content</p>
-                                                </div>
-                                            }
-
+                                        <div class="rev-f1__review" id="comment_list"></div>
+                                        <div class="u-s-m-y-60">
+                                            <button class="btn btn--e-brand-shadow" id="comment-pagination" data-page-index="1" style="display:none" type="button">Xem thêm bình luận</button>
                                         </div>
-
                                     </form>
-                                </div>
-                                <div class="u-s-m-b-30">
-                                    <!--====== Pagination ======-->
-                                    @await Component.InvokeAsync("Pager", Model.CommentViewModels)
-                                    <!--====== End - Pagination ======-->
                                 </div>
                             </div>
                         </div>
@@ -422,3 +415,62 @@
     <!--====== End - Section Content ======-->
 </div>
 <!--====== End - Section 1 ======-->
+
+<script id="tmpl_children_comments" type="x-tmpl-mustache">
+<div class="review-o u-s-p-t-15 u-s-p-b-30" id="comment-child-{{id}}">
+    <div class="review-o__info u-s-m-b-8"  style="display: flex; justify-content: space-between;">
+        <div style="width: auto; margin-right: 20px; display: grid">
+            <span class="review-o__name">{{ownerUser}}</span>
+            <span class="review-o__date" style="margin-bottom: 10px;margin-top: 10px">{{creationTime}}</span>
+        </div>
+    </div>
+    <p class="review-o__text" style="text-align: justify; align-items: center">{{content}}</p>
+</div>
+</script>
+
+<script id="tmpl_comments" type="x-tmpl-mustache">
+<!-- Parent Comment-->
+<div>
+    <div class="review-o">
+        <div class="review-o__info u-s-m-b-8" style="display: flex; justify-content: space-between;">
+            <div style="width: auto; margin-right: 20px; display: grid">
+                <span class="review-o__name">{{ownerUser}}</span>
+                <span class="review-o__date" style="margin-bottom: 10px;margin-top: 10px">{{creationTime}}</span>
+            </div>
+            <div style="margin-right: 10px">
+                <span class="review-o__name" style="font-size: 16px; margin-right: 10px">
+                   <a class="comment-reply-link" href="#" data-commentid="{{id}}"> <i class="fas fa-reply" style="color: #ff4500;"></i></a>
+                </span>
+
+            </div>
+        </div>
+        <p class="review-o__text" style="text-align: justify; align-items: center">{{content}}</p>
+    </div>
+      <div id="reply_comment_{{id}}"></div>
+    <!-- Children Comment-->
+    <div style="margin-left: 70px;" id="children_comments_{{id}}">
+     {{{childrenHtml}}}
+    </div>
+    <!-- End Children Comment-->
+
+</div>
+<!-- End Parent Comment-->
+
+</script>
+<script id="tmpl_reply_comment" type="x-tmpl-mustache">
+<div class="u-s-m-y-30">
+    <form class="pd-tab__rev-f2" action="/Courses/AddNewComment" method="post" id="frm_reply_comment_{{commentId}}">
+        <input type="hidden" name="entityId" value="@Model.CourseViewModel.Id" />
+        <input type="hidden" name="replyId" value="{{commentId}}" />
+         <input type="hidden" name="entityType" value="courses" />
+        <div class="rev-f2__group">
+            <div class="u-s-m-b-10">
+                <textarea class="text-area text-area--primary-style" name="content" placeholder="Bình Luận" id="txt_reply_content_{{commentId}}"></textarea>
+            </div>
+        </div>
+        <div class="u-s-m-b-15">
+            <button class="btn btn--e-brand-shadow" id="btn_send_reply" type="submit">Trả lời</button>
+        </div>
+    </form>
+</div>
+</script>

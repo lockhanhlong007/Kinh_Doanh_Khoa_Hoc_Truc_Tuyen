@@ -18,15 +18,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models
 
         public List<LessonViewModel> LessonViewModels { get; set; }
 
-        public Pagination<CommentViewModel> CommentViewModels { get; set; }
+        public List<CommentViewModel> CommentViewModels { get; set; }
 
         public List<CourseViewModel> RelatedCourses { get; set; }
-        public string SortType { get; set; }
-
-        public List<SelectListItem> SortTypes { get; } = new List<SelectListItem>
-        {
-            new SelectListItem(){Value = "new",Text = "Sắp Xếp: New"},
-            new SelectListItem(){Value = "old",Text = "Sắp Xếp: Old"}
-        };
     }
 }
