@@ -33,5 +33,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions
                 .SingleOrDefault(x => x.Type == ClaimTypes.Role);
             return claim?.Value;
         }
+
+        public static string GetEmail(this ClaimsPrincipal claimsPrincipal)
+        {
+            var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
+                .Claims
+                .SingleOrDefault(x => x.Type == ClaimTypes.Email);
+            return claim?.Value;
+        }
     }
 }

@@ -21,6 +21,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements
         Task<bool> PutForFileAsync<TResponse>(string url, MultipartFormDataContent requestContent, bool requiredLogin = true);
 
         Task<bool> PostForFileAsync<TResponse>(string url, MultipartFormDataContent requestContent, bool requiredLogin = true);
+        Task<bool> PutReturnBooleanAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true);
         Task<string> GetStringAsync(string url, bool requiredLogin = false);
     }
 }

@@ -31,21 +31,20 @@
       "destination": "wwwroot/lib/bootbox.js/"
     },
     {
-      "library": "mustache.js@4.1.0",
-      "destination": "wwwroot/lib/mustache.js/"
-    },
-    {
       "library": "jqueryui@1.12.1",
       "destination": "wwwroot/lib/jqueryui/"
     },
     {
       "library": "signalr.js@2.4.1",
       "destination": "wwwroot/lib/signalr.js/"
+    },
+    {
+      "library": "analytics.js@2.9.1",
+      "destination": "wwwroot/lib/analytics.js/"
+    },
+    {
+      "library": "mustache.js@4.1.0",
+      "destination": "wwwroot/lib/mustache.js/"
     }
-,
-{
-  "library": "analytics.js@2.9.1",
-  "destination": "wwwroot/lib/analytics.js/"
-}
-]
+  ]
 }

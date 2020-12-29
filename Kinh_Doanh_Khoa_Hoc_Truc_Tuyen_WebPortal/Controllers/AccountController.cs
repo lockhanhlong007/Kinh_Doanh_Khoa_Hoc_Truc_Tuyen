@@ -89,7 +89,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         public async Task<IActionResult> CheckMyAnnouncement(string announceId, int? pageSize, string filterBy = "true", int page = 1)
         {
             pageSize ??= 4;
-            await _apiClient.PostReturnBooleanAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest {AnnounceId = announceId, UserId = User.GetUserId()}, true);
+            await _apiClient.PostReturnBooleanAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest {AnnounceId = announceId, UserId = User.GetUserId()});
             return RedirectToAction(nameof(MyAnnouncements), new{ pageSize , filterBy , page });
         }
 
@@ -268,13 +268,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     Id = request.Id
                 };
                 await _apiClient.PostAsync<AccountPasswordCheckRequest, bool>(
-                        $"/api/users/{request.Id}/check-password", checkPassword, true);
+                        $"/api/users/{request.Id}/check-password", checkPassword);
                 var data = new UserPasswordChangeRequest();
                 data.NewPassword = request.NewPassword;
                 data.CurrentPassword = request.OldPassword;
                 data.Id = request.Id;
 
-                var result = await _apiClient.PutAsync<UserPasswordChangeRequest, bool>($"/api/users/{data.Id}/change-password", data, true);
+                var result = await _apiClient.PutAsync<UserPasswordChangeRequest, bool>($"/api/users/{data.Id}/change-password", data);
                 return RedirectToAction(nameof(AccountDetail));
             }
             catch (Exception e)
