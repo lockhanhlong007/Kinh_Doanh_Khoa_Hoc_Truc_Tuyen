@@ -27,7 +27,6 @@
                     tmpString = url.substring(index);
                     window.location.href = "/courses.html?" + tmpString + "&priceMin=" + min + "&priceMax=" + max + "&pageSize=" + pageSize + "&sortBy=" + sortType;
                 } else {
-                    debugger;
                     tmpString = url.substring(index, endIndex);
                     window.location.href = "/courses.html?" + tmpString + "&priceMin=" + min + "&priceMax=" + max + "&pageSize=" + pageSize + "&sortBy=" + sortType;
                 }

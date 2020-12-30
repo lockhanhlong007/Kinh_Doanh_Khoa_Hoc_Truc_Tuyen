@@ -46,6 +46,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IBaseApiClient, BaseApiClient>();
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IViewRenderService, ViewRenderService>();
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;

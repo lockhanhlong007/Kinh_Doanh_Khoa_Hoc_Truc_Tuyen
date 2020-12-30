@@ -1,4 +1,6 @@
 ﻿@using System.Globalization
+@using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common
+@using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
 @model CourseCatalogViewModel
 @section Scripts{
 
@@ -102,11 +104,11 @@ else
                                             <div class="shop-w__form-p-wrap">
                                                 <div>
                                                     <label for="price-min"></label>
-                                                    <input class="input-text input-text--primary-style" type="text" id="price-min" name="priceMin" value="@Model.PriceMin" placeholder="Min" onkeyup="var result = document.getElementById('price-min');var vl = result.value;if (vl < 0 || isNaN(vl)) { result.value = vl.replace(/[^\d]/g, ''); }"/>
+                                                    <input class="input-text input-text--primary-style" type="text" id="price-min" name="priceMin" value="@Model.PriceMin" placeholder="Min" onkeyup="var result = document.getElementById('price-min');var vl = result.value;if (vl < 0 || isNaN(vl)) { result.value = vl.replace(/[^\d]/g, ''); }" />
                                                 </div>
                                                 <div>
                                                     <label for="price-max"></label>
-                                                    <input class="input-text input-text--primary-style" type="text" id="price-max" name="priceMax" value="@Model.PriceMax" placeholder="Max" onkeyup="var result = document.getElementById('price-max');var vl = result.value;console.log(vl);if (vl < 0 || isNaN(vl)) { result.value = vl.replace(/[^\d]/g, ''); }"/>
+                                                    <input class="input-text input-text--primary-style" type="text" id="price-max" name="priceMax" value="@Model.PriceMax" placeholder="Max" onkeyup="var result = document.getElementById('price-max');var vl = result.value;console.log(vl);if (vl < 0 || isNaN(vl)) { result.value = vl.replace(/[^\d]/g, ''); }" />
                                                 </div>
                                                 <div>
                                                     <button class="btn btn--icon fas fa-angle-right btn--e-transparent-platinum-b-2" id="sortPrice" type="button"></button>
@@ -170,8 +172,8 @@ else
                                                         <img class="aspect__img" src="@img" alt="">
                                                     </a>
                                                     <div class="product-m__add-cart">
-
-                                                        <a class="btn--e-brand" data-modal="modal" data-modal-id="#add-to-cart">Add to Cart</a>
+                                                        <a class="btn--e-brand add-product-in-cart" data-id="@item.Id">Add to Cart</a>
+                                                        @*<a class="btn--e-brand" data-modal="modal" data-modal-id="#add-to-cart">Add to Cart</a>*@
                                                     </div>
                                                 </div>
                                                 <div class="product-m__content">
@@ -236,7 +238,7 @@ else
                             </div>
                         </div>
                     }
-                    </div>
+                </div>
             </div>
         </div>
     </div>

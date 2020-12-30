@@ -23,10 +23,6 @@
       "destination": "wwwroot/lib/jquery-ui-map/"
     },
     {
-      "library": "notify@0.4.2",
-      "destination": "wwwroot/lib/notify/"
-    },
-    {
       "library": "bootbox.js@5.5.2",
       "destination": "wwwroot/lib/bootbox.js/"
     },
@@ -45,6 +41,10 @@
     {
       "library": "mustache.js@4.1.0",
       "destination": "wwwroot/lib/mustache.js/"
+    },
+    {
+      "library": "notify@0.4.2",
+      "destination": "wwwroot/lib/notify/"
     }
   ]
 }

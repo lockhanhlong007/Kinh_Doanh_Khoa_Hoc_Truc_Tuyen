@@ -89,6 +89,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             });
             services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddTransient<IStorageService, StorageService>();
+            services.AddTransient<IViewRenderService, ViewRenderService>();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
@@ -158,7 +159,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     }
                 });
             });
-            services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateRequestValidator>());
+
+            services.AddControllersWithViews().AddRazorRuntimeCompilation().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateRequestValidator>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

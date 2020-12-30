@@ -1,10 +1,13 @@
 ﻿@using System.Globalization
 @using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
+
 @model CourseDetailClientViewModel
 @{
     var env = "https://localhost:44342";
     var imageCourse = env + Model.CourseViewModel.Image;
     var imageUser = env + Model.UserViewModel.Avatar;
+    var user = @User.GetUserId();
+    var checkActiveCourse = Model.ActiveCoursesViewModels.Any(x => x.UserId == user);
 }
 @section Scripts{
     <script src="~/assets/js/custom/customCourseDetail.js" asp-append-version="true"></script>
@@ -14,7 +17,7 @@
     </script>
 }
 <input type="hidden" id="hid_course_id" value="@Model.CourseViewModel.Id" />
-<input type="hidden" id="hid_current_login_id" value="@User.GetUserId()" />
+<input type="hidden" id="hid_current_login_id" value="@user" />
 <input type="hidden" id="hid_current_login_name" value="@User.Identity.Name" />
 <input type="hidden" id="hid_number_of_comments" value="@Model.CommentViewModels.Count" />
 <!--====== Section 1 ======-->
@@ -126,8 +129,14 @@
                         <form class="pd-detail__form">
                             <div class="pd-detail-inline-2">
                                 <div class="u-s-m-b-15">
-                                    @*<button class="btn btn--e-brand-b-2" type="submit">Thêm Vào Giỏ Hàng</button>*@
-                                    <button class="btn btn--e-brand-b-2" onclick="location.href='/lessons-with-courses-@(Model.CourseViewModel.Id).html'" type="button">Lesson</button>
+                                    @if (checkActiveCourse)
+                                    {
+                                        <button class="btn btn--e-brand-b-2" onclick="location.href='/lessons-with-courses-@(Model.CourseViewModel.Id).html'" type="button">Lesson</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn--e-brand-b-2 add-product-in-cart" data-id="@Model.CourseViewModel.Id" type="submit">Thêm Vào Giỏ Hàng</button>
+                                    }
                                 </div>
                             </div>
                         </form>
@@ -368,7 +377,8 @@
                                         <ul class="product-o__action-list">
                                             <li>
 
-                                                <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>
+                                                <a class="add-product-in-cart" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>
+                                                @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
                                             </li>
                                         </ul>
                                     </div>

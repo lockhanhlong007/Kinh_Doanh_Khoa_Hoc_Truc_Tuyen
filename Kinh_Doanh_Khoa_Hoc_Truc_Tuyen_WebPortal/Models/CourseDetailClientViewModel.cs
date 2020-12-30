@@ -21,5 +21,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models
         public List<CommentViewModel> CommentViewModels { get; set; }
 
         public List<CourseViewModel> RelatedCourses { get; set; }
+
+        public List<ActiveCoursesViewModel> ActiveCoursesViewModels { get; set; }
     }
 }
