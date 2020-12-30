@@ -13,16 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kinh_Doanh_Khoa_Hoc_Truc_Tu
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8654A736-1D67-4600-BD6F-CF6041D1080D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "identity", "identity", "{B4315136-F710-42AC-9B82-AF6D87E19531}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.IdentityServer", "Test.IdentityServer\Test.IdentityServer.csproj", "{2E35EFA4-08B8-4104-B3FA-50CA0632E924}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.ApiOne", "Test.ApiOne\Test.ApiOne.csproj", "{31814044-9D55-4403-8AB5-FA8E5D045A28}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.ApiTwo", "Test.ApiTwo\Test.ApiTwo.csproj", "{61F78E56-094A-4103-A9DA-96E952006988}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MvcClient", "Test.MvcClient\Test.MvcClient.csproj", "{EFB88ED5-1B3B-45D9-B028-B208C2ABA691}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

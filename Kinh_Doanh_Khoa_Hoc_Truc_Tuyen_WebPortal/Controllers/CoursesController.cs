@@ -47,6 +47,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             detail.CommentViewModels = await _apiClient.GetListAsync<CommentViewModel>($"/api/comments/courses/client?entityId={id}&entityType=courses");
             detail.RelatedCourses = await _apiClient.GetListAsync<CourseViewModel>($"/api/courses/related-courses/{id}");
             detail.UserViewModel = await _apiClient.GetAsync<UserViewModel>($"/api/users/course-{id}");
+            detail.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/{id}/active-courses");
             return View(detail);
         }
 

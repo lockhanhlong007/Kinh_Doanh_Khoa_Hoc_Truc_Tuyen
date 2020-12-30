@@ -1,8 +1,11 @@
 ﻿
 @using System.Globalization
+@using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common
 @model HomeViewModel
 @{
     var env = "https://localhost:44342";
+   
+
 }
 <!--====== Primary Slider ======-->
 <div class="s-skeleton s-skeleton--h-600 s-skeleton--bg-grey">
@@ -93,9 +96,9 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section__text-wrap">
-                        <h1 class="section__heading u-c-secondary u-s-m-b-12">TOP TRENDING</h1>
+                        <h1 class="section__heading u-c-secondary u-s-m-b-12">Top Trending</h1>
 
-                        <span class="section__span u-c-silver">CHOOSE CATEGORY</span>
+                        <span class="section__span u-c-silver">Choose Category</span>
                     </div>
                 </div>
             </div>
@@ -142,7 +145,9 @@
                                                     <ul class="product-o__action-list">
                                                         <li>
 
-                                                            <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>
+                                                            <a class="add-product-in-cart" data-id="@itemCourse.Id" data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>
+
+                                                            @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
                                                         </li>
                                                     </ul>
                                                 </div>
@@ -237,8 +242,9 @@
                                     <div class="product-o__action-wrap">
                                         <ul class="product-o__action-list">
                                             <li>
+                                                <a class="add-product-in-cart" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>
 
-                                                <a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>
+                                                @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
                                             </li>
                                         </ul>
                                     </div>

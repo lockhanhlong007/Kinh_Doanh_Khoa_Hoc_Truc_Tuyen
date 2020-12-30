@@ -96,6 +96,7 @@
             loadRepliedComments(courseId, commentId, nextPageIndex);
         });
 
+
     }
     function loadComments(id, pageIndex) {
 
@@ -175,5 +176,8 @@
             }
         });
     }
+
+
+
 
 }

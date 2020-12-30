@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Implements\" />
     <Folder Include="wwwroot\lib\google-analytics\" />
   </ItemGroup>
 

@@ -84,6 +84,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 DiscountAmount = result.DiscountAmount,
                 DiscountPercent = result.DiscountPercent,
                 CreatedUserName = result.CreatedUserName,
+                CreatedName = result.CreatedName,
                 CountStudent = countStudent
             });
 
@@ -568,6 +569,20 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             };
             return Ok(pagination);
         }
+
+        [HttpGet("{courseId}/active-courses")]
+        public async Task<IActionResult> GetActiveCourses(int coursesId)
+        {
+            var data = await _khoaHocDbContext.ActivateCourses.Where(x => x.CourseId == coursesId && x.Status).Select(x => new ActiveCoursesViewModel()
+            {
+                Status = x.Status,
+                CourseId = x.CourseId,
+                UserId = x.UserId.ToString(),
+                Id = x.UserId.ToString()
+            }).ToListAsync();
+            return Ok(data);
+        }
+
 
         [HttpDelete("{id}/image")]
         public async Task<IActionResult> DeleteAttachment(int id)
