@@ -7,9 +7,6 @@ import { catchError, map } from 'rxjs/operators';
 import { User, Function } from '../models';
 import { UtilitiesService } from './utilities.service';
 
-
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -21,14 +18,6 @@ export class UsersService extends BaseService {
 
 }
 
-  add(entity) {
-    return this.http.post(`${environment.ApiUrl}/api/users`, entity,   {
-      reportProgress: true,
-      observe: 'events'
-    })
-    .pipe(catchError(this.handleError));
-  }
-
   update(id: string, entity) {
     return this.http.put(`${environment.ApiUrl}/api/users/${id}`, entity,   {
       reportProgress: true,
@@ -39,6 +28,14 @@ export class UsersService extends BaseService {
 
   getDetail(id) {
     return this.http.get<User>(`${environment.ApiUrl}/api/users/${id}`, {headers: this._sharedHeaders})
+    .pipe(catchError(this.handleError));
+  }
+
+  add(entity) {
+    return this.http.post(`${environment.ApiUrl}/api/users`, entity,   {
+      reportProgress: true,
+      observe: 'events'
+    })
     .pipe(catchError(this.handleError));
   }
 

@@ -3,7 +3,7 @@
         <p-header style="width: 100%">
             <div class="p-grid">
                 <div class="p-col-12">
-                    <h3>List Of Orders</h3>
+                    <h3>Danh sách đơn đặt hàng</h3>
                 </div>
                 <div class="p-col-9">
                     <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="View" pButton type="button" label="Chi Tiết" icon="fa fa-eye" class="p-button-info" *ngIf="selectedItems.length== 1" (click)="showDetailModal()"></button>
@@ -27,22 +27,22 @@
                     <th class="p-text-center" style="width: 50px">
                         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'createdUser'">Created User
-                        <p-sortIcon [field]="'createdUser'"></p-sortIcon>
+                    <th class="p-text-center" [pSortableColumn]="'name'">Tên khách hàng
+                        <p-sortIcon [field]="'name'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'message'">Message
+                    <th class="p-text-center" [pSortableColumn]="'message'">Tin nhắn
                         <p-sortIcon [field]="'message'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'paymentMethod'">Payment Method
+                    <th class="p-text-center" [pSortableColumn]="'paymentMethod'">Phương thức thanh toán
                         <p-sortIcon [field]="'paymentMethod'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'total'">Total
+                    <th class="p-text-center" [pSortableColumn]="'total'">Tổng cộngcộng
                         <p-sortIcon [field]="'total'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'status'">Status
+                    <th class="p-text-center" [pSortableColumn]="'status'">Trạng thái
                         <p-sortIcon [field]="'status'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'creationTime'">Creation Time
+                    <th class="p-text-center" [pSortableColumn]="'creationTime'">Ngày tạo
                         <p-sortIcon [field]="'creationTime'"></p-sortIcon>
                     </th>
 
@@ -54,7 +54,7 @@
                     <td style="width: 50px">
                         <p-tableCheckbox [value]="row"></p-tableCheckbox>
                     </td>
-                    <td>{{row.createdUser | formatData: 20}}</td>
+                    <td>{{row.name | formatData: 20}}</td>
                     <td>{{row.message}}</td>
                     <td>{{row.paymentMethod | formatOrder: 'paymentMethod'}}</td>
                     <td>{{row.total | currency:'VND':'symbol':'1.0-3' }}</td>

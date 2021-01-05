@@ -1,6 +1,13 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
+using System.Net.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 
@@ -11,11 +18,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
     public class EmailSender : IEmailSender
     {
         private readonly IConfiguration _configuration;
-
-        public EmailSender(IConfiguration configuration)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public EmailSender(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
+
 
         public Task SendEmailAsync(string email, string subject, string message)
         {
@@ -35,22 +44,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             mailMessage.Body = message;
             mailMessage.Subject = subject;
             mailMessage.IsBodyHtml = true;
+            var session = _httpContextAccessor.HttpContext.Session.Get<string>(SystemConstants.AttachmentSession);
+            if (session != null)
+            {
+                var fileName = Path.GetFileName(session);
+                var myClient = new WebClient();
+                var bytes = myClient.DownloadData(session);
+                var web = new MemoryStream(bytes);
+                mailMessage.Attachments.Add(new Attachment(web, fileName));
+            }
             client.Send(mailMessage);
-            //var client = new RestClient
-            //{
-            //    BaseUrl = new Uri("https://api.mailgun.net/v3"),
-            //    Authenticator = new HttpBasicAuthenticator("api",
-            //        "5a3a8ada09b52886a74262c0526ebebc-a83a87a9-27da9e4d")
-            //};
-            //var request = new RestRequest();
-            //request.AddParameter("domain", "sandbox31ad4bb8cc9540728a038a562c9a32dd.mailgun.org", ParameterType.UrlSegment);
-            //request.Resource = "{domain}/messages";
-            //request.AddParameter("from", "Mailgun Sandbox <postmaster@sandbox31ad4bb8cc9540728a038a562c9a32dd.mailgun.org>");
-            //request.AddParameter("to", email);
-            //request.AddParameter("subject", subject);
-            //request.AddParameter("text", message);
-            //request.Method = Method.POST;
-            //client.Execute(request);
             return Task.CompletedTask;
         }
     }

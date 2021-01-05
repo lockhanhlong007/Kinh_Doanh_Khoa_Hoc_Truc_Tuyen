@@ -11,10 +11,9 @@
 
 
 
-
 .My_dropdown {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 .My_dropdown-content {

@@ -7,6 +7,7 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 
@@ -47,7 +48,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             detail.CommentViewModels = await _apiClient.GetListAsync<CommentViewModel>($"/api/comments/courses/client?entityId={id}&entityType=courses");
             detail.RelatedCourses = await _apiClient.GetListAsync<CourseViewModel>($"/api/courses/related-courses/{id}");
             detail.UserViewModel = await _apiClient.GetAsync<UserViewModel>($"/api/users/course-{id}");
-            detail.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/{id}/active-courses");
+            detail.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/{id}/active-courses?coursesId={id}");
             return View(detail);
         }
 
@@ -64,6 +65,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         }
 
         #region Ajax Method
+        [HttpGet]
+        public async Task<IActionResult> GetCoursesByFilter(string filter)
+        {
+            var data = await _apiClient.GetListAsync<string>($"/api/courses/filter-name");
+            if (!string.IsNullOrEmpty(filter))
+            {
+                data = data.Where(x => x.ToLower().Contains(filter.ToLower())).ToList();
+            }
+            return Ok(data);
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetCommentById(int id, string entityType, int pageIndex = 1, int pageSize = 3)
@@ -88,9 +99,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             var result = await _apiClient.PostAsync<CommentCreateRequest,CommentViewModel>(
                 $"/api/comments/courses/{request.EntityId}", request);
             result.OwnerUser = User.GetFullName() + " (" + User.GetEmail() + ")";
-            if (result != null)
-                return Ok(result);
-            return BadRequest();
+            return Ok(result);
         }
 
         [HttpPut]

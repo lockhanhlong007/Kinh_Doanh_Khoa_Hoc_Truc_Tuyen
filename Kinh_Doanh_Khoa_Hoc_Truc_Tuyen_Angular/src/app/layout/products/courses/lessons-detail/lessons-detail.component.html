@@ -14,7 +14,7 @@
             <div class="p-grid-pad p-fluid p-grid-responsive">
                 <div class="p-field p-grid">
                     <div class="p-col-2">
-                        <span class="required">Tên Bài Học:</span>
+                        <span class="required">Tên bài học:</span>
                     </div>
                     <div class="p-col-7">
                         <input type="text" pInputText formControlName="name">
@@ -44,7 +44,7 @@
                 </div>
                 <div class="p-field p-grid">
                     <div class="p-col-2">
-                        <span class="required">Attachment:</span>
+                        <span class="required">Tệp đính kèm:</span>
                     </div>
                     <div class="p-col-7">
                         <p-fileUpload *ngIf="this.fileAttachPath === ''" [showUploadButton]="false" (onRemove)="removeAttachments($event)" (onSelect)="selectAttachments($event)" [showCancelButton]="false" accept=".doc,.docx.,.xls,.ppt,.pptx,xlsx,.pdf,.rar,.zip,.7z,.ios" maxFileSize="1000000000">
@@ -62,7 +62,7 @@
                 </div>
                 <div class="p-field p-grid">
                     <div class="p-col-2">
-                        <span class="required">Sort Order:</span>
+                        <span class="required">Thứ tự:</span>
                     </div>
                     <div class="p-col-7">
                         <input type="number" pInputText pKeyFilter="int" formControlName="sortOrder">
@@ -73,7 +73,7 @@
                 </div>
                 <div *ngIf="role !== 'Teacher'" class="p-field p-grid">
                     <div class="p-col-2">
-                        <span class="required">Status</span>
+                        <span class="required">Trạng thái:</span>
                     </div>
                     <div class="p-col-7">
                         <p-dropdown appendTo="body" [options]="isStatus" emptyFilterMessage="Không có dữ liệu" [style]="{'width':'100%'}" formControlName="status">

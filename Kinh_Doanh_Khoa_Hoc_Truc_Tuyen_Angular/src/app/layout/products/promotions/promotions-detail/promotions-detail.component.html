@@ -11,7 +11,7 @@
             <div class="p-grid-pad p-fluid p-grid-responsive">
                 <div class="p-field p-grid">
                     <div class="p-col-3">
-                        <span class="required">Name:</span>
+                        <span class="required">Tên sự kiện:</span>
                     </div>
                     <div class="p-col-6">
                         <input type="text" pInputText [pKeyFilter]="noSpecial" formControlName="name">
@@ -22,7 +22,7 @@
                 </div>
                 <div class="p-field p-grid">
                     <div class="p-col-3">
-                        <span class="required">From Date:</span>
+                        <span class="required">Từ ngày:</span>
                     </div>
                     <div class="p-col-6">
                         <p-calendar formControlName="fromDate" dateFormat="dd/mm/yy" [showIcon]="true" [locale]="vi" [monthNavigator]="true" [yearNavigator]="true" yearRange="1900:2030" showButtonBar="true">
@@ -34,7 +34,7 @@
                 </div>
                 <div class="p-field p-grid">
                     <div class="p-col-3">
-                        <span class="required">To Date:</span>
+                        <span class="required">Đến ngày:</span>
                     </div>
                     <div class="p-col-6">
                         <p-calendar formControlName="toDate" dateFormat="dd/mm/yy" [showIcon]="true" [locale]="vi" [monthNavigator]="true" [yearNavigator]="true" yearRange="1900:2030" showButtonBar="true">
@@ -46,7 +46,7 @@
                 </div>
                 <div class="p-field p-grid">
                     <div class="p-col-3">
-                        <span class="required">Method Discount</span>
+                        <span class="required">Phương thức giảm giá</span>
                     </div>
                     <div class="p-col-6 ">
                         <p-dropdown [options]="method" (onChange)="onChangeDiscount($event)" emptyFilterMessage="Không có dữ liệu" [style]="{'width':'100%'}" formControlName="chooseDiscount">
@@ -58,7 +58,7 @@
                 </div>
                 <div class="p-field p-grid" *ngIf="isHiddenAmount">
                     <div class="p-col-3 ">
-                        <span class="required ">Discount Amount:</span>
+                        <span class="required ">Giảm giá theo giá:</span>
                     </div>
                     <div class="p-col-6 ">
                         <p-inputNumber mode="currency" currency="VND" locale="vi-VN" formControlName="discountAmount"></p-inputNumber>
@@ -69,7 +69,7 @@
                 </div>
                 <div class="p-field p-grid" *ngIf="isHiddenPercent">
                     <div class="p-col-3 ">
-                        <span class="required ">Discount Percent:</span>
+                        <span class="required ">Giảm giá theo %:</span>
                     </div>
                     <div class="p-col-6 ">
                         <p-inputNumber inputId="percent" prefix="%" formControlName="discountPercent" inputId="percent" prefix="%"> </p-inputNumber>
@@ -80,7 +80,7 @@
                 </div>
                 <div class="p-field p-grid">
                     <div class="p-col-3">
-                        <span class="required">Status</span>
+                        <span class="required">Trạng thái</span>
                     </div>
                     <div class="p-col-6 ">
                         <p-dropdown [options]="isActive" emptyFilterMessage="Không có dữ liệu" [style]="{'width':'100%'}" formControlName="status">

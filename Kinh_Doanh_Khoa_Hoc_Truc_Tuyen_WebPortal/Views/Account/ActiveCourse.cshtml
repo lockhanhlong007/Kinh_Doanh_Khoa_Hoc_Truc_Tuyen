@@ -9,10 +9,10 @@
                 <div class="breadcrumb__wrap">
                     <ul class="breadcrumb__list">
                         <li class="has-separator">
-                            <a href="/">Home</a>
+                            <a href="/">Trang chủ</a>
                         </li>
                         <li class="is-marked">
-                            <a href="#">Active Course</a>
+                            <a href="#">Kích hoạt khóa họce</a>
                         </li>
                     </ul>
                 </div>
@@ -42,7 +42,7 @@
                                     <div asp-validation-summary="All" class="text-error u-s-m-b-15"></div>
                                     <div class="u-s-m-b-30">
                                         <label class="gl-label" for="order-id">Active Course <sup>*</sup></label>
-                                        <input class="input-text input-text--primary-style" type="text" asp-for="@Model.Code" style="align-items: center; text-align: center;font-size: 16px" id="order-id" placeholder="Enter Code">
+                                        <input class="input-text input-text--primary-style" type="text" asp-for="@Model.Code" style="align-items: center; text-align: center;font-size: 16px" id="order-id" placeholder="Nhập mã kích hoạt">
                                         <span asp-validation-for="@Model.Code" class="text-error"></span>
                                     </div>
                                     <button class="btn btn--e-brand-b-2" type="submit">Kích Hoạt</button>

@@ -102,6 +102,32 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             throw new Exception(body);
         }
 
+        public async Task<string> PostReturnStringAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            StringContent httpContent = null;
+            if (requestContent != null)
+            {
+                var json = JsonConvert.SerializeObject(requestContent);
+                httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            if (requiredLogin)
+            {
+                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.PostAsync(url, httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return JsonConvert.DeserializeObject<string>(body);
+            }
+            throw new Exception(body);
+        }
+
 
         public async Task<bool> PostReturnBooleanAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true)
         {

@@ -3,7 +3,7 @@
         <p-header style="width: 100%">
             <div class="p-grid">
                 <div class="p-col-12">
-                    <h3>List Of Promotions</h3>
+                    <h3>Danh sách sự kiện</h3>
                 </div>
                 <div class="p-col-4">
                     <button style="margin-right: 5px;" apPermission appFunction="Promotions" appAction="Create" pButton type="button" label="Thêm" icon="fa fa-plus" (click)="showAddModal()"></button>
@@ -26,19 +26,19 @@
                     <th class="p-text-center" style="width: 50px">
                         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'name'">Name
+                    <th class="p-text-center" [pSortableColumn]="'name'">Tên sự kiện
                         <p-sortIcon [field]="'name'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'fromDate'">From Date
+                    <th class="p-text-center" [pSortableColumn]="'fromDate'">Từ ngày
                         <p-sortIcon [field]="'fromDate'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'toDate'">To Date
+                    <th class="p-text-center" [pSortableColumn]="'toDate'">Đến ngày
                         <p-sortIcon [field]="'toDate'"></p-sortIcon>
                     </th>
-                    <th style="width: 150px" class="p-text-center" [pSortableColumn]="'discountAmount'">Discount Amount
+                    <th style="width: 150px" class="p-text-center" [pSortableColumn]="'discountAmount'">Giảm giá theo giá
                         <p-sortIcon [field]="'discountAmount'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" style="width: 150px" [pSortableColumn]="'discountPercent'">Discount Percent
+                    <th class="p-text-center" style="width: 150px" [pSortableColumn]="'discountPercent'">Giảm giá theo %
                         <p-sortIcon [field]="'discountPercent'"></p-sortIcon>
                     </th>
                 </tr>
@@ -84,25 +84,25 @@
                     <th style="width: 50px;">
                         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
-                    <th class="p-text-center" style="width: 150px" [pSortableColumn]="'image'">Image
+                    <th class="p-text-center" style="width: 150px" [pSortableColumn]="'image'">Ảnh
                         <p-sortIcon [field]="'image'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'name'">Name
+                    <th class="p-text-center" [pSortableColumn]="'name'">Tên
                         <p-sortIcon [field]="'name'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'content'">Content
+                    <th class="p-text-center" [pSortableColumn]="'content'">Nội dung
                         <p-sortIcon [field]="'content'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'description'">Description
+                    <th class="p-text-center" [pSortableColumn]="'description'">Mô tả
                         <p-sortIcon [field]="'description'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'price'">Price
+                    <th class="p-text-center" [pSortableColumn]="'price'">Giá
                         <p-sortIcon [field]="'price'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'categoryName'">Category Name
+                    <th class="p-text-center" [pSortableColumn]="'categoryName'">Tên danh mục
                         <p-sortIcon [field]="'categoryName'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" style="width: 150px" [pSortableColumn]="'status'">Status
+                    <th class="p-text-center" style="width: 150px" [pSortableColumn]="'status'">Trạng thái
                         <p-sortIcon [field]="'status'"></p-sortIcon>
                     </th>
                 </tr>

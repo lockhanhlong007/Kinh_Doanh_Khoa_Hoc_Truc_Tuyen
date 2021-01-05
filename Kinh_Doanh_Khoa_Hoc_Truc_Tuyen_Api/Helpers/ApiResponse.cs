@@ -20,9 +20,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers
             switch (statusCode)
             {
                 case 404:
-                    return "Resource not found";
+                    return "Không tìm thấy trang này";
                 case 500:
-                    return "An unhandled error occurred";
+                    return "Lỗi server";
                 default:
                     return null;
             }

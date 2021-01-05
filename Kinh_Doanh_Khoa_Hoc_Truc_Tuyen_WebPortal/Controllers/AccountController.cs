@@ -136,10 +136,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             }
             catch (Exception e)
             {
-                ModelState.AddModelError("",
-                    e.Message.Equals("false")
-                        ? "Mã kích hoạt này đã được sử dụng rồi"
-                        : "Không tìm thấy mã kích hoạt này");
+                var res = JsonConvert.DeserializeObject<ApiResponse>(e.Message);
+                ModelState.AddModelError("", res.Message);
                 request.NameDash = "Active Course";
                 return View(request);
             }
@@ -338,6 +336,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10);
                     authProperties.IsPersistent = false;
                 }
+                HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                HttpContext.Session.Remove(SystemConstants.EmailSession);
+                HttpContext.Session.Remove(SystemConstants.CartSession);
                 HttpContext.Session.SetString("access_token", result.AccessToken);
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
@@ -432,7 +433,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{userId}");
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{userId}'.");
+                throw new ApplicationException($"Không thể load user với id '{userId}'.");
             }
 
             var result = await _apiClient.PostReturnBooleanAsync($"/api/users/confirm-email",new ConfirmEmailRequest
@@ -469,8 +470,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 // visit https://go.microsoft.com/fwlink/?LinkID=532713
                 var token = await _apiClient.GetStringAsync($"/api/users/{model.Email}-reset-password-token");
                 var callbackUrl = Url.ResetPasswordCallbackLink(user.Id, token, Request.Scheme);
-                await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-                   $"Please reset your password by clicking here: <a href='{callbackUrl}'>link</a>");
+                await _emailSender.SendEmailAsync(model.Email, "Khôi phục mật khẩu",
+                   $"Bạn hãy nhấn vào đây để khôi phục mật khẩu: <a href='{callbackUrl}'>link</a>");
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));
             }
             //If we got this far, something failed, redisplay form

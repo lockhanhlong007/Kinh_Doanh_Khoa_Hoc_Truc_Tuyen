@@ -10,16 +10,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
     {
         public ChangePasswordViewModelValidator()
         {
-            RuleFor(x => x.OldPassword).NotEmpty().WithMessage("Old Password is required");
+            RuleFor(x => x.OldPassword).NotEmpty().WithMessage("Yêu cầu nhập mật khẩu hiện tại");
 
-            RuleFor(x => x.NewPassword).NotEmpty().WithMessage("New Password is required")
-                .MinimumLength(6).WithMessage("New Password is at least 6 characters");
+            RuleFor(x => x.NewPassword).NotEmpty().WithMessage("Yêu cầu nhập mật khẩu mới")
+                .MinimumLength(6).WithMessage("Mật khẩu mới ít nhất 6 ký tự");
 
             RuleFor(x => x).Custom((request, context) =>
                 {
                     if (request.NewPassword != request.ConfirmNewPassword)
                     {
-                        context.AddFailure("Confirm password is not match");
+                        context.AddFailure("Xác nhận mật khẩu và mật khẩu không khớp");
                     }
                 });
 
@@ -27,7 +27,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
             {
                 if (request.OldPassword == request.NewPassword)
                 {
-                    context.AddFailure("old password and new password must be different");
+                    context.AddFailure("Mật khẩu cũ và mật khẩu mới phải khác nhau");
                 }
             });
         }

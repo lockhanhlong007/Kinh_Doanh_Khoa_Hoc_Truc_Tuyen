@@ -7,16 +7,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
     {
         public UserCreateRequestValidator()
         {
-            RuleFor(x => x.UserName).NotEmpty().WithMessage("User name is required");
-            RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required").MinimumLength(6).WithMessage("Password has to at least 6 characters")
-                .Matches(@"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").WithMessage("Password is not match complexity rules.");
-            RuleFor(x => x.Email).NotEmpty().WithMessage("Email is required")
-                .Matches(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$").WithMessage("Email format is not match");
+            RuleFor(x => x.UserName).NotEmpty().WithMessage("Yêu cầu nhập tên đăng nhập");
+            RuleFor(x => x.Password).NotEmpty().WithMessage("Yêu cầu nhập mật khẩu").MinimumLength(6)
+                .WithMessage("Mật khẩu ít nhất 6 ký tự");
+            RuleFor(x => x.Email).NotEmpty().WithMessage("Yêu cầu nhập email")
+                .Matches(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$").WithMessage("Định dạng email không chính xác");
 
-            RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Phone number is required");
+            RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Yêu cầu nhập số điện thoại");
 
-            RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required")
-                .MaximumLength(50).WithMessage("Name can not over 50 characters limit");
+            RuleFor(x => x.Name).NotEmpty().WithMessage("Yêu cầu nhập tên")
+                .MaximumLength(50).WithMessage("Họ và tên phải dưới 50 ký tự");
         }
     }
 }

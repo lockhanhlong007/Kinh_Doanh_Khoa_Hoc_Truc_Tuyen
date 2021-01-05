@@ -3,7 +3,7 @@
         <p-header style="width: 100%">
             <div class="p-grid">
                 <div class="p-col-12">
-                    <h3>List Of Lessons</h3>
+                    <h3>Danh sách bài học</h3>
                 </div>
                 <div class="p-col-7">
                     <button style="margin-right: 5px;" apPermission appFunction="Courses" appAction="View" pButton type="button" label="Back" icon="fa fa-angle-left" class="p-button-success" (click)="Back()"></button>
@@ -27,22 +27,22 @@
                     <th class="p-text-center" style="width: 50px">
                         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'name'">Name
+                    <th class="p-text-center" [pSortableColumn]="'name'">Tên bài học
                         <p-sortIcon [field]="'name'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'videoPath'">Video Path
+                    <th class="p-text-center" [pSortableColumn]="'videoPath'">Video
                         <p-sortIcon [field]="'videoPath'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'attachment'">Attachment
+                    <th class="p-text-center" [pSortableColumn]="'attachment'">Tệp đính kèm
                         <p-sortIcon [field]="'attachment'"></p-sortIcon>
                     </th>
-                    <th style="width: 180px" class="p-text-center" [pSortableColumn]="'sortOrder'">Sort Order
+                    <th style="width: 180px" class="p-text-center" [pSortableColumn]="'sortOrder'">Thứ tự
                         <p-sortIcon [field]="'sortOrder'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'courseName'">Course Name
+                    <th class="p-text-center" [pSortableColumn]="'courseName'">Tên khóa học
                         <p-sortIcon [field]="'courseName'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" style="width: 180px" [pSortableColumn]="'status'">Status
+                    <th class="p-text-center" style="width: 180px" [pSortableColumn]="'status'">Trạng thái
                         <p-sortIcon [field]="'status'"></p-sortIcon>
                     </th>
                 </tr>

@@ -13,9 +13,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public PaymentMethod PaymentMethod { set; get; }
 
-        public Guid UserId { set; get; }
+        public Guid? UserId { set; get; }
 
         public long? Total { get; set; }
+
+        public string Email { get; set; }
 
         public string Address { get; set; }
 
@@ -29,7 +31,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public DateTime? LastModificationTime { get; set; }
 
-        public string CreatedUser { get; set; }
+        public string Name { get; set; }
 
         public string ImageUser { get; set; }
 

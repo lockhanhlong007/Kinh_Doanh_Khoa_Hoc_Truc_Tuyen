@@ -7,7 +7,7 @@
     var imageCourse = env + Model.CourseViewModel.Image;
     var imageUser = env + Model.UserViewModel.Avatar;
     var user = @User.GetUserId();
-    var checkActiveCourse = Model.ActiveCoursesViewModels.Any(x => x.UserId == user);
+    var checkActiveCourse = Model.ActiveCoursesViewModels.Any(x => x.UserId.ToLower() == user);
 }
 @section Scripts{
     <script src="~/assets/js/custom/customCourseDetail.js" asp-append-version="true"></script>
@@ -80,7 +80,7 @@
                                 <span class="pd-detail__price">
                                     @string.Format(CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", promotionPrice)
                                 </span>
-                                <span class="pd-detail__discount">(@Model.CourseViewModel.DiscountPercent% OFF)</span>
+                                <span class="pd-detail__discount">(Giảm @Model.CourseViewModel.DiscountPercent%)</span>
                                 <del class="pd-detail__del">
                                     @string.Format(CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", Model.CourseViewModel.Price)
                                 </del>
@@ -107,7 +107,7 @@
                     <div class="u-s-m-b-15">
                         <div class="pd-detail__rating gl-rating-style">
                             <span class="pd-detail__review u-s-m-l-4">
-                                <a data-click-scroll="#view-review">@Model.CommentViewModels.Count Reviews</a>
+                                <a data-click-scroll="#view-review">@Model.CommentViewModels.Count Bình luận</a>
                             </span>
                         </div>
                     </div>
@@ -131,11 +131,11 @@
                                 <div class="u-s-m-b-15">
                                     @if (checkActiveCourse)
                                     {
-                                        <button class="btn btn--e-brand-b-2" onclick="location.href='/lessons-with-courses-@(Model.CourseViewModel.Id).html'" type="button">Lesson</button>
+                                        <button class="btn btn--e-brand-b-2" onclick="location.href='/lessons-with-courses-@(Model.CourseViewModel.Id).html'" type="button">Bài học</button>
                                     }
                                     else
                                     {
-                                        <button class="btn btn--e-brand-b-2 add-product-in-cart" data-id="@Model.CourseViewModel.Id" type="submit">Thêm Vào Giỏ Hàng</button>
+                                        <button class="btn btn--e-brand-b-2 add-product-in-cart" data-id="@Model.CourseViewModel.Id" type="submit">Thêm vào giỏ</button>
                                     }
                                 </div>
                             </div>
@@ -351,7 +351,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section__text-wrap">
-                        <h1 class="section__heading u-c-secondary u-s-m-b-12">Related Courses</h1>
+                        <h1 class="section__heading u-c-secondary u-s-m-b-12">Khóa học liên quan</h1>
                     </div>
                 </div>
             </div>
@@ -377,7 +377,7 @@
                                         <ul class="product-o__action-list">
                                             <li>
 
-                                                <a class="add-product-in-cart" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>
+                                                <a class="add-product-in-cart" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
                                                 @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
                                             </li>
                                         </ul>

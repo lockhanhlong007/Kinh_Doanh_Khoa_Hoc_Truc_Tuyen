@@ -3,7 +3,7 @@
         <p-header style="width: 100%">
             <div class="p-grid">
                 <div class="p-col-12">
-                    <h3>List Of Comments</h3>
+                    <h3>Danh sách bình luận</h3>
                 </div>
                 <div class="p-col-7">
                     <button style="margin-right: 5px;" apPermission appFunction="Courses" appAction="View" pButton type="button" label="Back" icon="fa fa-angle-left" class="p-button-success" (click)="Back()"></button>
@@ -22,16 +22,16 @@
                     <th class="p-text-center" style="width: 50px">
                         <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'content'">Content
+                    <th class="p-text-center" [pSortableColumn]="'content'">Nội dung
                         <p-sortIcon [field]="'content'"></p-sortIcon>
                     </th>
-                    <th style="width: 150px" class="p-text-center" [pSortableColumn]="'entityType'">Entity Type
+                    <th style="width: 150px" class="p-text-center" [pSortableColumn]="'entityType'">Kiểu bình luận
                         <p-sortIcon [field]="'entityType'"></p-sortIcon>
                     </th>
-                    <th style="width: 200px" class="p-text-center" [pSortableColumn]="'creationTime'">Creation Time
+                    <th style="width: 200px" class="p-text-center" [pSortableColumn]="'creationTime'">Ngày tạo
                         <p-sortIcon [field]="'creationTime'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" style="width: 20%" [pSortableColumn]="'ownerUser'">Created User
+                    <th class="p-text-center" style="width: 20%" [pSortableColumn]="'ownerUser'">Người tạo
                         <p-sortIcon [field]="'ownerUser'"></p-sortIcon>
                     </th>
                 </tr>

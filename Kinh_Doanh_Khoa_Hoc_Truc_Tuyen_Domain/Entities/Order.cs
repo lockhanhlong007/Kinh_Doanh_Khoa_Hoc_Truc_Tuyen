@@ -13,7 +13,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         {
         }
 
-        public Order(int id, PaymentMethod paymentMethod, DateTime creationTime, Guid userId)
+        public Order(int id, PaymentMethod paymentMethod, DateTime creationTime, Guid? userId)
         {
             Id = id;
             PaymentMethod = paymentMethod;
@@ -26,11 +26,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public PaymentMethod PaymentMethod { set; get; }
 
-        public Guid UserId { set; get; }
+        public Guid? UserId { set; get; }
 
         public long? Total { get; set; }
 
         public string Address { get; set; }
+
+        public string Name { get; set; }
+
+        public string Email { get; set; }
 
         public string PhoneNumber { get; set; }
 

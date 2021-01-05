@@ -7,7 +7,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
     {
         public CategoryCreateRequestValidator()
         {
-            RuleFor(x => x.Name).NotEmpty().WithMessage("Category Name is required");
+            RuleFor(x => x.Name).NotEmpty().WithMessage("Yêu cầu nhập tên danh mục");
         }
     }
 }

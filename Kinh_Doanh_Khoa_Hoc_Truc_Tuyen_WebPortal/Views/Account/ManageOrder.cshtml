@@ -11,11 +11,11 @@
                     <ul class="breadcrumb__list">
                         <li class="has-separator">
 
-                            <a href="/">Home</a>
+                            <a href="/">Trang chủ</a>
                         </li>
                         <li class="is-marked">
 
-                            <a href="#">My Orders</a>
+                            <a href="#">Đơn hàng</a>
                         </li>
                     </ul>
                 </div>
@@ -41,10 +41,10 @@
                     <div class="col-lg-9 col-md-12">
                         <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
                             <div class="dash__pad-2">
-                                <h1 class="dash__h1 u-s-m-b-15">My Orders</h1>
+                                <h1 class="dash__h1 u-s-m-b-15">Đơn hàng</h1>
                                 <form class="m-order u-s-m-b-30" method="get">
                                     <div class="m-order__select-wrapper">
-                                        <label class="u-s-m-r-8" for="my-order-sort">Filter:</label>
+                                        <label class="u-s-m-r-8" for="my-order-sort">Lọc:</label>
                                         <select class="select-box select-box--primary-style" id="my-order-sort" name="sortBy" asp-for="SortType"
                                                 onchange="this.form.submit()" asp-items="Model.SortTypes"></select>
                                     </div>
@@ -56,7 +56,7 @@
                                             <div class="manage-o__header u-s-m-b-30">
                                                 <div class="dash-l-r">
                                                     <div>
-                                                        <div class="manage-o__text-2 u-c-secondary">Order #@modelOrderViewModel.Id</div>
+                                                        <div class="manage-o__text-2 u-c-secondary">Mã đơn hàng #@modelOrderViewModel.Id</div>
                                                         <div class="manage-o__text u-c-silver">Ngày tạo: @modelOrderViewModel.CreationTime</div>
                                                     </div>
                                                     <div>
@@ -83,28 +83,28 @@
                                                         <div>
                                                             @if (modelOrderViewModel.Status == OrderStatus.InProgress)
                                                             {
-                                                                <span class="manage-o__badge badge--processing">In Progress</span>
+                                                                <span class="manage-o__badge badge--processing">Đang xử lý</span>
                                                             }
                                                             else if (modelOrderViewModel.Status == OrderStatus.New)
                                                             {
-                                                                <span class="manage-o__badge badge--shipped">New Order</span>
+                                                                <span class="manage-o__badge badge--shipped">Đơn mới</span>
                                                             }
                                                             else if (modelOrderViewModel.Status == OrderStatus.Cancelled)
                                                             {
-                                                                <span class="manage-o__badge" style="background-color: #bbe1ff;color: #fa059e;">Cancelled</span>
+                                                                <span class="manage-o__badge" style="background-color: #bbe1ff;color: #fa059e;">Hủy đơn</span>
                                                             }
                                                             else if (modelOrderViewModel.Status == OrderStatus.Returned)
                                                             {
-                                                                <span class="manage-o__badge" style="background-color: #b9f4a5;color: #c31d1a;">Returned</span>
+                                                                <span class="manage-o__badge" style="background-color: #b9f4a5;color: #c31d1a;">Trả hàng</span>
                                                             }
                                                             else
                                                             {
-                                                                <span class="manage-o__badge badge--delivered">Completed</span>
+                                                                <span class="manage-o__badge badge--delivered">Hoàn thành</span>
                                                             }
                                                         </div>
                                                         <div>
                                                             <span class="manage-o__text-2 u-c-silver">
-                                                                Total:
+                                                                Tổng công:
                                                                 <span class="manage-o__text-2 u-c-secondary">@modelOrderViewModel.Total</span>
                                                             </span>
                                                         </div>

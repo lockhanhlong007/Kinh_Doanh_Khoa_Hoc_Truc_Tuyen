@@ -42,8 +42,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _hostingEnvironment = hostingEnvironment;
         }
 
-        #region Orders
-
         [HttpGet("filter")]
         public async Task<IActionResult> GetOrdersPaging(string filter, int pageIndex, int pageSize)
         {
@@ -63,7 +61,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Message = x.Message,
                 Address = x.Address,
                 PhoneNumber = x.PhoneNumber ?? x.AppUser.PhoneNumber,
-                CreatedUser = x.AppUser.Name + "(" + x.AppUser.Email + ")",
+                Name = x.Name ?? x.AppUser.Name,
+                Email = x.Email ?? x.AppUser.Email,
                 PaymentMethod = x.PaymentMethod,
                 Total = x.Total
             }).ToListAsync();
@@ -118,7 +117,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 orderViewModel.Message = item.Message;
                 orderViewModel.Address = item.Address;
                 orderViewModel.PhoneNumber = item.PhoneNumber ?? user.PhoneNumber;
-                orderViewModel.CreatedUser = user.Name + "(" + user.Email + ")";
+                orderViewModel.Name = item.Name ?? item.AppUser.Name;
+                orderViewModel.Email = item.Email ?? item.AppUser.Email;
                 orderViewModel.PaymentMethod = item.PaymentMethod;
                 orderViewModel.Total = item.Total;
                 orderViewModel.ImageUser = _storageService.GetFileUrl(user.Avatar);
@@ -173,15 +173,46 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Update status order failed"));
         }
 
+        [HttpPut("status-type/client")]
+        [ValidationFilter]
+        public async Task<IActionResult> PutStatusForClientOrder(OrderStatusRequest request)
+        {
+            var order = await _khoaHocDbContext.Orders.FindAsync(request.OrderId);
+            if (order == null)
+            {
+                return NotFound(new ApiNotFoundResponse($"Cannot found the order with id: {request.OrderId}"));
+            }
+            if (request.StatusType == 1)
+            {
+                order.Status = OrderStatus.InProgress;
+            }
+            else if (request.StatusType == 2)
+            {
+                order.Status = OrderStatus.Returned;
+            }
+            else if (request.StatusType == 3)
+            {
+                order.Status = OrderStatus.Cancelled;
+            }
+            else
+            {
+                order.Status = OrderStatus.Completed;
+            }
+            _khoaHocDbContext.Orders.Update(order);
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
+                return Ok();
+            return BadRequest(new ApiBadRequestResponse("Update status order failed"));
+        }
         [HttpPost("export-excel")]
-        public async Task<IActionResult> PostExportOrder(OrderViewModel order)
+        public IActionResult PostExportOrder(OrderViewModel order)
         {
             try
             {
                 var webRootFolder = _hostingEnvironment.WebRootPath;
-                var user = await _userManager.FindByIdAsync(order.UserId.ToString());
-                var resultFile = $"Bill_{user.Name}_{DateTime.Now:dd-MM-yyyy}_{order.UserId}.xlsx";
-                var resultFilePdf = $"Bill_{user.Name}_{DateTime.Now:dd-MM-yyyy}_{order.UserId}.pdf";
+                var resultFile = $"Bill_{order.Name.convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.xlsx";
+                var resultFilePdf = $"Bill_{order.Name.convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.pdf";
+                var date = DateTime.UtcNow.Date;
                 var templateDocument = Path.Combine(webRootFolder, "attachments\\form", "Hoa_Don_Ban_Hang_Le.xlsx");
                 var templateResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFile);
                 var templatePdfResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFilePdf);
@@ -207,10 +238,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         throw new Exception("Không kết nối được với file");
                     }
                     worksheet.Cells[4, 3].Value = User.GetFullName();
-                    worksheet.Cells[5, 3].Value = user.Name;
-                    worksheet.Cells[6, 3].Value = order.Address;
-                    worksheet.Cells[7, 3].Value = user.Email;
-                    worksheet.Cells[8, 3].Value = order.PhoneNumber ?? user.PhoneNumber;
+                    worksheet.Cells[5, 3].Value = order.Name;
+                    worksheet.Cells[6, 3].Value = order.Email;
+                    worksheet.Cells[7, 3].Value = order.PhoneNumber;
+                    worksheet.Cells[8, 3].Value = order.Address;
                     var stt = 1;
                     var index = 11;
                     foreach (var detail in order.OrderDetails)
@@ -281,7 +312,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         worksheet.Cells[index + 2, 3].Value = double.Parse(thanhTien ?? "0").ChuyenSoSangChuoi();
                         worksheet.Cells[index + 2, 3].Style.Font.Bold = true;
                         worksheet.Cells[index + 4, 3].Value =
-                            $"Ngày {order.CreationTime.Day} tháng {order.CreationTime.Month} năm {order.CreationTime.Year}";
+                            $"Ngày {date.Day} tháng {date.Month} năm {date.Year}";
                     }
                     else
                     {
@@ -290,7 +321,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         worksheet.Cells[24, 3].Value = double.Parse(thanhTien ?? "0").ChuyenSoSangChuoi();
                         worksheet.Cells[24, 3].Style.Font.Bold = true;
                         worksheet.Cells[26, 3].Value =
-                            $"Ngày {order.CreationTime.Day} tháng {order.CreationTime.Month} năm {order.CreationTime.Year}";
+                            $"Ngày {date.Day} tháng {date.Month} năm {date.Year}";
                     }
 
                     package.SaveAs(file);
@@ -337,7 +368,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 LastModificationTime = order.LastModificationTime,
                 Status = order.Status,
                 Message = order.Message,
-                CreatedUser = user?.Name + "(" + user?.Email + ")",
+                Name = order.Name ?? user?.Name + "(" + user?.Email + ")",
                 PaymentMethod = order.PaymentMethod,
                 Total = order.Total,
                 OrderDetails = orderDetailViewModel
@@ -377,7 +408,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 LastModificationTime = order.LastModificationTime,
                 Status = order.Status,
                 Message = order.Message,
-                CreatedUser = user?.Name + "(" + user?.Email + ")",
+                Name = order.Name ?? user?.Name + "(" + user?.Email + ")",
                 PaymentMethod = order.PaymentMethod,
                 Total = order.Total,
                 OrderDetails = lstOrderDetailViewModel
@@ -395,8 +426,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             return Ok(order);
         }
-
-
 
         [HttpGet("user-{id}")]
         public async Task<IActionResult> GetOrders(string id)
@@ -418,139 +447,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 PaymentMethod = x.PaymentMethod,
                 Address = x.Address,
                 PhoneNumber = x.PhoneNumber,
+                Name = x.Name,
+                Email = x.Email,
                 Id = x.Id,
             }).ToListAsync();
             return Ok(orderViewModel);
         }
 
-        //[HttpPost]
-        //[ValidationFilter]
-        //public async Task<IActionResult> PostOrder(OrderCreateRequest request)
-        //{
-        //var order = new Order()
-        //{
-        //    Status = request.Status,
-        //    UserId = request.UserId,
-        //    Message = request.Message,
-        //    PaymentMethod = request.PaymentMethod,
-        //    Total = request.Total
-        //};
-        //    await _khoaHocDbContext.Orders.AddAsync(order);
-        //    var result = await _khoaHocDbContext.SaveChangesAsync();
-        //    if (result > 0)
-        //    {
-        //        return Ok();
-        //    }
-
-        //    return BadRequest(new ApiBadRequestResponse("Create order failed"));
-        //}
-
-        //[HttpPut("{id}")]
-        //[ValidationFilter]
-        //public async Task<IActionResult> PutOrder(OrderCreateRequest request)
-        //{
-        //    var order = await _khoaHocDbContext.Orders.FindAsync(request.Id);
-        //    if (order == null)
-        //    {
-        //        return BadRequest(new ApiBadRequestResponse($"Cannot found order with id: {request.Id}"));
-        //    }
-
-        //    order.Status = request.Status;
-        //    order.Message = request.Message;
-        //    order.PaymentMethod = request.PaymentMethod;
-        //    order.UserId = request.UserId;
-        //    _khoaHocDbContext.Orders.Update(order);
-        //    var result = await _khoaHocDbContext.SaveChangesAsync();
-        //    if (result > 0)
-        //    {
-        //        return NoContent();
-        //    }
-
-        //    return BadRequest(new ApiBadRequestResponse("Update order failed"));
-        //}
-
-
-        #endregion
-
-        #region Order Detail
-
-        //[HttpGet("{orderId}/order-details/filter")]
-        //public async Task<IActionResult> GetOrderDetailsPaging(int orderId, string filter, int pageIndex, int pageSize)
-        //{
-        //    var query = _khoaHocDbContext.OrderDetails.Include(x => x.ActivateCourse).Where(x => x.OrderId == orderId).AsNoTracking();
-        //    if (!string.IsNullOrEmpty(filter))
-        //    {
-        //        query = query.Where(x => x.ActivateCourse.Course.Name.Contains(filter));
-        //    }
-        //    var totalRecords = await query.CountAsync();
-        //    var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new OrderDetailViewModel
-        //    {
-        //        OrderId = x.OrderId,
-        //        Price = x.Price,
-        //        CourseName = x.ActivateCourse.Course.Name,
-        //        ActiveCourseId = x.ActiveCourseId,
-        //        PromotionPrice = x.PromotionPrice
-        //    }).ToListAsync();
-
-        //    var pagination = new Pagination<OrderDetailViewModel>
-        //    {
-        //        Items = items,
-        //        TotalRecords = totalRecords,
-        //        PageSize = pageSize,
-        //        PageIndex = pageIndex
-        //    };
-        //    return Ok(pagination);
-        //}
-
-        //[HttpGet("{orderId}/order-details/{activeCourseId}")]
-        //public IActionResult GetOrderDetails(int orderId, string activeCourseId)
-        //{
-        //    var orderDetail = _khoaHocDbContext.OrderDetails.Include(x => x.ActivateCourse)
-        //        .FirstOrDefault(x => x.ActiveCourseId == Guid.Parse(activeCourseId) && x.OrderId == orderId);
-        //    if (orderDetail == null)
-        //    {
-        //        return NotFound(new ApiNotFoundResponse($"Cannot found order detail with active courseId {activeCourseId} and orderId {orderId}"));
-        //    }
-        //    return Ok(new OrderDetailViewModel()
-        //    {
-        //        Price = orderDetail.Price,
-        //        ActiveCourseId = orderDetail.ActiveCourseId,
-        //        PromotionPrice = orderDetail.PromotionPrice,
-        //        CourseName = orderDetail.ActivateCourse.Course.Name,
-        //        OrderId = orderDetail.OrderId
-        //    });
-        //}
-
-        //[HttpPost("{orderId}/order-details/delete-multi-items")]
-        //[ValidationFilter]
-        //public async Task<IActionResult> DeleteOrderDetail(int orderId, List<string> request)
-        //{
-        //    foreach (var activeCourseId in request)
-        //    {
-        //        var orderDetail = _khoaHocDbContext.OrderDetails.Include(x => x.ActivateCourse)
-        //            .FirstOrDefault(x => x.ActiveCourseId == Guid.Parse(activeCourseId) && x.OrderId == orderId);
-        //        if (orderDetail == null)
-        //        {
-        //            return NotFound(new ApiNotFoundResponse($"Cannot found order detail with activeCourseId {activeCourseId} and orderId {orderId}"));
-        //        }
-
-        //        var order = await _khoaHocDbContext.Orders.FindAsync(orderDetail);
-        //        order.Total = order.Total - orderDetail.PromotionPrice ?? orderDetail.Price;
-        //        _khoaHocDbContext.Orders.Update(order);
-        //        _khoaHocDbContext.OrderDetails.Remove(orderDetail);
-
-        //    }
-        //    var result = await _khoaHocDbContext.SaveChangesAsync();
-        //    if (result > 0)
-        //        return Ok();
-        //    return BadRequest(new ApiBadRequestResponse($"Delete order detail failed"));
-        //}
-
         [HttpPut("{orderId}/order-details/{activeCourseId}")]
         [ValidationFilter]
         public async Task<IActionResult> PutOrderDetail(OrderDetailCreateRequest request)
         {
-            var orderDetail =  _khoaHocDbContext.OrderDetails.FirstOrDefault(x => x.ActiveCourseId == request.ActiveCourseId && x.OrderId == request.OrderId);
+            var orderDetail = _khoaHocDbContext.OrderDetails.FirstOrDefault(x => x.ActiveCourseId == request.ActiveCourseId && x.OrderId == request.OrderId);
             if (orderDetail == null)
             {
                 return BadRequest(new ApiBadRequestResponse($"Cannot found order detail with active courseId {request.ActiveCourseId} and orderId {request.OrderId}"));
@@ -578,32 +486,65 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Update order failed"));
         }
 
+        [HttpPost("create")]
+        public async Task<IActionResult> PostOrder(OrderCreateRequest request)
+        {
+            var order = new Order();
+            order.Status = request.Status;
+            order.Message = request.Message;
+            order.Name = request.Name;
+            order.Address = request.Address;
+            order.Email = request.Email;
+            order.PaymentMethod = request.PaymentMethod;
+            order.PhoneNumber = request.PhoneNumber;
+            order.UserId = request.UserId;
+            order.Total = request.OrderDetails.Sum(x => x.PromotionPrice ?? x.Price);
+            await _khoaHocDbContext.Orders.AddAsync(order);
+            await _khoaHocDbContext.SaveChangesAsync();
+            var lstOrderDetails = new List<OrderDetail>();
+            foreach (var orderDetailCreateRequest in request.OrderDetails)
+            {
+                var detail = new OrderDetail();
+                detail.Price = orderDetailCreateRequest.Price;
+                detail.PromotionPrice = orderDetailCreateRequest.PromotionPrice;
+                detail.ActiveCourseId = orderDetailCreateRequest.ActiveCourseId;
+                detail.OrderId = order.Id;
+                orderDetailCreateRequest.OrderId = order.Id;
+                lstOrderDetails.Add(detail);
+            }
 
+            await _khoaHocDbContext.OrderDetails.AddRangeAsync(lstOrderDetails);
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            var orderViewModel = new OrderViewModel();
+            orderViewModel.Id = order.Id;
+            orderViewModel.CreationTime = orderViewModel.CreationTime;
+            orderViewModel.Status = order.Status;
+            orderViewModel.Message = order.Message;
+            orderViewModel.Name = order.Name;
+            orderViewModel.Address = order.Address;
+            orderViewModel.Email = order.Email;
+            orderViewModel.PaymentMethod = order.PaymentMethod;
+            orderViewModel.PhoneNumber = order.PhoneNumber;
+            orderViewModel.UserId = order.UserId;
+            orderViewModel.Total = order.OrderDetails.Sum(x => x.PromotionPrice ?? x.Price);
+            foreach (var detailViewModel in request.OrderDetails)
+            {
+                orderViewModel.OrderDetails.Add(new OrderDetailViewModel
+                {
+                    ActiveCourseId = detailViewModel.ActiveCourseId,
+                    Price = detailViewModel.Price,
+                    PromotionPrice = detailViewModel.PromotionPrice,
+                    OrderId = detailViewModel.OrderId,
+                    CourseName = detailViewModel.CourseName
+                });
+            }
+            if (result > 0)
+            {
+                return Ok(orderViewModel);
+            }
 
+            return BadRequest(new ApiBadRequestResponse("Create order failed"));
+        }
 
-
-
-        //[HttpPost("{orderId}/order-details")]
-        //[ValidationFilter]
-        //public async Task<IActionResult> PostOrderDetail(OrderDetailCreateRequest request)
-        //{
-        //    var orderDetail = new OrderDetail()
-        //    {
-        //        ActiveCourseId = request.ActiveCourseId,
-        //        Price = request.Price,
-        //        OrderId = request.OrderId,
-        //        PromotionPrice = request.PromotionPrice
-        //    };
-        //    await _khoaHocDbContext.OrderDetails.AddAsync(orderDetail);
-        //    var result = await _khoaHocDbContext.SaveChangesAsync();
-        //    if (result > 0)
-        //    {
-        //        return Ok();
-        //    }
-
-        //    return BadRequest(new ApiBadRequestResponse("Create order detail failed"));
-        //}
-
-        #endregion
     }
 }

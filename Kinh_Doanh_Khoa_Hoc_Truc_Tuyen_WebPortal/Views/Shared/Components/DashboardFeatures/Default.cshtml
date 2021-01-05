@@ -8,53 +8,53 @@
             <li>
                 @if (Model.NameDashBoard.Equals("My Profile"))
                 {
-                    <a class="dash-active" href="/my-profile.html">My Profile</a>
+                    <a class="dash-active" href="/my-profile.html">Thông tin cá nhân</a>
                 }
                 else
                 {
-                    <a href="/my-profile.html">My Profile</a>
+            <a href="/my-profile.html">Thông tin cá nhân</a>
                 }
             </li>
             <li>
                 @if (Model.NameDashBoard.Equals("Active Course"))
                 {
-                    <a class="dash-active" href="/active-course.html">Active Course</a>
+                    <a class="dash-active" href="/active-course.html">Kích hoạt khóa học</a>
                 }
                 else
                 {
-                    <a href="/active-course.html">Active Course</a>
+            <a href="/active-course.html">Kích hoạt khóa học</a>
                 }
 
             </li>
             <li>
                 @if (Model.NameDashBoard.Equals("My Orders"))
                 {
-                    <a class="dash-active" href="/manage-orders.html">My Orders</a>
+                    <a class="dash-active" href="/manage-orders.html">Đơn hàng</a>
                 }
                 else
                 {
-                    <a href="/manage-orders.html">My Orders</a>
+            <a href="/manage-orders.html">Đơn hàng</a>
                 }
             </li>
             <li>
                 @if (Model.NameDashBoard.Equals("My Courses"))
                 {
-                    <a class="dash-active" href="/my-courses.html">My Courses</a>
+                    <a class="dash-active" href="/my-courses.html">Khóa học</a>
                 }
                 else
                 {
-                    <a href="/my-courses.html">My Courses</a>
+            <a href="/my-courses.html">Khóa học</a>
                 }
             </li>
             <li>
                 @if (Model.NameDashBoard.Equals("My Announcements"))
                 {
-                    <a class="dash-active" href="/my-announcement.html">My Announcements</a>
+                    <a class="dash-active" href="/my-announcement.html">Thông báo</a>
 
                 }
                 else
                 {
-                    <a href="/my-announcements.html">My Announcements</a>
+            <a href="/my-announcements.html">Thông báo</a>
                 }
             </li>
         </ul>
@@ -70,7 +70,7 @@
 
                     <span class="dash__w-text">@Model.CountOrderPlaced</span>
 
-                    <span class="dash__w-name">Orders Complete</span>
+                    <span class="dash__w-name">Đơn hàng hoàn thành</span>
                 </div>
             </li>
             <li>
@@ -80,7 +80,7 @@
 
                     <span class="dash__w-text">@Model.CountCanceledOrder</span>
 
-                    <span class="dash__w-name">Canceled & Returned Orders</span>
+                    <span class="dash__w-name">Hủy đơn / Trả hàng</span>
                 </div>
             </li>
             <li>
@@ -90,7 +90,7 @@
 
                     <span class="dash__w-text">@Model.CountNewOrder</span>
 
-                    <span class="dash__w-name">New Orders</span>
+                    <span class="dash__w-name">Đơn mới</span>
                 </div>
             </li>
         </ul>

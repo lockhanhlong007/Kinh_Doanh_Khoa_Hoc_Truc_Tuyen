@@ -156,6 +156,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }).ToList());
         }
 
+        [HttpGet("filter-name")]
+        public async Task<IActionResult> GetFilterName()
+        {
+            var data = await _khoaHocDbContext.Courses.Select(x => x.Name).ToListAsync();
+            return Ok(data);
+        }
 
         [HttpGet("related-courses/{id}")]
         public async Task<IActionResult> GetRelatedCourses(int id)
@@ -201,7 +207,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.Contains(filter));
+                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()));
             }
 
             var totalRecords = await query.CountAsync();
@@ -255,7 +261,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var query = data.AsQueryable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.Contains(filter));
+                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
             }
 
             foreach (var item in query)
@@ -510,17 +516,26 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpPut("user-active-course")]
         public async Task<IActionResult> PutActiveCourseForUser(ActiveCourseRequest request)
         {
+
             var key = _khoaHocDbContext.ActivateCourses.FirstOrDefault(x =>
-                x.Id == Guid.Parse(request.Code) && x.UserId == Guid.Parse(request.UserId));
+                x.Id == Guid.Parse(request.Code));
             if (key == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found code: {request.Code}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy mã kích hoạt: {request.Code}"));
+            }
+
+            var checkCourse = _khoaHocDbContext.ActivateCourses.Any(x =>
+                x.UserId.Equals(Guid.Parse(request.UserId)) && x.CourseId == key.CourseId);
+            if (checkCourse)
+            {
+                return BadRequest(new ApiBadRequestResponse("Bạn đã có khóa học này rùi!"));
             }
             if (key.Status)
             {
-                return BadRequest(false);
+                return BadRequest(new ApiBadRequestResponse("Mã kích hoạt này đã được sử dụng rồi"));
             }
             key.Status = true;
+            key.UserId = Guid.Parse(request.UserId);
             _khoaHocDbContext.ActivateCourses.Update(key);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
@@ -528,7 +543,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
 
-            return BadRequest(false);
+            return BadRequest(new ApiBadRequestResponse("Không tìm thấy mã kích hoạt này"));
         }
 
         [HttpGet("my-courses/user-{userId}")]
@@ -583,6 +598,28 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(data);
         }
 
+        [HttpPost("create-active-course")]
+        public async Task<IActionResult> PostActiveCourse(ActiveCourseCreateRequest request)
+        {
+            var key = Guid.NewGuid();
+            var active = new ActivateCourse();
+            active.CourseId = request.CourseId;
+            active.Status = request.Status;
+            active.Id = key;
+            if (!string.IsNullOrEmpty(request.UserId))
+            {
+                active.UserId = Guid.Parse(request.UserId);
+            }
+            await _khoaHocDbContext.ActivateCourses.AddAsync(active);
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
+            {
+                return Ok(key);
+            }
+
+            return BadRequest();
+
+        }
 
         [HttpDelete("{id}/image")]
         public async Task<IActionResult> DeleteAttachment(int id)

@@ -10,7 +10,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
     {
         public PromotionCreateRequestValidator()
         {
-            RuleFor(x => x.Name).NotEmpty().WithMessage("Name is required");
+            RuleFor(x => x.Name).NotEmpty().WithMessage("Yêu cầu nhập tên sự kiện");
         }
     }
 }
