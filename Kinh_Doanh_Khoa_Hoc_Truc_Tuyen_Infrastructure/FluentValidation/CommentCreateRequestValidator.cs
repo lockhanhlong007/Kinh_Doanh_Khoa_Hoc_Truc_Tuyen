@@ -8,11 +8,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
         public CommentCreateRequestValidator()
         {
             RuleFor(x => x.EntityId).GreaterThan(0)
-                .WithMessage("Id is not valid");
+                .WithMessage("Không tồn tại EntityId");
 
-            RuleFor(x => x.Content).NotEmpty().WithMessage("Content is required");
+            RuleFor(x => x.Content).NotEmpty().WithMessage("Yêu cầu nhập nội dung");
 
-            RuleFor(x => x.EntityType).NotEmpty().WithMessage("Type is required");
+            RuleFor(x => x.EntityType).NotEmpty().WithMessage("Yêu cầu nhập entityType");
         }
     }
 }

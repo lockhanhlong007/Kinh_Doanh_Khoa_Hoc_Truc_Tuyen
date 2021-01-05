@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\lib\google-analytics\" />
+    <Folder Include="wwwroot\vnpay\" />
   </ItemGroup>
 
 </Project>

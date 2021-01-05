@@ -12,13 +12,13 @@
                 <div class="breadcrumb__wrap">
                     <ul class="breadcrumb__list">
                         <li class="has-separator">
-                            <a href="/">Home</a>
+                            <a href="/">Trang chủ</a>
                         </li>
                         <li class="has-separator">
-                            <a href="/track-order.html">Track Order</a>
+                            <a href="/manage-orders.html">Đơn hàng</a>
                         </li>
                         <li class="is-marked">
-                            <a href="#">Track Order Detail</a>
+                            <a href="#">Theo dõi đơn hàng</a>
                         </li>
                     </ul>
                 </div>
@@ -47,12 +47,12 @@
                             <div class="dash__pad-2">
                                 <div class="dash-l-r">
                                     <div>
-                                        <div class="manage-o__text-2 u-c-secondary">Order #@Model.OrderViewModel.Id</div>
+                                        <div class="manage-o__text-2 u-c-secondary">Mã đơn hàng #@Model.OrderViewModel.Id</div>
                                         <div class="manage-o__text u-c-silver">Ngày Tạo: @Model.OrderViewModel.CreationTime</div>
                                     </div>
                                     <div>
                                         <div class="manage-o__text-2 u-c-silver">
-                                            Total:
+                                            Tổng cộng:
                                             <span class="manage-o__text-2 u-c-secondary">
                                                 @string.Format(CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", @Model.OrderViewModel.Total)
                                             </span>
@@ -120,7 +120,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">New Order</span>
+                                                            <span class="timeline-text">Đơn mới</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -130,7 +130,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">In Progress</span>
+                                                            <span class="timeline-text">Đăng xử lý</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -140,7 +140,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">Cancelled</span>
+                                                            <span class="timeline-text">Hủy đơn</span>
                                                         </div>
                                                     </div>
                                                 }
@@ -153,7 +153,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">New Order</span>
+                                                            <span class="timeline-text">Đơn mới</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -163,7 +163,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">In Progress</span>
+                                                            <span class="timeline-text">Đang xử lý</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -173,7 +173,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">Completed</span>
+                                                            <span class="timeline-text">Hoàn thành</span>
                                                         </div>
                                                     </div>
                                                 }
@@ -189,7 +189,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">New Order</span>
+                                                            <span class="timeline-text">Đơn mới</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -199,7 +199,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">In Progress</span>
+                                                            <span class="timeline-text">Đang xử lý</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -209,7 +209,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">Cancelled</span>
+                                                            <span class="timeline-text">Hủy đơn</span>
                                                         </div>
                                                     </div>
                                                 }
@@ -222,7 +222,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">New Order</span>
+                                                            <span class="timeline-text">Đơn mới</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -232,7 +232,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">In Progress</span>
+                                                            <span class="timeline-text">Đang xử lý</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -242,7 +242,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">Returned</span>
+                                                            <span class="timeline-text">Trả hàng</span>
                                                         </div>
                                                     </div>
                                                 }
@@ -255,7 +255,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">New Order</span>
+                                                            <span class="timeline-text">Đơn mới</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -265,7 +265,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">In Progress</span>
+                                                            <span class="timeline-text">Đang xử lý</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -275,7 +275,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">Completed</span>
+                                                            <span class="timeline-text">Hoàn thành</span>
                                                         </div>
                                                     </div>
                                                 }
@@ -288,7 +288,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">New Order</span>
+                                                            <span class="timeline-text">Đơn mới</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -298,7 +298,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">In Progress</span>
+                                                            <span class="timeline-text">Đang xử lý</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -308,7 +308,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">Completed</span>
+                                                            <span class="timeline-text">Hoàn thành</span>
                                                         </div>
                                                     </div>
                                                 }
@@ -321,7 +321,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">New Order</span>
+                                                            <span class="timeline-text">Đơn mới</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -331,7 +331,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">In Progress</span>
+                                                            <span class="timeline-text">Đang xử lý</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-lg-4 u-s-m-b-30">
@@ -341,7 +341,7 @@
                                                                 <span class="timeline-circle"></span>
                                                             </div>
 
-                                                            <span class="timeline-text">Completed</span>
+                                                            <span class="timeline-text">Hoàn thành</span>
                                                         </div>
                                                     </div>
                                                 }
@@ -394,18 +394,18 @@
                                     <div class="dash__box dash__box--bg-white dash__box--shadow u-h-100">
                                         <div class="dash__pad-3">
                                             <h2 class="dash__h2 u-s-m-b-8">Thông tin đơn hàng</h2>
-                                            <h2 class="dash__h2 u-s-m-b-8">@Model.OrderViewModel.CreatedUser</h2>
-                                            <span class="dash__text-2">Address: @Model.OrderViewModel.Address</span>
-                                            <span class="dash__text-2">Phone Number: @Model.OrderViewModel.PhoneNumber</span>
+                                            <h2 class="dash__h2 u-s-m-b-8">@Model.OrderViewModel.Name</h2>
+                                            <span class="dash__text-2">Địa chỉ: @Model.OrderViewModel.Address</span>
+                                            <span class="dash__text-2">Số điện thoại: @Model.OrderViewModel.PhoneNumber</span>
                                             <span class="dash__text-2">Tin nhắn: @Model.OrderViewModel.Message</span>
-                                            <h2 class="dash__h2 u-s-m-y-8">Tổng Cộng</h2>>
+                                            <h2 class="dash__h2 u-s-m-y-8">Tổng Cộng</h2>
                                             <div class="dash-l-r u-s-m-b-8">
                                                 <div class="manage-o__text-2 u-c-secondary">Tổng Cộng</div>
                                                 <div class="manage-o__text-2 u-c-secondary">
                                                     @string.Format(CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", Model.OrderViewModel.Total)
                                                 </div>
                                             </div>
-                                            <span class="dash__text-2">Thanh Toán: Cash On Delivery</span>
+                                            <span class="dash__text-2">Thanh Toán: Thanh toán khi nhận hàng</span>
                                         </div>
                                     </div>
                                 }
@@ -414,9 +414,11 @@
                                     <div class="dash__box dash__box--bg-white dash__box--shadow u-h-100">
                                         <div class="dash__pad-3">
                                             <h2 class="dash__h2 u-s-m-b-8">Thông tin đơn hàng</h2>
-                                            <h2 class="dash__h2 u-s-m-b-8">@Model.OrderViewModel.CreatedUser</h2>
-                                            <span class="dash__text-2">Address: @Model.OrderViewModel.Address</span>
-                                            <span class="dash__text-2">Phone Number: @Model.OrderViewModel.PhoneNumber</span>
+                                            <h2 class="dash__h2 u-s-m-b-8">@Model.OrderViewModel.Name</h2>
+                                            <span class="dash__text-2">Địa chỉ: @Model.OrderViewModel.Address</span>
+                                            <span class="dash__text-2">Số điện thoại: @Model.OrderViewModel.PhoneNumber</span>
+                                            <span class="dash__text-2">Email: @Model.OrderViewModel.Email</span>
+                                            <span class="dash__text-2">Tin nhắn: @Model.OrderViewModel.Message</span>
                                             <h2 class="dash__h2 u-s-m-y-8">Tổng Cộng</h2>
                                             <div class="dash-l-r u-s-m-b-8">
                                                 <div class="manage-o__text-2 u-c-secondary">Tổng Cộng</div>
@@ -424,7 +426,7 @@
                                                     @string.Format(CultureInfo.GetCultureInfo("vi-VN"), "{0:C0}", Model.OrderViewModel.Total)
                                                 </div>
                                             </div>
-                                            <span class="dash__text-2">Thanh Toán: Payment Gateway</span>
+                                            <span class="dash__text-2">Thanh Toán: Thanh toán trực tuyến</span>
                                         </div>
                                     </div>
                                 }

@@ -27,15 +27,15 @@ export class RevenueComponent implements OnInit, OnDestroy {
   public isChange = false;
   public chooseType =
   [
-    {value: null, label: 'Choose Filter'},
-    {value: 1, label: 'One Week Ago'},
-    {value: 2, label: 'One Month Ago'},
-    {value: 3, label: 'Range'}
+    {value: null, label: 'Chọn kiểu lọc'},
+    {value: 1, label: '1 tuần trước'},
+    {value: 2, label: '1 tháng trước'},
+    {value: 3, label: 'Phạm vi'}
   ];
   public isChooseType = null;
   public chooseChart =
   [
-    {value: null, label: 'Choose Chart'},
+    {value: null, label: 'Chọn biệu đồ'},
     {value: true, label: 'Bar'},
     {value: false, label: 'Line'}
   ];

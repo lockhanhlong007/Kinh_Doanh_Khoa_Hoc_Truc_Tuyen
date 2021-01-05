@@ -5,13 +5,17 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Protocols;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
@@ -41,70 +45,221 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         [Route("checkout.html")]
         public IActionResult Checkout()
         {
+            var session = HttpContext.Session.Get<List<CartViewModel>>(SystemConstants.CartSession) ?? new List<CartViewModel>();
+            return View(session);
+        }
+
+        [HttpGet]
+        [Route("checkout-confirm.html")]
+        public IActionResult CheckoutConfirm(string message)
+        {
+            ViewData["MessageDelivery"] = message;
             return View();
         }
 
-        ///// <summary>
-        ///// Checkouts the specified model.
-        ///// </summary>
-        ///// <param name="model">The model.</param>
-        ///// <returns></returns>
-        //[Route("checkout.html")]
-        //[ValidateAntiForgeryToken]
-        //[HttpPost]
-        //public async Task<IActionResult> Checkout(CheckoutViewModel model)
-        //{
-        //    var session = HttpContext.Session.Get<List<CartViewModel>>(SystemConstants.CartSession);
-        //    if (ModelState.IsValid)
-        //    {
-        //        if (session != null)
-        //        {
-        //            //var details = session.Select(item => new OrderDetailViewModel()
-        //            //{
-        //            //    Product = item.Product,
-        //            //    Price = item.Price,
-        //            //    ActiveCourseId = item.Product.Id
-        //            //})
-        //            //    .ToList();
-        //            //var billViewModel = new BillViewModel()
-        //            //{
-        //            //    CustomerMobile = model.CustomerMobile,
-        //            //    BillStatus = BillStatus.New,
-        //            //    CustomerAddress = model.CustomerAddress,
-        //            //    CustomerName = model.CustomerName,
-        //            //    CustomerMessage = model.CustomerMessage,
-        //            //    DateCreated = DateTime.Now,
-        //            //    Status = Status.Active,
-        //            //    BillDetails = details
-        //            //};
-        //            //if (User.Identity.IsAuthenticated)
-        //            //{
-        //            //    billViewModel.CustomerId = new Guid(User.GetSpecificClaim("Id"));
-        //            //}
-        //            //try
-        //            //{
-        //            //    _billService.Create(billViewModel);
-        //            //    _billService.Save();
-        //            //    ViewData["Success"] = true;
-        //            //    var content = await _viewRenderService.RenderToStringAsync("ShopCart/BillMail", billViewModel);
-        //            //    //Send mail
-        //            //    await _emailSender.SendEmailAsync(_configuration["MailSettings:AdminMail"], "Đơn Hàng Mới Đến Từ Website Quản Lý Vật Liệu Xây Dựng", content);
+        [HttpGet]
+        [Route("checkout-payment-confirm.html")]
+        public async Task<IActionResult> CheckoutPaymentConfirm()
+        {
+            string vnp_HashSecret = _configuration["VnPaySettings:vnp_HashSecret"]; //Chuoi bi mat
+            var vnpayData = Request.Query;
+            VnPayLibrary vnpay = new VnPayLibrary();
+            if (vnpayData.Count > 0)
+            {
+                foreach (var s in vnpayData)
+                {
+                    //get all querystring data
+                    if (!string.IsNullOrEmpty(s.Key) && s.Key.StartsWith("vnp_"))
+                    {
+                        vnpay.AddResponseData(s.Key, s.Value);
+                    }
+                }
+            }
+            //vnp_TxnRef: Ma don hang merchant gui VNPAY tai command=pay    
+            string vnp_TxnRef = vnpay.GetResponseData("vnp_TxnRef");
+            var checkOrderId = vnp_TxnRef.Split("-");
+            int orderId = int.Parse(checkOrderId[0]);
+            //vnp_TransactionNo: Ma GD tai he thong VNPAY
+            long vnpayTranId = Convert.ToInt64(vnpay.GetResponseData("vnp_TransactionNo"));
+            //vnp_ResponseCode:Response code from VNPAY: 00: Thanh cong, Khac 00: Xem tai lieu
+            string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
+            //vnp_SecureHash: MD5 cua du lieu tra ve
+            string vnp_SecureHash = Request.Query["vnp_SecureHash"];
+            bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
+            if (checkSignature)
+            {
+                if (vnp_ResponseCode == "00")
+                {
+                    //Thanh toan thanh cong
+                    await _apiClient.PutReturnBooleanAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 4 });
+                    var email = HttpContext.Session.Get<string>(SystemConstants.EmailSession);
+                    if (email != null)
+                    {
+                        try
+                        {
+                            await _emailSender.SendEmailAsync(email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn bán mua hàng của bạn");
+                            HttpContext.Session.Remove(SystemConstants.EmailSession);
+                            ViewData["MessagePayment"] = "Thanh toán thành công";
+                        }
+                        catch (Exception e)
+                        {
+                            ViewData["MessagePayment"] = "Có lỗi xảy ra trong quá trình xử lý email";
+                        }
+                       
+                    }
+                    HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                }
+                else
+                {
+                    //Thanh toan khong thanh cong. Ma loi: vnp_ResponseCode
+                    await _apiClient.PutReturnBooleanAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 3 });
+                    HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                    ViewData["MessagePayment"] = "Thanh toán không thành công";
+                }
+            }
+            else
+            {
+                await _apiClient.PutReturnBooleanAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 3 });
+                HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                ViewData["MessagePayment"] = "Có lỗi xảy ra trong quá trình xử lý";
+            }
+            return View();
+        }
+        
+        #region Ajax Method
+        [HttpPost]
+        public async Task<IActionResult> CheckoutForDelivery(OrderCreateRequest model)
+        {
+            var session = HttpContext.Session.Get<List<CartViewModel>>(SystemConstants.CartSession);
+            if (session != null)
+            {
+                try
+                {
+                    var listOrderDetails = new List<OrderDetailCreateRequest>();
+                    foreach (var cartViewModel in session)
+                    {
+                        var active = new ActiveCourseCreateRequest();
+                        active.Status = false;
+                        active.CourseId = cartViewModel.CourseViewModel.Id;
+                        if (User.Identity.IsAuthenticated)
+                        {
+                            active.UserId = User.GetUserId();
+                        }
+                        var key = await _apiClient.PostReturnStringAsync($"/api/courses/create-active-course", active);
+                        var detail = new OrderDetailCreateRequest();
+                        detail.CourseName = cartViewModel.CourseViewModel.Name;
+                        detail.Price = cartViewModel.Price;
+                        detail.PromotionPrice = cartViewModel.PromotionPrice;
+                        detail.ActiveCourseId = Guid.Parse(key);
+                        listOrderDetails.Add(detail);
+                    }
 
-        //            //    HttpContext.Session.Remove(CommonConstants.CartSession);
-        //            //}
-        //            //catch (Exception ex)
-        //            //{
-        //            //    ViewData["Success"] = false;
-        //            //    ModelState.AddModelError("", ex.Message);
-        //            //}
-        //        }
-        //    }
-        //    model.Carts = session;
-        //    return View(model);
-        //}
+                    if (User.Identity.IsAuthenticated)
+                    {
+                        model.UserId = Guid.Parse(User.GetUserId());
+                    }
+
+                    model.Status = OrderStatus.New;
+                    model.OrderDetails = listOrderDetails;
+                    var result = await _apiClient.PostAsync<OrderCreateRequest, OrderViewModel>($"/api/orders/create", model);
+                    var exportBill = await _apiClient.PostAsync<OrderViewModel, ApiResponse>($"/api/orders/export-excel", result);
+                    var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
+                    HttpContext.Session.Remove(SystemConstants.CartSession);
+                    HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
+                    // await _emailSender.SendEmailAsync(model.Email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn bán mua hàng của bạn");
+                    HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                    return Ok();
+                }
+                catch (Exception)
+                {
+                    return BadRequest();
+                }
+            }
+            return BadRequest();
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> CheckoutForPayment()
+        {
+            var session = HttpContext.Session.Get<List<CartViewModel>>(SystemConstants.CartSession);
+            if (session != null)
+            {
+                var model = new OrderCreateRequest();
+                var listOrderDetails = new List<OrderDetailCreateRequest>();
+                var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{User.GetUserId()}");
+                foreach (var cartViewModel in session)
+                {
+                    var active = new ActiveCourseCreateRequest();
+                    active.Status = false;
+                    active.CourseId = cartViewModel.CourseViewModel.Id;
+                    active.UserId = User.GetUserId();
+                    var key = await _apiClient.PostReturnStringAsync($"/api/courses/create-active-course", active);
+                    var detail = new OrderDetailCreateRequest();
+                    detail.CourseName = cartViewModel.CourseViewModel.Name;
+                    detail.Price = cartViewModel.Price;
+                    detail.PromotionPrice = cartViewModel.PromotionPrice;
+                    detail.ActiveCourseId = Guid.Parse(key);
+                    listOrderDetails.Add(detail);
+                }
+                model.Name = user.Name;
+                model.Email = user.Email;
+                model.PhoneNumber = user.PhoneNumber;
+                model.Message = "Thanh toán VNpay";
+                model.Status = OrderStatus.New;
+                model.UserId = user.Id;
+                model.PaymentMethod = PaymentMethod.PaymentGateway;
+                model.OrderDetails = listOrderDetails;
+                var result = await _apiClient.PostAsync<OrderCreateRequest, OrderViewModel>($"/api/orders/create", model);
+                var exportBill = await _apiClient.PostAsync<OrderViewModel, ApiResponse>($"/api/orders/export-excel", result);
+                var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
+                HttpContext.Session.Remove(SystemConstants.CartSession);
+                HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
+                HttpContext.Session.Set(SystemConstants.EmailSession, user.Email);
+                //Get Config Info
+                string vnp_Returnurl = _configuration["VnPaySettings:vnp_Returnurl"]; //URL nhan ket qua tra ve 
+                string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
+                string vnp_TmnCode = _configuration["VnPaySettings:vnp_TmnCode"]; //Ma website
+                string vnp_HashSecret = _configuration["VnPaySettings:vnp_HashSecret"]; //Chuoi bi mat
+                var ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                //Build URL for VNPAY
+                VnPayLibrary vnpay = new VnPayLibrary();
+                vnpay.AddRequestData("vnp_Version", "2.0.0");
+                vnpay.AddRequestData("vnp_Command", "pay");
+                vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+                vnpay.AddRequestData("vnp_Locale", "vn");
+                vnpay.AddRequestData("vnp_CurrCode", "VND");
+                vnpay.AddRequestData("vnp_TxnRef", (result.Id + "-" + DateTime.Now.Ticks));
+                vnpay.AddRequestData("vnp_OrderInfo", result.Message);
+                vnpay.AddRequestData("vnp_OrderType", "insurance"); //default value: other
+                vnpay.AddRequestData("vnp_Amount", (result.Total * 100).ToString());
+                vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
+                vnpay.AddRequestData("vnp_IpAddr", ip);
+                vnpay.AddRequestData("vnp_CreateDate", result.CreationTime.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_BankCode", "NCB");
+                var paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+                return Ok(new
+                {
+                    code = "00",
+                    Message = "Confirm Success",
+                    data = paymentUrl
+                });
+            }
+            return BadRequest();
+        }
 
 
 
+        /// <summary>
+        /// Gets the user by identifier.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
+        /// <returns></returns>
+        public async Task<IActionResult> GetUserById(string id)
+        {
+            var data = await _apiClient.GetAsync<UserViewModel>($"/api/users/{id}");
+            return Ok(data);
+        }
 
         /// <summary>
         /// Lấy Danh Sách Sản Phẩm Trong Giỏ Hàng
@@ -206,5 +361,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             HttpContext.Session.Remove(SystemConstants.CartSession);
             return new OkResult();
         }
+
+        #endregion
     }
 }

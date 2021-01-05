@@ -13,8 +13,7 @@
     <!--====== Google Font ======-->
     <link href="~/font/font-Open-Sans.css" rel="stylesheet" />
     <!--====== JQuery Ui ======-->
-    <link href="~/lib/jqueryui/jquery-ui.css" rel="stylesheet" />
-
+    <link href="~/lib/jqueryui/jquery-ui.min.css" rel="stylesheet" />
     <!--====== Notify Css ======-->
     <link href="~/lib/notify/styles/metro/notify-metro.css" rel="stylesheet" />
 
@@ -26,6 +25,7 @@
 
     <!--====== App ======-->
     <link rel="stylesheet" href="~/assets/css/app.css">
+    @await RenderSectionAsync("CssLinks", required: false)
 
 </head>
 
@@ -57,7 +57,7 @@
                 <div class="modal-content modal-radius modal-shadow">
                     <button class="btn dismiss-button fas fa-times" type="button" data-dismiss="modal"></button>
                     <div class="modal-body" id="modal-add-to-cart">
-                        
+
                     </div>
                 </div>
             </div>
@@ -92,11 +92,11 @@
                         <span class="s-option__text">Đã thêm khóa học vào giỏ hàng</span>
                         <div class="s-option__link-box">
 
-                            <a class="s-option__link btn--e-white-brand-shadow" data-dismiss="modal">Continue Shopping</a>
+                            <a class="s-option__link btn--e-white-brand-shadow" data-dismiss="modal">Tiếp tục mua hàng</a>
 
-                            <a class="s-option__link btn--e-white-brand-shadow" href="/cart.html">View Cart</a>
+                            <a class="s-option__link btn--e-white-brand-shadow" href="/cart.html">Xem giỏ hàng</a>
 
-                            <a class="s-option__link btn--e-brand-shadow" href="/checkout.html">Proceed To Checkout</a>
+                            <a class="s-option__link btn--e-brand-shadow" href="/checkout.html">Tiến hành đặt mua</a>
                         </div>
                     </div>
                 </div>
@@ -120,7 +120,6 @@
     <script src="~/lib/google-analytics/analytics.js" async defer></script>
     <!--====== Jquery ======-->
     <script src="~/lib/jquery/jquery.js"></script>
-    <script src="~/lib/jqueryui/jquery-ui.js"></script>
     <script src="~/lib/jquery-validate/jquery.validate.js"></script>
     <script src="~/lib/jquery-validate/additional-methods.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
@@ -169,6 +168,7 @@
             </div>
         </div>
     </noscript>
+<script src="~/lib/jqueryui/jquery-ui.min.js"></script>
 
     <!--Header Shop Cart-->
     <script src="~/assets/js/custom/customBase.js"></script>

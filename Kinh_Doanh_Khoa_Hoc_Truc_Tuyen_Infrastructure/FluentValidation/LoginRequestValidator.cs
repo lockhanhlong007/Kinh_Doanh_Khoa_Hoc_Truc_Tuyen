@@ -7,9 +7,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
     {
         public LoginRequestValidator()
         {
-            RuleFor(x => x.UserName).NotEmpty().WithMessage("User name is required");
-            RuleFor(x => x.Password).NotEmpty().WithMessage("Password is required")
-                .MinimumLength(6).WithMessage("Password is at least 6 characters");
+            RuleFor(x => x.UserName).NotEmpty().WithMessage("Yêu cầu nhập tên đăng nhập");
+            RuleFor(x => x.Password).NotEmpty().WithMessage("Yêu cầu nhập mật khẩu")
+                .MinimumLength(6).WithMessage("Mật khẩu phải ít nhất 6 ký tự");
         }
     }
 }

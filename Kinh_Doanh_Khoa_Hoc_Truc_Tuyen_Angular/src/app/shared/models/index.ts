@@ -20,3 +20,4 @@ export * from './oder.model';
 export * from './comments.model';
 export * from './statistic.model';
 export * from './revenue.model';
+export * from './user-change-password.model';

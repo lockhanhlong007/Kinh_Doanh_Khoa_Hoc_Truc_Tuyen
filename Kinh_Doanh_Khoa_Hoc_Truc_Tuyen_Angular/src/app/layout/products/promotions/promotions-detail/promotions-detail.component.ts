@@ -29,12 +29,12 @@ public entityId: string;
 public isHiddenAmount = false;
 public isHiddenPercent = false;
 public method: any[] = [
-    {value: null, label: 'Method Discount'},
-    {value: 2, label : 'Discount Amount'},
-    {value: 1, label : 'Discount Percent'}];
+    {value: null, label: 'Phương thức giảm giá'},
+    {value: 2, label : 'Giảm theo giá'},
+    {value: 1, label : 'Giảm theo %'}];
 public isActive: any[] = [
-        {value: true, label : 'Active'},
-        {value: false, label : 'InActive'}];
+        {value: true, label : 'Hoạt động'},
+        {value: false, label : 'Không hoạt động'}];
 public btnDisabled = false;
 public saveBtnName: string;
 public closeBtnName: string;

@@ -7,7 +7,8 @@ export class Order {
     address: string;
     phoneNumber: string;
     message: string;
-    createdUser: string;
+    email: string;
+    name: string;
     creationTime: string;
     lastModificationTime: string;
     status: number;

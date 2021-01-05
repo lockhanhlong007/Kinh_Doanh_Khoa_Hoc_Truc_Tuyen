@@ -7,8 +7,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
     {
         public CourseViewModelRequestValidator()
         {
-            RuleFor(x => x.Name).NotEmpty().WithMessage("Course Name is required");
-            RuleFor(x => x.Content).NotEmpty().WithMessage("Course Content is required");
+            RuleFor(x => x.Name).NotEmpty().WithMessage("Yêu cầu nhập tên khóa học");
+            RuleFor(x => x.Content).NotEmpty().WithMessage("Yêu cầu nhập nội dung khóa học");
         }
     }
 }
