@@ -39,7 +39,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (result == null)
             {
                 _logger.LogError($"Cannot found function with id {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found function with id {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy function với id {id}"));
             }
 
             return Ok(new FunctionViewModel()
@@ -80,7 +80,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (dbFunction != null)
             {
                  _logger.LogError($"Function with id {request.Id} is existed.");
-                return BadRequest(new ApiBadRequestResponse($"Function with id {request.Id} is existed."));
+                return BadRequest(new ApiBadRequestResponse($"Function này đã tồn tại với id {request.Id}"));
             }
 
             var function = new Function
@@ -99,7 +99,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return CreatedAtAction(nameof(GetById), new { id = function.Id }, request);
             }
             _logger.LogError("Create function is failed");
-            return BadRequest(new ApiBadRequestResponse("Create function is failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpGet]
@@ -156,7 +156,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (function == null)
             {
                 _logger.LogError($"Cannot found function with id {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found function with id {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy function với id {id}"));
             }
 
             function.Name = request.Name;
@@ -184,7 +184,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (function == null)
                 {
                     _logger.LogError($"Cannot found function with id {id}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot found function with id {id}"));
+                    return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy function với id {id}"));
                 }
                 var commands = _khoaHocDbContext.CommandInFunctions.Where(x => x.FunctionId == id);
                 if (commands.Any())
@@ -202,7 +202,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (result <= 0)
                 {
                     _logger.LogError("Delete function failed");
-                    return BadRequest(new ApiBadRequestResponse("Delete function failed"));
+                    return BadRequest(new ApiBadRequestResponse("Delete thất bại"));
                 }
 
             }
@@ -244,7 +244,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (check != null)
                 {
                     _logger.LogError("This command has been existed in function");
-                    return BadRequest(new ApiBadRequestResponse("This command has been existed in function"));
+                    return BadRequest(new ApiBadRequestResponse("Command nãy đã tồn tại trong function này"));
                 }
                 var entity = new CommandInFunction()
                 {
@@ -277,7 +277,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
             _logger.LogError("Add command to function failed");
-            return BadRequest(new ApiBadRequestResponse("Add command to function failed"));
+            return BadRequest(new ApiBadRequestResponse("Thêm command vào function thất bại"));
         }
 
         [HttpPost("{functionId}/commands/delete-items")]
@@ -289,7 +289,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 var entity = await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, functionId);
                 if (entity == null)
-                    return BadRequest(new ApiBadRequestResponse("This command is not existed in function"));
+                    return BadRequest(new ApiBadRequestResponse("Command này không có trong function này"));
                 _khoaHocDbContext.CommandInFunctions.Remove(entity);
             }
 
@@ -300,7 +300,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
             _logger.LogError("Delete command to function failed");
-            return BadRequest(new ApiBadRequestResponse("Delete command to function failed"));
+            return BadRequest(new ApiBadRequestResponse("Xóa command trong function thất bại"));
         }
 
     }

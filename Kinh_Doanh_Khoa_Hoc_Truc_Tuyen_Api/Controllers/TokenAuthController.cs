@@ -38,14 +38,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok();
         }
 
-        [HttpGet("Hello")]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
-        public IActionResult Secrect()
-        {
-            return Ok("Hello");
-        }
-
         [HttpPost("Authenticate")]
         [AllowAnonymous]
         public async Task<IActionResult> Authenticate(LoginViewModel model)

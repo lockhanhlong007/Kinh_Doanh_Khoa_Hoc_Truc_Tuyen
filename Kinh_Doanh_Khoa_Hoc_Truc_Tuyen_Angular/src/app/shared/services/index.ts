@@ -1,5 +1,3 @@
-import { from } from 'rxjs';
-
 export * from './auth.service';
 export * from './utilities.service';
 export * from './functions.service';
@@ -12,3 +10,4 @@ export * from './courses.service';
 export * from './lessons.service';
 export * from './statistics.service';
 export * from './promotions.service';
+export * from './announcement.service';

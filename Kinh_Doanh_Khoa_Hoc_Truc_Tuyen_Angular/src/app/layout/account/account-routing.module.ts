@@ -22,6 +22,10 @@ const routes: Routes = [
     {
         path: 'announcement',
         component: AnnouncementComponent
+    },
+    {
+        path: 'announcement',
+        component: AnnouncementComponent
     }
 ];
 

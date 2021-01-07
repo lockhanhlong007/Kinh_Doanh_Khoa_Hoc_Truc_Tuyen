@@ -22,13 +22,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
         private readonly UserManager<AppUser> _userManager;
         private readonly EKhoaHocDbContext _applicationDbContext;
         private readonly RoleManager<AppRole> _roleManager;
+        private readonly IStorageService _storageService;
 
-        public IdentityProfileService(RoleManager<AppRole> roleManager, EKhoaHocDbContext applicationDbContext, UserManager<AppUser> userManager, IUserClaimsPrincipalFactory<AppUser> claimsPrincipalFactory)
+        public IdentityProfileService(RoleManager<AppRole> roleManager, EKhoaHocDbContext applicationDbContext, UserManager<AppUser> userManager, IUserClaimsPrincipalFactory<AppUser> claimsPrincipalFactory, IStorageService storageService)
         {
             _roleManager = roleManager;
             _applicationDbContext = applicationDbContext;
             _userManager = userManager;
             _claimsPrincipalFactory = claimsPrincipalFactory;
+            _storageService = storageService;
         }
 
         public async Task GetProfileDataAsync(ProfileDataRequestContext context)
@@ -56,6 +58,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
             claims.Add(new Claim(ClaimTypes.Email, user.Email));
             claims.Add(new Claim(SystemConstants.Permissions, JsonConvert.SerializeObject(permissions)));
             claims.Add(new Claim("FullName", user.Name));
+            claims.Add(new Claim("Avatar", _storageService.GetFileUrl(user.Avatar)));
             context.IssuedClaims = claims;
 
 

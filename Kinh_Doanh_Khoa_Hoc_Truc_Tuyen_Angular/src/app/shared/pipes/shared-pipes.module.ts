@@ -5,10 +5,23 @@ import { ConvertPathPipe } from './convert-path.pipe';
 import { FormatStatusCoursesPipe } from './format-status-courses.pipe';
 import { FormatStatusBasePipe } from './format-status-base.pipe';
 import { FormatOrderPipe } from './format-order.pipe';
+import { FormatStatusAnnouncePipe } from './format-status-announce.pipe';
 
 @NgModule({
     imports: [CommonModule],
-    declarations: [FormatDataPipe, ConvertPathPipe, FormatStatusCoursesPipe, FormatStatusBasePipe, FormatOrderPipe],
-    exports: [FormatDataPipe, ConvertPathPipe, FormatStatusCoursesPipe, FormatStatusBasePipe, FormatOrderPipe]
+    declarations: [
+        FormatDataPipe,
+        ConvertPathPipe,
+        FormatStatusCoursesPipe,
+        FormatStatusBasePipe,
+        FormatOrderPipe,
+        FormatStatusAnnouncePipe],
+    exports: [
+        FormatDataPipe,
+        ConvertPathPipe,
+        FormatStatusAnnouncePipe,
+        FormatStatusCoursesPipe,
+        FormatStatusBasePipe,
+        FormatOrderPipe]
 })
 export class SharedPipesModule {}

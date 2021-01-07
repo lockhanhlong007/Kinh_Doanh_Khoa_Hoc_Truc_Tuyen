@@ -146,7 +146,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var order = await _khoaHocDbContext.Orders.FindAsync(orderId);
                 if (order == null)
                 {
-                    return NotFound(new ApiNotFoundResponse($"Cannot found the order with id: {orderId}"));
+                    return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy đơn hàng với id: {orderId}"));
                 }
                 if(statusType == 1)
                 {
@@ -170,7 +170,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
-            return BadRequest(new ApiBadRequestResponse("Update status order failed"));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
         }
 
         [HttpPut("status-type/client")]
@@ -180,7 +180,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var order = await _khoaHocDbContext.Orders.FindAsync(request.OrderId);
             if (order == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found the order with id: {request.OrderId}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy đơn hàng với id: {request.OrderId}"));
             }
             if (request.StatusType == 1)
             {
@@ -202,7 +202,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
-            return BadRequest(new ApiBadRequestResponse("Update status order failed"));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
         }
         [HttpPost("export-excel")]
         public IActionResult PostExportOrder(OrderViewModel order)
@@ -210,14 +210,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             try
             {
                 var webRootFolder = _hostingEnvironment.WebRootPath;
-                var resultFile = $"Bill_{order.Name.convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.xlsx";
-                var resultFilePdf = $"Bill_{order.Name.convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.pdf";
+                var resultFile = $"Bill_{order.Name.Replace(" ","_").convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.xlsx";
+                var resultFilePdf = $"Bill_{order.Name.Replace(" ", "_").convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.pdf";
                 var date = DateTime.UtcNow.Date;
                 var templateDocument = Path.Combine(webRootFolder, "attachments\\form", "Hoa_Don_Ban_Hang_Le.xlsx");
                 var templateResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFile);
                 var templatePdfResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFilePdf);
                 FileInfo file = new FileInfo(templateResultDocument);
-
                 if (file.Exists)
                 {
                     file.Delete();
@@ -346,7 +345,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var order = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.Id == id);
             if (order == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found order with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy đơn hàng với id: {id}"));
             }
             var user = await _userManager.FindByIdAsync(order.UserId.ToString());
             var orderDetailViewModel = order.OrderDetails?.Select(x => new OrderDetailViewModel()
@@ -382,7 +381,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var order = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.Id == id && x.UserId == Guid.Parse(userId));
             if (order == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found order with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy đơn hàng với id: {id}"));
             }
             var user = await _userManager.FindByIdAsync(order.UserId.ToString());
             var lstOrderDetailViewModel = new List<OrderDetailViewModel>();
@@ -422,7 +421,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var order = _khoaHocDbContext.Orders.FirstOrDefault(x => x.Id == id && x.UserId == Guid.Parse(userId));
             if (order == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found order with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy đơn hàng với id: {id}"));
             }
             return Ok(order);
         }
@@ -461,7 +460,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var orderDetail = _khoaHocDbContext.OrderDetails.FirstOrDefault(x => x.ActiveCourseId == request.ActiveCourseId && x.OrderId == request.OrderId);
             if (orderDetail == null)
             {
-                return BadRequest(new ApiBadRequestResponse($"Cannot found order detail with active courseId {request.ActiveCourseId} and orderId {request.OrderId}"));
+                return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy mã kích họa {request.ActiveCourseId} và mã đơn hàng {request.OrderId}"));
             }
             orderDetail.ActiveCourseId = request.ActiveCourseId;
             orderDetail.OrderId = request.OrderId;
@@ -472,7 +471,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var order = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.Id == request.OrderId);
             if (order == null)
             {
-                return BadRequest(new ApiBadRequestResponse("Update order failed"));
+                return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
             }
             order!.Total = 0;
             var lstOrderDetail = order!.OrderDetails;
@@ -483,7 +482,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return NoContent();
             }
-            return BadRequest(new ApiBadRequestResponse("Update order failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpPost("create")]
@@ -543,7 +542,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok(orderViewModel);
             }
 
-            return BadRequest(new ApiBadRequestResponse("Create order failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
     }

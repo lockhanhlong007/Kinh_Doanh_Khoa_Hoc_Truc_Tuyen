@@ -94,7 +94,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
             _logger.LogError("Create user failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpGet("{id}")]
@@ -104,7 +104,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (result == null)
             {
                 _logger.LogError($"Cannot found user with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
             }
 
             return Ok(new UserViewModel
@@ -127,7 +127,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (result == null)
             {
                 _logger.LogError($"Cannot found user with userName: {userName}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with userName: {userName}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với username {userName}"));
             }
 
             return Ok(new UserViewModel
@@ -150,7 +150,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (result == null)
             {
                 _logger.LogError($"Cannot found user with email: {email}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with email: {email}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với email: {email}"));
             }
 
             return Ok(new UserViewModel
@@ -176,7 +176,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (user == null)
                 {
                     _logger.LogError($"Cannot found user with email: {email}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {email}"));
+                    return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {email}"));
                 }
 
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -196,13 +196,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {request.UserId}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.UserId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {request.UserId}"));
             }
 
             var result = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
             if (!result.Succeeded)
             {
-                return BadRequest(new ApiBadRequestResponse(result));
+                return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
             }
 
             return Ok();
@@ -217,7 +217,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (user == null)
                 {
                     _logger.LogError($"Cannot found user with id: {id}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+                    return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
                 }
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -237,13 +237,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {request.UserId}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.UserId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {request.UserId}"));
             }
 
             var result = await _userManager.ConfirmEmailAsync(user, request.Code);
             if (!result.Succeeded)
             {
-                return BadRequest(new ApiBadRequestResponse(result));
+                return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
             }
 
             return Ok();
@@ -257,13 +257,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (course == null)
             {
                 _logger.LogError($"Cannot found course with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found course with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy khóa học với id: {id}"));
             }
             var result = await _userManager.FindByNameAsync(course.CreatedUserName);
             if (result == null)
             {
                 _logger.LogError($"Cannot found user with userName: {course.CreatedUserName}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with userName: {course.CreatedUserName}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với username {course.CreatedUserName}"));
             }
             var countStudents = _khoaHocDbContext.ActivateCourses.Include(x => x.Course).Count(x => x.Course.CreatedUserName.Equals(result.UserName) && x.Id != result.Id && x.Status);
             var countCourses = _khoaHocDbContext.Courses.Count(x => x.CreatedUserName.Equals(result.UserName));
@@ -345,7 +345,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {request.Id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.Id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {request.Id}"));
             }
 
             var result = await _userManager.CheckPasswordAsync(user, request.Password);
@@ -353,7 +353,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return Ok();
             }
-            return BadRequest(false);
+            return BadRequest("Mật khẩu hiện tại không đúng với hệ thống");
         }
 
         [HttpPut("{id}")]
@@ -365,9 +365,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
             }
-
             user.Name = request.Name;
             user.Dob = DateTime.Parse(request.Dob);
             if (request.Avatar != null)
@@ -377,10 +376,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 await _storageService.SaveFileAsync(request.Avatar.OpenReadStream(), fileName, "images");
                 user.Avatar = "images/" + fileName;
             }
-            else
-            {
-                user.Avatar = "images/defaultAvatar.png";
-            }
             user.Biography = request.Biography;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -388,7 +383,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NoContent();
             }
             _logger.LogError("Update user failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
         [HttpPut("information-{id}")]
@@ -398,7 +393,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
             }
             user.Name = request.Name;
             user.Dob = DateTime.Parse(request.Dob);
@@ -410,7 +405,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NoContent();
             }
             _logger.LogError("Update user failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
         [HttpPut("{id}/change-avatar")]
@@ -421,7 +416,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {request.Id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.Id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {request.Id}"));
             }
             if (request.Avatar != null)
             {
@@ -440,7 +435,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NoContent();
             }
             _logger.LogError("Update user failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
         [HttpPut("{id}/change-password")]
@@ -451,7 +446,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (user == null)
             {
                 _logger.LogError($"Cannot found user with id: {request.Id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {request.Id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {request.Id}"));
             }
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
@@ -461,7 +456,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
 
             _logger.LogError("Change password failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Đổi mật khẩu thất bại"));
         }
 
         [HttpPost("delete-multi-items")]
@@ -475,25 +470,46 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (user == null)
                 {
                     _logger.LogError($"Cannot found user with id: {id}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {id}"));
+                    return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
 
                 }
                 var adminUsers = await _userManager.GetUsersInRoleAsync(SystemConstants.Admin);
                 if (adminUsers.All(x => x.Id == Guid.Parse(id)))
                 {
                     _logger.LogError("You cannot remove the only admin user remaining.");
-                    return BadRequest(new ApiBadRequestResponse("You cannot remove the only admin user remaining."));
+                    return BadRequest(new ApiBadRequestResponse("Bạn không thể xóa hết tất cả user có quyền admin"));
                 }
                 var result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)
                 {
                     _logger.LogError("Delete user failed");
-                    return BadRequest(new ApiBadRequestResponse(result));
+                    return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
                 }
             }
 
             return Ok();
         }
+
+        [HttpDelete("{id}-delete-avatar")]
+        public async Task<IActionResult> DeleteAvatar(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                _logger.LogError($"Cannot found user with id: {id}");
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
+
+            }
+            user.Avatar = "";
+            _khoaHocDbContext.Users.Update(user);
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            if (result > 0)
+            {
+                return Ok();
+            }
+            return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
+        }
+
 
         [HttpGet("{userId}/menu")]
         public async Task<IActionResult> GetMenuByUserPermission(string userId)
@@ -527,7 +543,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {userId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {userId}"));
             var roles = await _userManager.GetRolesAsync(user);
             return Ok(roles);
         }
@@ -538,16 +554,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             if (request.RoleNames?.Length == 0)
             {
-                return BadRequest(new ApiBadRequestResponse("Role names cannot empty"));
+                return BadRequest(new ApiBadRequestResponse("Tên quyền không được để trống"));
             }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {userId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {userId}"));
             var result = await _userManager.AddToRolesAsync(user, request.RoleNames);
             if (result.Succeeded)
                 return Ok();
 
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpDelete("{userId}/roles")]
@@ -556,24 +572,24 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             if (request.RoleNames?.Length == 0)
             {
-                return BadRequest(new ApiBadRequestResponse("Role names cannot empty"));
+                return BadRequest(new ApiBadRequestResponse("Tên quyền không được để trống"));
             }
             if (request.RoleNames!.Contains(SystemConstants.Admin))
             {
                 if ((await _userManager.GetUsersInRoleAsync("Admin")).Count < 2)
                 {
-                    return BadRequest(new ApiBadRequestResponse($"Cannot remove {SystemConstants.Admin} role"));
+                    return BadRequest(new ApiBadRequestResponse($"Không thể xóa quyền {SystemConstants.Admin}"));
                 }
 
             }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found user with id: {userId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {userId}"));
             var result = await _userManager.RemoveFromRolesAsync(user, request.RoleNames);
             if (result.Succeeded)
                 return Ok();
 
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
     }

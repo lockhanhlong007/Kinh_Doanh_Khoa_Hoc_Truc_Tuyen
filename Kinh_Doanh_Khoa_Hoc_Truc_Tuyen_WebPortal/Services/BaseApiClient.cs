@@ -99,7 +99,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             {
                 return JsonConvert.DeserializeObject<TResponse>(body);
             }
-            throw new Exception(body);
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
 
         public async Task<string> PostReturnStringAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true)
@@ -125,9 +125,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             {
                 return JsonConvert.DeserializeObject<string>(body);
             }
-            throw new Exception(body);
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
-
 
         public async Task<bool> PostReturnBooleanAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true)
         {
@@ -146,11 +145,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.PostAsync(url, httpContent);
+            var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
                 return true;
             }
-            return false;
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
 
         public async Task<bool> PostForFileAsync<TResponse>(string url, MultipartFormDataContent requestContent, bool requiredLogin = true)
@@ -169,7 +169,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             {
                 return true;
             }
-            throw new Exception(body);
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
 
         public async Task<bool> PutForFileAsync<TResponse>(string url, MultipartFormDataContent requestContent, bool requiredLogin = true)
@@ -188,11 +188,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             {
                 return true;
             }
-            throw new Exception(body);
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
 
-
-        public async Task<bool> PutAsync<TRequest, TResponse>(string url, TRequest requestContent, bool requiredLogin = true)
+        public async Task<bool> PutAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true)
         {
             var client = _httpClientFactory.CreateClient("BackendApi");
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
@@ -214,32 +213,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             if (response.IsSuccessStatusCode)
                 return true;
 
-            throw new Exception(body);
-        }
-
-        public async Task<bool> PutReturnBooleanAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true)
-        {
-            var client = _httpClientFactory.CreateClient("BackendApi");
-            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
-            StringContent httpContent = null;
-            if (requestContent != null)
-            {
-                var json = JsonConvert.SerializeObject(requestContent);
-                httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            }
-
-            if (requiredLogin)
-            {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            }
-            var response = await client.PutAsync(url, httpContent);
-            var body = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                return true;
-            }
-            return false;
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
 
         public async Task<bool> Delete(string url, bool requiredLogin = true)
@@ -249,7 +223,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             if (requiredLogin)
             {
                 var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
-                //var token = _httpContextAccessor.HttpContext.Session.GetString(SystemConstants.Token);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.DeleteAsync(url);
@@ -257,7 +230,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
 
             if (response.IsSuccessStatusCode)
                 return true;
-            return false;
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
     }
 }

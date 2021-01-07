@@ -86,42 +86,51 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             //vnp_SecureHash: MD5 cua du lieu tra ve
             string vnp_SecureHash = Request.Query["vnp_SecureHash"];
             bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
-            if (checkSignature)
+            try
             {
-                if (vnp_ResponseCode == "00")
+                if (checkSignature)
                 {
-                    //Thanh toan thanh cong
-                    await _apiClient.PutReturnBooleanAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 4 });
-                    var email = HttpContext.Session.Get<string>(SystemConstants.EmailSession);
-                    if (email != null)
+                    if (vnp_ResponseCode == "00")
                     {
-                        try
+                        //Thanh toan thanh cong
+                        await _apiClient.PutAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 4 });
+                        var email = HttpContext.Session.Get<string>(SystemConstants.EmailSession);
+                        if (email != null)
                         {
-                            await _emailSender.SendEmailAsync(email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn bán mua hàng của bạn");
-                            HttpContext.Session.Remove(SystemConstants.EmailSession);
-                            ViewData["MessagePayment"] = "Thanh toán thành công";
-                        }
-                        catch (Exception e)
-                        {
-                            ViewData["MessagePayment"] = "Có lỗi xảy ra trong quá trình xử lý email";
-                        }
+                            try
+                            {
+                                await _emailSender.SendEmailAsync(email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn mua hàng của bạn");
+                                HttpContext.Session.Remove(SystemConstants.EmailSession);
+                                ViewData["MessagePayment"] = "Thanh toán thành công";
+                                HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                            }
+                            catch (Exception e)
+                            {
+                                ViewData["MessagePayment"] = "Có lỗi xảy ra trong quá trình xử lý email";
+                                HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                                return View();
+                            }
                        
+                        }
                     }
-                    HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                    else
+                    {
+                        //Thanh toan khong thanh cong. Ma loi: vnp_ResponseCode
+                        await _apiClient.PutAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 3 });
+                        HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                        ViewData["MessagePayment"] = "Thanh toán không thành công";
+                    }
                 }
                 else
                 {
-                    //Thanh toan khong thanh cong. Ma loi: vnp_ResponseCode
-                    await _apiClient.PutReturnBooleanAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 3 });
+                    await _apiClient.PutAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 3 });
                     HttpContext.Session.Remove(SystemConstants.AttachmentSession);
-                    ViewData["MessagePayment"] = "Thanh toán không thành công";
+                    ViewData["MessagePayment"] = "Có lỗi xảy ra trong quá trình xử lý";
                 }
             }
-            else
+            catch (Exception e)
             {
-                await _apiClient.PutReturnBooleanAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 3 });
-                HttpContext.Session.Remove(SystemConstants.AttachmentSession);
-                ViewData["MessagePayment"] = "Có lỗi xảy ra trong quá trình xử lý";
+                ViewData["MessagePayment"] = e.Message;
             }
             return View();
         }
@@ -166,18 +175,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
                     HttpContext.Session.Remove(SystemConstants.CartSession);
                     HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
-                    // await _emailSender.SendEmailAsync(model.Email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn bán mua hàng của bạn");
+                    await _emailSender.SendEmailAsync(model.Email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn mua hàng của bạn");
                     HttpContext.Session.Remove(SystemConstants.AttachmentSession);
                     return Ok();
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    return BadRequest();
+                    return BadRequest(e.Message);
                 }
             }
             return BadRequest();
         }
-
 
         [HttpGet]
         public async Task<IActionResult> CheckoutForPayment()
@@ -185,70 +193,75 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             var session = HttpContext.Session.Get<List<CartViewModel>>(SystemConstants.CartSession);
             if (session != null)
             {
-                var model = new OrderCreateRequest();
-                var listOrderDetails = new List<OrderDetailCreateRequest>();
-                var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{User.GetUserId()}");
-                foreach (var cartViewModel in session)
+                try
                 {
-                    var active = new ActiveCourseCreateRequest();
-                    active.Status = false;
-                    active.CourseId = cartViewModel.CourseViewModel.Id;
-                    active.UserId = User.GetUserId();
-                    var key = await _apiClient.PostReturnStringAsync($"/api/courses/create-active-course", active);
-                    var detail = new OrderDetailCreateRequest();
-                    detail.CourseName = cartViewModel.CourseViewModel.Name;
-                    detail.Price = cartViewModel.Price;
-                    detail.PromotionPrice = cartViewModel.PromotionPrice;
-                    detail.ActiveCourseId = Guid.Parse(key);
-                    listOrderDetails.Add(detail);
+                    var model = new OrderCreateRequest();
+                    var listOrderDetails = new List<OrderDetailCreateRequest>();
+                    var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{User.GetUserId()}");
+                    foreach (var cartViewModel in session)
+                    {
+                        var active = new ActiveCourseCreateRequest();
+                        active.Status = false;
+                        active.CourseId = cartViewModel.CourseViewModel.Id;
+                        active.UserId = User.GetUserId();
+                        var key = await _apiClient.PostReturnStringAsync($"/api/courses/create-active-course", active);
+                        var detail = new OrderDetailCreateRequest();
+                        detail.CourseName = cartViewModel.CourseViewModel.Name;
+                        detail.Price = cartViewModel.Price;
+                        detail.PromotionPrice = cartViewModel.PromotionPrice;
+                        detail.ActiveCourseId = Guid.Parse(key);
+                        listOrderDetails.Add(detail);
+                    }
+                    model.Name = user.Name;
+                    model.Email = user.Email;
+                    model.PhoneNumber = user.PhoneNumber;
+                    model.Message = "Thanh toán VNpay";
+                    model.Status = OrderStatus.New;
+                    model.UserId = user.Id;
+                    model.PaymentMethod = PaymentMethod.PaymentGateway;
+                    model.OrderDetails = listOrderDetails;
+                    var result = await _apiClient.PostAsync<OrderCreateRequest, OrderViewModel>($"/api/orders/create", model);
+                    var exportBill = await _apiClient.PostAsync<OrderViewModel, ApiResponse>($"/api/orders/export-excel", result);
+                    var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
+                    HttpContext.Session.Remove(SystemConstants.CartSession);
+                    HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
+                    HttpContext.Session.Set(SystemConstants.EmailSession, user.Email);
+                    //Get Config Info
+                    string vnp_Returnurl = _configuration["VnPaySettings:vnp_Returnurl"]; //URL nhan ket qua tra ve 
+                    string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
+                    string vnp_TmnCode = _configuration["VnPaySettings:vnp_TmnCode"]; //Ma website
+                    string vnp_HashSecret = _configuration["VnPaySettings:vnp_HashSecret"]; //Chuoi bi mat
+                    var ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+                    //Build URL for VNPAY
+                    VnPayLibrary vnpay = new VnPayLibrary();
+                    vnpay.AddRequestData("vnp_Version", "2.0.0");
+                    vnpay.AddRequestData("vnp_Command", "pay");
+                    vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+                    vnpay.AddRequestData("vnp_Locale", "vn");
+                    vnpay.AddRequestData("vnp_CurrCode", "VND");
+                    vnpay.AddRequestData("vnp_TxnRef", (result.Id + "-" + DateTime.Now.Ticks));
+                    vnpay.AddRequestData("vnp_OrderInfo", result.Message);
+                    vnpay.AddRequestData("vnp_OrderType", "insurance"); //default value: other
+                    vnpay.AddRequestData("vnp_Amount", (result.Total * 100).ToString());
+                    vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
+                    vnpay.AddRequestData("vnp_IpAddr", ip);
+                    vnpay.AddRequestData("vnp_CreateDate", result.CreationTime.ToString("yyyyMMddHHmmss"));
+                    vnpay.AddRequestData("vnp_BankCode", "NCB");
+                    var paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+                    return Ok(new
+                    {
+                        code = "00",
+                        Message = "Confirm Success",
+                        data = paymentUrl
+                    });
                 }
-                model.Name = user.Name;
-                model.Email = user.Email;
-                model.PhoneNumber = user.PhoneNumber;
-                model.Message = "Thanh toán VNpay";
-                model.Status = OrderStatus.New;
-                model.UserId = user.Id;
-                model.PaymentMethod = PaymentMethod.PaymentGateway;
-                model.OrderDetails = listOrderDetails;
-                var result = await _apiClient.PostAsync<OrderCreateRequest, OrderViewModel>($"/api/orders/create", model);
-                var exportBill = await _apiClient.PostAsync<OrderViewModel, ApiResponse>($"/api/orders/export-excel", result);
-                var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
-                HttpContext.Session.Remove(SystemConstants.CartSession);
-                HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
-                HttpContext.Session.Set(SystemConstants.EmailSession, user.Email);
-                //Get Config Info
-                string vnp_Returnurl = _configuration["VnPaySettings:vnp_Returnurl"]; //URL nhan ket qua tra ve 
-                string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
-                string vnp_TmnCode = _configuration["VnPaySettings:vnp_TmnCode"]; //Ma website
-                string vnp_HashSecret = _configuration["VnPaySettings:vnp_HashSecret"]; //Chuoi bi mat
-                var ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-                //Build URL for VNPAY
-                VnPayLibrary vnpay = new VnPayLibrary();
-                vnpay.AddRequestData("vnp_Version", "2.0.0");
-                vnpay.AddRequestData("vnp_Command", "pay");
-                vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-                vnpay.AddRequestData("vnp_Locale", "vn");
-                vnpay.AddRequestData("vnp_CurrCode", "VND");
-                vnpay.AddRequestData("vnp_TxnRef", (result.Id + "-" + DateTime.Now.Ticks));
-                vnpay.AddRequestData("vnp_OrderInfo", result.Message);
-                vnpay.AddRequestData("vnp_OrderType", "insurance"); //default value: other
-                vnpay.AddRequestData("vnp_Amount", (result.Total * 100).ToString());
-                vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-                vnpay.AddRequestData("vnp_IpAddr", ip);
-                vnpay.AddRequestData("vnp_CreateDate", result.CreationTime.ToString("yyyyMMddHHmmss"));
-                vnpay.AddRequestData("vnp_BankCode", "NCB");
-                var paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
-                return Ok(new
+                catch (Exception e)
                 {
-                    code = "00",
-                    Message = "Confirm Success",
-                    data = paymentUrl
-                });
+                    return BadRequest(e.Message);
+                }
             }
             return BadRequest();
         }
-
-
 
         /// <summary>
         /// Gets the user by identifier.

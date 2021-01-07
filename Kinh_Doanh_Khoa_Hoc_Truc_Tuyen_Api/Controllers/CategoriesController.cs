@@ -49,7 +49,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.Categories.FindAsync(id);
             if (result == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Category with id: {id} is not found"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thầy danh mục với id: {id}"));
             }
 
             var category = new CategoryViewModel()
@@ -80,11 +80,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return CreatedAtAction(nameof(GetById), new { id = category.Id }, request);
             }
 
-            return BadRequest(new ApiBadRequestResponse("Create category failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo danh mục thất bại"));
         }
 
         [HttpGet]
-        [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
         public async Task<IActionResult> GetCategories()
         {
             return Ok(await _khoaHocDbContext.Categories.Select(x => new CategoryViewModel()
@@ -218,11 +217,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var category = await _khoaHocDbContext.Categories.FindAsync(id);
             if (category == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Category with id: {id} is not found"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy danh mục với id: {id}"));
             }
             if (id == request.ParentId)
             {
-                return BadRequest(new ApiBadRequestResponse("Category cannot be a child itself."));
+                return BadRequest(new ApiBadRequestResponse("Danh mục con không thể là con của danh mục cha này"));
             }
             category.Name = request.Name;
             category.ParentId = request.ParentId;
@@ -233,7 +232,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return NoContent();
             }
-            return BadRequest(new ApiBadRequestResponse("Update category failed"));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
         [HttpGet("{functionId}/parents")]
         [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
@@ -258,7 +257,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var category = await _khoaHocDbContext.Categories.FindAsync(id);
                 if (category == null)
                 {
-                    return NotFound(new ApiNotFoundResponse($"Category with id: {id} is not found"));
+                    return NotFound(new ApiNotFoundResponse($"Không tìm thấy danh mục với id: {id}"));
                 }
                 _khoaHocDbContext.Categories.Remove(category);
               
@@ -268,7 +267,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return Ok();
             }
-            return BadRequest(new ApiBadRequestResponse("Delete category failed"));
+            return BadRequest(new ApiBadRequestResponse("Xóa danh mục thất bại"));
         }
 
     }

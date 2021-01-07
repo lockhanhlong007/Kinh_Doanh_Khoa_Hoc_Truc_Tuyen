@@ -88,9 +88,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         [Route("check-my-announcement.html")]
         public async Task<IActionResult> CheckMyAnnouncement(string announceId, int? pageSize, string filterBy = "true", int page = 1)
         {
-            pageSize ??= 4;
-            await _apiClient.PostReturnBooleanAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest {AnnounceId = announceId, UserId = User.GetUserId()});
-            return RedirectToAction(nameof(MyAnnouncements), new{ pageSize , filterBy , page });
+            try
+            {
+                pageSize ??= 4;
+                await _apiClient.PutAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest {AnnounceId = announceId, UserId = User.GetUserId()});
+                return RedirectToAction(nameof(MyAnnouncements), new{ pageSize , filterBy , page });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpGet]
@@ -131,13 +138,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     Code = request.Code,
                     UserId = User.GetUserId()
                 };
-                await _apiClient.PutAsync<ActiveCourseRequest,bool>($"/api/courses/user-active-course", active);
+                await _apiClient.PutAsync($"/api/courses/user-active-course", active);
                 return RedirectToAction(nameof(ActiveCourseConfirmation));
             }
             catch (Exception e)
             {
-                var res = JsonConvert.DeserializeObject<ApiResponse>(e.Message);
-                ModelState.AddModelError("", res.Message);
+                ModelState.AddModelError("", e.Message);
                 request.NameDash = "Active Course";
                 return View(request);
             }
@@ -210,7 +216,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             user.Email = request.AccountViewModel.Email;
             user.PhoneNumber = request.AccountViewModel.PhoneNumber;
             user.UserName = request.AccountViewModel.UserName;
-            await _apiClient.PutAsync<UserViewModel, bool>($"/api/users/information-{User.GetUserId()}", user);
+            await _apiClient.PutAsync($"/api/users/information-{User.GetUserId()}", user);
             return RedirectToAction(nameof(AccountDetail));
         }
 
@@ -272,13 +278,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 data.CurrentPassword = request.OldPassword;
                 data.Id = request.Id;
 
-                var result = await _apiClient.PutAsync<UserPasswordChangeRequest, bool>($"/api/users/{data.Id}/change-password", data);
+                await _apiClient.PutAsync($"/api/users/{data.Id}/change-password", data);
                 return RedirectToAction(nameof(AccountDetail));
             }
             catch (Exception e)
             {
-                ModelState.AddModelError("",
-                    e.Message.Equals("false") ? "Mật Khẩu Hiện Tại Không Đúng Với Hệ Thống" : "Đổi Mật Khẩu Thất Bại");
+                ModelState.AddModelError("", e.Message);
                 request.NewPassword = null;
                 request.ConfirmNewPassword = null;
                 request.OldPassword = null;
@@ -346,9 +351,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     authProperties);
                 return RedirectToLocal(returnUrl);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                ModelState.AddModelError("", "Tài Khoản Hoặc Mật Khẩu Không Đúng");
+                ModelState.AddModelError("", e.Message);
                 return View();
             }
         }
@@ -507,23 +512,28 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             {
                 return View(model);
             }
-            var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{model.UserId}");
-            if (user == null)
+
+            try
             {
-                // Don't reveal that the user does not exist
+                var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/{model.UserId}");
+                if (user == null)
+                {
+                    // Don't reveal that the user does not exist
+                    return RedirectToAction(nameof(ResetPasswordConfirmation));
+                }
+                await _apiClient.PostReturnBooleanAsync($"/api/users/reset-password-confirm", new ResetPasswordRequest
+                {
+                    Password = model.Password,
+                    Token = model.Token,
+                    UserId = model.UserId.ToString()
+                }, false);
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
-            var result = await _apiClient.PostReturnBooleanAsync($"/api/users/reset-password-confirm", new ResetPasswordRequest
+            catch (Exception e)
             {
-                Password = model.Password,
-                Token = model.Token,
-                UserId = model.UserId.ToString()
-            }, false);
-            if (result)
-            {
-                return RedirectToAction(nameof(ResetPasswordConfirmation));
+                ModelState.AddModelError("", e.Message);
+                return View();
             }
-            return View();
         }
 
         [HttpGet]

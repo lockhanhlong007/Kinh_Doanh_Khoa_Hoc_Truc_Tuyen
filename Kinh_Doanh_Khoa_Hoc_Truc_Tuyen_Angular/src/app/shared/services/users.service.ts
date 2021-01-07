@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 import { BaseService } from './base.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
-import { User, Function } from '../models';
+import { User, Function, UserChangePassword } from '../models';
 import { UtilitiesService } from './utilities.service';
 
 @Injectable({
@@ -17,6 +17,15 @@ export class UsersService extends BaseService {
     this._sharedHeaders = this._sharedHeaders.set('Content-Type', 'application/json');
 
 }
+  updatePassword(entity: UserChangePassword) {
+    return this.http.put(`${environment.ApiUrl}/api/users/${entity.id}/change-password`, entity, { headers: this._sharedHeaders })
+    .pipe(catchError(this.handleError));
+  }
+
+  deleteAvatar(id: string) {
+    return this.http.delete(`${environment.ApiUrl}/api/users/${id}-delete-avatar`,
+     { headers: this._sharedHeaders }).pipe(catchError(this.handleError));
+  }
 
   update(id: string, entity) {
     return this.http.put(`${environment.ApiUrl}/api/users/${id}`, entity,   {

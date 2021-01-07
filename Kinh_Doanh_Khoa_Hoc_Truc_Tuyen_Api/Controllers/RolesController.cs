@@ -47,7 +47,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (role == null)
             {
                 _logger.LogError($"Cannot find role with id: {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot find role with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy quyền với id: {id}"));
             }
             return Ok(new RoleViewModel
             {
@@ -72,7 +72,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return CreatedAtAction(nameof(GetById), new { id = role.Id }, new RoleViewModel());
             }
 
-            return BadRequest(new ApiBadRequestResponse(result));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpGet]
@@ -120,7 +120,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (role == null)
             {
                 _logger.LogError($"Cannot find role with id: {roleViewModel.Id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot find role with id: {roleViewModel.Id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy quyền với id: {roleViewModel.Id}"));
             }
 
             role.Name = roleViewModel.Name;
@@ -130,8 +130,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return NoContent();
             }
-            _logger.LogError("Update role failed");
-            return BadRequest(new ApiBadRequestResponse(result));
+            _logger.LogError("Tạo thất bại");
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
         [HttpPost("delete-multi-items")]
@@ -141,7 +141,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (ids.Contains("Admin"))
             {
                 _logger.LogError("Cannot delete role: Admin");
-                return BadRequest(new ApiBadRequestResponse($"Cannot delete role: Admin"));
+                return BadRequest(new ApiBadRequestResponse($"Không thể xóa quyền: Admin"));
 
             }
             foreach (var id in ids)
@@ -151,7 +151,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (role == null)
                 {
                     _logger.LogError($"Cannot find role with id: {id}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot find role with id: {id}"));
+                    return NotFound(new ApiNotFoundResponse($"Không tìm thấy quyền với id: {id}"));
                 }
 
                 var userInRole = (await _userManager.GetUsersInRoleAsync(role.Name)).ToList();
@@ -170,7 +170,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogError("Delete role failed");
-                    return BadRequest(new ApiBadRequestResponse(result));
+                    return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
                 }
             } 
             return Ok();
@@ -212,7 +212,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     return NoContent();
                 }
                 _logger.LogError("Save permission failed");
-                return BadRequest(new ApiBadRequestResponse("Save permission failed"));
+                return BadRequest(new ApiBadRequestResponse("Lưu permission thất bại"));
             }
             catch (Exception e)
             {

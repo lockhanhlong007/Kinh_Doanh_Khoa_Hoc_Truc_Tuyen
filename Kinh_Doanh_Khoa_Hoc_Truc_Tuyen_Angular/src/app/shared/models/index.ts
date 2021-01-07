@@ -21,3 +21,6 @@ export * from './comments.model';
 export * from './statistic.model';
 export * from './revenue.model';
 export * from './user-change-password.model';
+export * from './announcement-mark-read-request.model';
+export * from './announcement-user.model';
+export * from './announcement.model';
