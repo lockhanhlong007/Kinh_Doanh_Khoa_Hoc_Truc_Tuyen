@@ -22,7 +22,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
             RuleFor(x => x.UserName).NotEmpty().WithMessage("Yêu cầu nhập tên đăng nhập");
 
             RuleFor(x => x.Password).NotEmpty().WithMessage("Yêu cầu mật khẩu")
-                .MinimumLength(6).WithMessage("Mật khẩu phải ít nhất 6 ký tự");
+                .MinimumLength(4).WithMessage("Mật khẩu phải ít nhất 4 ký tự");
 
             RuleFor(x => x).Custom((request, context) =>
             {

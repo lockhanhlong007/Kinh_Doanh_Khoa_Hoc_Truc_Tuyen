@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
@@ -12,9 +13,12 @@ import { AuthService } from '../../../shared/services/auth.service';
 export class HeaderComponent implements OnInit {
     public pushRightClass: string;
     userName: string;
+    public avatar: string;
+    public backendApiUrl = environment.ApiUrl;
     constructor(private translate: TranslateService, public router: Router, private authService: AuthService) {
-        const name = this.authService.getDecodedAccessToken(this.authService.getToken()).preferred_username;
-        this.userName = name;
+        const decode = this.authService.getDecodedAccessToken(this.authService.getToken());
+        this.userName = decode.preferred_username;
+        this.avatar = this.backendApiUrl + decode.Avatar;
         this.router.events.subscribe((val) => {
             if (val instanceof NavigationEnd && window.innerWidth <= 992 && this.isToggled()) {
                 this.toggleSidebar();

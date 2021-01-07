@@ -13,7 +13,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation
             RuleFor(x => x.OldPassword).NotEmpty().WithMessage("Yêu cầu nhập mật khẩu hiện tại");
 
             RuleFor(x => x.NewPassword).NotEmpty().WithMessage("Yêu cầu nhập mật khẩu mới")
-                .MinimumLength(6).WithMessage("Mật khẩu mới ít nhất 6 ký tự");
+                .MinimumLength(4).WithMessage("Mật khẩu mới ít nhất 4 ký tự");
 
             RuleFor(x => x).Custom((request, context) =>
                 {

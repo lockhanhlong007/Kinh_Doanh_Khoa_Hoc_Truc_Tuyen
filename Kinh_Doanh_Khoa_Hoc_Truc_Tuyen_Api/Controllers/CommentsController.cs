@@ -183,15 +183,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(result);
         }
 
-
-
         [HttpGet("{commentId}")]
         public async Task<IActionResult> GetCommentDetail(int commentId)
         {
             var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
             if (comment == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found comment with id: {commentId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy bình luận với id: {commentId}"));
             }
             var user = await _userManager.FindByIdAsync(comment.UserId.ToString());
             var commentViewModel = new CommentViewModel
@@ -223,7 +221,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var course = await _khoaHocDbContext.Courses.FindAsync(request.EntityId);
                 if (course == null)
                 {
-                    return BadRequest(new ApiBadRequestResponse($"Cannot found course with id: {request.EntityId}"));
+                    return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy khóa học với id: {request.EntityId}"));
                 }
                 await _khoaHocDbContext.Comments.AddAsync(comment);
             }
@@ -232,7 +230,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var lesson = await _khoaHocDbContext.Lessons.FindAsync(request.EntityId);
                 if (lesson == null)
                 {
-                    return BadRequest(new ApiBadRequestResponse($"Cannot found lesson with id: {request.EntityId}"));
+                    return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy bài học với id: {request.EntityId}"));
                 }
              
                 await _khoaHocDbContext.Comments.AddAsync(comment);
@@ -253,7 +251,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 });
             }
 
-            return BadRequest(new ApiBadRequestResponse("Create comment failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo bình luận thất bại"));
         }
         [HttpPut("{commentId}/{entityType}/{entityId}")]
         [ValidationFilter]
@@ -262,7 +260,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
             if (comment == null)
             {
-                return BadRequest(new ApiBadRequestResponse($"Cannot found comment with id: {commentId}"));
+                return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy bình luận với id: {commentId}"));
             }
 
             var user = await _userManager.FindByIdAsync(comment.UserId.ToString());
@@ -275,7 +273,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return NoContent();
             }
-            return BadRequest(new ApiBadRequestResponse("Update comment failed"));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
         [HttpPost("delete-multi-items")]
@@ -287,7 +285,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
                 if (comment == null)
                 {
-                    return NotFound(new ApiNotFoundResponse($"Cannot found the comment with id: {commentId}"));
+                    return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy comment với id: {commentId}"));
                 }
                 _khoaHocDbContext.Comments.Remove(comment);
               
@@ -295,7 +293,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
-            return BadRequest(new ApiBadRequestResponse($"Delete comment failed"));
+            return BadRequest(new ApiBadRequestResponse($"Tạo thất bại"));
         }
 
         [HttpPost("delete-single-comment")]
@@ -305,7 +303,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var comment = await _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             if (comment == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found the comment with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy bình luận với id: {id}"));
             }
             _khoaHocDbContext.Comments.Remove(comment);
             var result = await _khoaHocDbContext.SaveChangesAsync();
@@ -325,7 +323,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 };
                 return Ok(commentViewModel);
             }
-            return BadRequest(new ApiBadRequestResponse($"Delete comment failed"));
+            return BadRequest(new ApiBadRequestResponse($"Xóa bình luận thất bại"));
         }
     }
 }

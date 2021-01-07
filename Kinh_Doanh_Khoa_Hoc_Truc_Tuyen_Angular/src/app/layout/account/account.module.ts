@@ -28,9 +28,10 @@ import { TreeTableModule } from 'primeng/treetable';
 import { ValidationMessageModule } from '../../shared/modules/validation-message/validation-message.module';
 import { SharedPipesModule } from '../../shared/pipes/shared-pipes.module';
 import { NotificationService } from '../../shared/services';
+import { AnnouncementDetailComponent } from './announcement/announcement-detail/announcement-detail.component';
 
 @NgModule({
-  declarations: [AccountDetailComponent, ChangePasswordComponent, AnnouncementComponent],
+  declarations: [AccountDetailComponent, ChangePasswordComponent, AnnouncementComponent, AnnouncementDetailComponent],
   imports: [
     CommonModule,
     AccountRoutingModule,

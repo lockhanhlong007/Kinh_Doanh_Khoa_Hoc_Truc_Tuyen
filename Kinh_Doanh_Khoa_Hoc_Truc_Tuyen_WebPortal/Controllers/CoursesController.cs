@@ -95,32 +95,49 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> AddNewComment([FromForm] CommentCreateRequest request)
         {
-            request.UserId = User.GetUserId();
-            var result = await _apiClient.PostAsync<CommentCreateRequest,CommentViewModel>(
-                $"/api/comments/courses/{request.EntityId}", request);
-            result.OwnerUser = User.GetFullName() + " (" + User.GetEmail() + ")";
-            return Ok(result);
+            try
+            {
+                request.UserId = User.GetUserId();
+                var result = await _apiClient.PostAsync<CommentCreateRequest,CommentViewModel>(
+                    $"/api/comments/courses/{request.EntityId}", request);
+                result.OwnerUser = User.GetFullName() + " (" + User.GetEmail() + ")";
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPut]
         public async Task<IActionResult> EditComment([FromForm] CommentCreateRequest request)
         {
-            request.UserId = User.GetUserId();
-            var result = await _apiClient.PutReturnBooleanAsync(
-                $"/api/comments/{request.Id}/courses/{request.EntityId}", request);
-            if (result)
+            try
+            {
+                request.UserId = User.GetUserId();
+                await _apiClient.PutAsync(
+                    $"/api/comments/{request.Id}/courses/{request.EntityId}", request);
                 return Ok();
-            return BadRequest();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpDelete]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var result = await _apiClient.Delete(
-                $"/api/comments/delete-single-comment?id={id}");
-            if (result)
+            try
+            {
+                await _apiClient.Delete(
+                    $"/api/comments/delete-single-comment?id={id}");
                 return Ok();
-            return BadRequest();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
         
         #endregion

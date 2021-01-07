@@ -22,6 +22,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
 
         public Guid UserId { set; get; }
 
+        public string UserFullName { get; set; }
+
         public DateTime CreationTime { get; set; }
 
         public DateTime? LastModificationTime { get; set; }

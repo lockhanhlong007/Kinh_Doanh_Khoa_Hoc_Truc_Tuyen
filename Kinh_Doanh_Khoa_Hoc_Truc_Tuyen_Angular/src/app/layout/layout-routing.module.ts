@@ -40,6 +40,10 @@ const routes: Routes = [
                 },
                 canActivate: [AuthGuard],
                 loadChildren: () => import('./statistics/statistics.module').then((m) => m.StatisticsModule)
+            },
+            {
+                path: 'account',
+                loadChildren: () => import('./account/account.module').then((m) => m.AccountModule)
             }
         ]
     }

@@ -64,7 +64,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (result == null)
             {
                 _logger.LogError($"Cannot found Course with id {id}");
-                return  NotFound(new ApiNotFoundResponse($"Cannot found course with id {id}"));
+                return  NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {id}"));
             }
 
             var countStudent = _khoaHocDbContext.ActivateCourses.Include(x => x.AppUser).Count(x => x.CourseId == id && x.AppUser.UserName != result.CreatedUserName && x.Status);
@@ -100,7 +100,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (dbCourse != null)
             {
                 _logger.LogError($"Course with id {request.Id} is existed.");
-                return BadRequest(new ApiBadRequestResponse($"Course with id {request.Id} is existed."));
+                return BadRequest(new ApiBadRequestResponse($"Đã tồn tại khóa học này với id: {request.Id}"));
             }
 
             var course = new Course
@@ -127,7 +127,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
             _logger.LogError("Create course is failed");
-            return BadRequest(new ApiBadRequestResponse("Create course is failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpGet("new-courses")]
@@ -169,7 +169,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var course = await _khoaHocDbContext.Courses.FindAsync(id);
             if (course == null)
             {
-                return NotFound(new ApiNotFoundResponse($"Cannot found course with id {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {id}"));
             }
             await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             if (conn.State == ConnectionState.Closed)
@@ -319,6 +319,86 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(pagination);
         }
 
+        [HttpGet("client-filter-no-pagination")]
+        public async Task<IActionResult> GetCoursesNoPagingForClient(int? categoryId, long? priceMin, long? priceMax, string sortBy, string filter)
+        {
+            List<CourseViewModel> data;
+            await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            if (conn.State == ConnectionState.Closed)
+            {
+                await conn.OpenAsync();
+            }
+            if (categoryId != null)
+            {
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("@categoryId", categoryId);
+                var category = await _khoaHocDbContext.Categories.FindAsync(categoryId);
+                data = category.ParentId == null
+                    ? (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryParentId", parameters, null, 120,
+                        CommandType.StoredProcedure)).ToList()
+                    : (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryId", parameters, null, 120,
+                        CommandType.StoredProcedure)).ToList();
+            }
+            else
+            {
+                data = (await conn.QueryAsync<CourseViewModel>("ListCourses", null, null, 120,
+                    CommandType.StoredProcedure)).ToList();
+            }
+            var query = data.AsQueryable();
+            if (!string.IsNullOrEmpty(filter))
+            {
+                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
+            }
+
+            foreach (var item in query)
+            {
+                if (item.DiscountPercent > 0)
+                {
+                    item.SortPrice = item.Price - (item.Price * item.DiscountPercent / 100);
+                }
+                else if (item.DiscountAmount > 0)
+                {
+                    item.SortPrice = item.DiscountAmount;
+
+                }
+                else
+                {
+                    item.SortPrice = item.Price;
+                }
+            }
+            if (priceMin != null && priceMax != null)
+            {
+                query = query.Where(x => x.SortPrice >= priceMin && x.SortPrice <= priceMax);
+            }
+            query = sortBy switch
+            {
+                "name" => query.OrderByDescending(x => x.Name),
+                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
+                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
+                _ => query.OrderByDescending(x => x.CreationTime)
+            };
+            var courses = query.Select(c => new CourseViewModel()
+            {
+                Name = c.Name,
+                Status = c.Status,
+                CategoryId = c.CategoryId,
+                Price = c.Price,
+                CreationTime = c.CreationTime,
+                LastModificationTime = c.LastModificationTime,
+                Image = _storageService.GetFileUrl(c.Image),
+                Content = c.Content,
+                Description = c.Description,
+                Id = c.Id,
+                CategoryName = c.CategoryName,
+                DiscountAmount = c.DiscountAmount,
+                DiscountPercent = c.DiscountPercent,
+                CreatedUserName = c.CreatedUserName
+            }).ToList();
+            return Ok(courses);
+        }
+
+
+
         [HttpPut("{id}")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Update)]
         [ValidationFilter]
@@ -329,7 +409,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (course == null)
             {
                 _logger.LogError($"Cannot found course with id {request.Id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found course with id {request.Id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {request.Id}"));
             }
             if (request.Image != null)
             {
@@ -351,7 +431,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NoContent();
             }
             _logger.LogError("Update course failed");
-            return BadRequest(new ApiBadRequestResponse("Update course failed"));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
         [HttpPut("approve")]
@@ -365,7 +445,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (course == null)
                 {
                     _logger.LogError($"Cannot found course with id {id}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot found course with id {id}"));
+                    return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {id}"));
                 }
                 course.Status = 1;
                 _khoaHocDbContext.Courses.Update(course);
@@ -376,7 +456,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NoContent();
             }
             _logger.LogError("Update course failed");
-            return BadRequest(new ApiBadRequestResponse("Update course failed"));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
         [HttpPost("delete-multi-items")]
@@ -424,7 +504,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
             _logger.LogError("Delete Course failed");
-            return BadRequest(new ApiBadRequestResponse("Delete Course failed"));
+            return BadRequest(new ApiBadRequestResponse("Xóa khóa học thất bại"));
         }
 
         [HttpGet("{id}/users")]
@@ -433,7 +513,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             var courses = await _khoaHocDbContext.Courses.FindAsync(id);
             if (courses == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found courses with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {id}"));
             var activateCourses = _khoaHocDbContext.ActivateCourses.Include(x => x.AppUser)
                 .Where(x => x.CourseId == courses.Id).Select(u => new UserViewModel()
                 {
@@ -455,7 +535,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             var courses = await _khoaHocDbContext.Courses.FindAsync(coursesId);
             if (courses == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found courses with id: {coursesId}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
             foreach (var activeCourse in request.Select(id => new ActivateCourse() { UserId = Guid.Parse(id), CourseId = coursesId, Status = false }))
             {
                 await _khoaHocDbContext.ActivateCourses.AddAsync(activeCourse);
@@ -463,7 +543,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
-            return BadRequest(new ApiBadRequestResponse("Create Failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpPost("{coursesId}/users/delete-multi-items")]
@@ -473,7 +553,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             var courses = await _khoaHocDbContext.Courses.FindAsync(coursesId);
             if (courses == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found courses with id: {coursesId}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
             foreach (var id in request)
             {
                 var activeCourse = _khoaHocDbContext.ActivateCourses.FirstOrDefault(x => x.CourseId == coursesId && x.UserId == Guid.Parse(id));
@@ -482,7 +562,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
-            return BadRequest(new ApiBadRequestResponse("Remove Failed"));
+            return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
 
         [HttpPut("{coursesId}/users/active")]
@@ -492,14 +572,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             var courses = await _khoaHocDbContext.Courses.FindAsync(coursesId);
             if (courses == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found courses with id: {coursesId}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
             foreach (var id in input)
             {
                 var activeCourse = _khoaHocDbContext.ActivateCourses.FirstOrDefault(x => x.CourseId == coursesId && x.UserId == Guid.Parse(id));
                 if (activeCourse == null)
                 {
                     _logger.LogError($"Cannot found active course with id {id}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot found active course with id {id}"));
+                    return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy mã kích hoạt với id {id}"));
                 }
                 activeCourse.Status = true;
                 _khoaHocDbContext.ActivateCourses.Update(activeCourse);
@@ -510,7 +590,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
             _logger.LogError("Update active course failed");
-            return BadRequest(new ApiBadRequestResponse("Update active course failed"));
+            return BadRequest(new ApiBadRequestResponse("Update kích hoạt khóa học thất bại"));
         }
 
         [HttpPut("user-active-course")]
@@ -528,7 +608,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 x.UserId.Equals(Guid.Parse(request.UserId)) && x.CourseId == key.CourseId);
             if (checkCourse)
             {
-                return BadRequest(new ApiBadRequestResponse("Bạn đã có khóa học này rùi!"));
+                return BadRequest(new ApiBadRequestResponse("Bạn đã có khóa học này rồi!"));
             }
             if (key.Status)
             {
@@ -617,7 +697,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok(key);
             }
 
-            return BadRequest();
+            return BadRequest("Không thể tạo mã kích hoạt");
 
         }
 
@@ -626,7 +706,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             var course = await _khoaHocDbContext.Courses.FindAsync(id);
             if (course == null)
-                return BadRequest(new ApiBadRequestResponse($"Cannot found courses with id {id}"));
+                return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy khóa học với id {id}"));
             course.Image = "";
             _khoaHocDbContext.Courses.Update(course);
             var result = await _khoaHocDbContext.SaveChangesAsync();
@@ -634,7 +714,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return Ok();
             }
-            return BadRequest(new ApiBadRequestResponse("Delete Image failed"));
+            return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
     }
 }

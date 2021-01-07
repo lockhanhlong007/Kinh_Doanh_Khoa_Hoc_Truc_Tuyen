@@ -80,7 +80,7 @@
                                                         <div class="description-title" style="text-align: justify; align-items: center">@modelOrderViewModel.Message</div>
                                                     </div>
                                                     <div class="description__info-wrap">
-                                                        <div>
+                                                        <div class="u-s-m-b-10">
                                                             @if (modelOrderViewModel.Status == OrderStatus.InProgress)
                                                             {
                                                                 <span class="manage-o__badge badge--processing">Đang xử lý</span>
@@ -104,7 +104,7 @@
                                                         </div>
                                                         <div>
                                                             <span class="manage-o__text-2 u-c-silver">
-                                                                Tổng công:
+                                                                Tổng cộng:
                                                                 <span class="manage-o__text-2 u-c-secondary">@modelOrderViewModel.Total</span>
                                                             </span>
                                                         </div>

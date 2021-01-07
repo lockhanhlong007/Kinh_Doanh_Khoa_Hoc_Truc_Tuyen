@@ -40,7 +40,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (result == null)
             {
                 _logger.LogError($"Cannot found Course with id {id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found course with id {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {id}"));
             }
 
             return Ok(new PromotionViewModel()
@@ -66,7 +66,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (dbPromotion != null)
             {
                 _logger.LogError($"Course with id {request.Id} is existed.");
-                return BadRequest(new ApiBadRequestResponse($"Course with id {request.Id} is existed."));
+                return BadRequest(new ApiBadRequestResponse($"Khóa học này đã tồn tại với id {request.Id}"));
             }
             var promotion = new Promotion()
             {
@@ -85,7 +85,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return CreatedAtAction(nameof(GetById), new { id = promotion.Id }, request);
             }
             _logger.LogError("Create course is failed");
-            return BadRequest(new ApiBadRequestResponse("Create course is failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpGet("filter")]
@@ -131,7 +131,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (promotion == null)
             {
                 _logger.LogError($"Cannot found promotion with id {request.Id}");
-                return NotFound(new ApiNotFoundResponse($"Cannot found promotion with id {request.Id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {request.Id}"));
             }
 
             promotion.Name = request.Name;
@@ -147,7 +147,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NoContent();
             }
             _logger.LogError("Update promotion failed");
-            return BadRequest(new ApiBadRequestResponse("Update promotion failed"));
+            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
 
@@ -161,7 +161,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (promotion == null)
                 {
                     _logger.LogError($"Cannot found promotion with id {id}");
-                    return NotFound(new ApiNotFoundResponse($"Cannot found promotion with id {id}"));
+                    return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {id}"));
                 }
                 var promotionInCourses = _khoaHocDbContext.PromotionInCourses.Where(x => x.PromotionId == id);
                 if (promotionInCourses.Any())
@@ -176,7 +176,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             }
             _logger.LogError("Delete Course failed");
-            return BadRequest(new ApiBadRequestResponse("Delete Course failed"));
+            return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
 
 
@@ -187,7 +187,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             var promotion = await _khoaHocDbContext.Promotions.FindAsync(id);
             if (promotion == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found promotion with id: {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {id}"));
             var promotionCourses = _khoaHocDbContext.PromotionInCourses.Include(x => x.Course)
                 .Where(x => x.PromotionId == promotion.Id && x.Course.Status != 3).Select(x => new CourseViewModel()
                 {
@@ -210,7 +210,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             var promotion = await _khoaHocDbContext.Promotions.FindAsync(promotionId);
             if (promotion == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found promotion with id: {promotionId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {promotionId}"));
             var existingPromotion = _khoaHocDbContext.Promotions.Include(x => x.PromotionInCourses)
                 .Where(x => x.ToDate >= promotion.FromDate　&& x.Id != promotionId).ToList();
             foreach (var promotionCourses in request.Select(id => new PromotionInCourse() {CourseId = id, PromotionId = promotionId}))
@@ -218,14 +218,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 if (existingPromotion.Any(x => x.PromotionInCourses.Any(pic => pic.CourseId == promotionCourses.CourseId)))
                 {
                     var detail = await _khoaHocDbContext.Courses.FindAsync(promotionCourses.CourseId);
-                    return BadRequest(new ApiBadRequestResponse($"Can't not add course(Id: {detail.Id} - Name: {detail.Name}) in promotion(Id: {promotion.Id})"));
+                    return BadRequest(new ApiBadRequestResponse($"Không thể tạo khóa học (Id: {detail.Id} - Tên: {detail.Name}) trong sự kiện với id: {promotion.Id}"));
                 }
                 await _khoaHocDbContext.PromotionInCourses.AddAsync(promotionCourses);
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
-            return BadRequest(new ApiBadRequestResponse("Create Failed"));
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
         [HttpGet("filter/courses")]
@@ -269,7 +269,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             var promotion = await _khoaHocDbContext.Promotions.FindAsync(promotionId);
             if (promotion == null)
-                return NotFound(new ApiNotFoundResponse($"Cannot found promotion with id: {promotionId}"));
+                return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {promotionId}"));
             foreach (var id in request)
             {
                 var promotionInCourses = await _khoaHocDbContext.PromotionInCourses.FindAsync(promotionId, id);
@@ -278,7 +278,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
                 return Ok();
-            return BadRequest(new ApiBadRequestResponse("Remove Failed"));
+            return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
 
     }
