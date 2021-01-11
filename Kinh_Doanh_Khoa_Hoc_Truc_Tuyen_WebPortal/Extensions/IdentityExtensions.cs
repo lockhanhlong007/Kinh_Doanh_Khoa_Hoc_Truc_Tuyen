@@ -49,5 +49,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
                 .SingleOrDefault(x => x.Type == "Avatar");
             return claim?.Value;
         }
+
+        public static string GetToken(this ClaimsPrincipal claimsPrincipal)
+        {
+            var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
+                .Claims
+                .SingleOrDefault(x => x.Type == "access_token");
+            return claim?.Value;
+        }
     }
 }

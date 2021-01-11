@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageConstants } from '../../../../shared';
-import { AuthService, LessonsService, NotificationService, UtilitiesService } from '../../../../shared/services';
+import { AuthService, LessonsService, NotificationService, SignalRService, UtilitiesService } from '../../../../shared/services';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -18,6 +18,7 @@ export class LessonsDetailComponent implements OnInit, OnDestroy {
     private lessonsService: LessonsService,
     private notificationService: NotificationService,
     private utilitiesService: UtilitiesService,
+    private signalRSevice: SignalRService,
     private activeRoute: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder) {
@@ -180,10 +181,10 @@ export class LessonsDetailComponent implements OnInit, OnDestroy {
     if (this.lessonId) {
       this.subscription.add(this.lessonsService.update(this.lessonId, formData)
         .subscribe((response: any) => {
-          console.log('Delete nek1: ' + response);
-          console.log('StatusCode Delete nek2: ' + response.StatusCode);
-          console.log('status Delete nek3: ' + response.status);
-          if (response.status === 204) {
+          if (response.status === 200 && response.body) {
+            if (response.body.announcementViewModel) {
+              this.signalRSevice.SendMessageToUser('SendToUserAsync', response.body.userId, response.body.announcementViewModel);
+            }
             this.notificationService.showSuccess(MessageConstants.Updated_Ok);
             this.router.navigateByUrl('/products/courses/' + this.courseId + '/lessons');
           }

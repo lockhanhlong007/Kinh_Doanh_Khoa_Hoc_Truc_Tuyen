@@ -4,4 +4,5 @@ export class ClientRequest {
     scope: string;
     clientId: string;
     clientSecret: string;
+    rememberMe: boolean;
 }

@@ -7,15 +7,18 @@ using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.HubConfig;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
@@ -33,13 +36,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private ILogger<OrdersController> _logger;
         private readonly IStorageService _storageService;
         private readonly UserManager<AppUser> _userManager;
-        public OrdersController(IWebHostEnvironment webHostEnvironment,EKhoaHocDbContext khoaHocDbContext, ILogger<OrdersController> logger, IStorageService storageService, UserManager<AppUser> userManager, IWebHostEnvironment hostingEnvironment)
+        private readonly IHubContext<ChatHub> _hubContext;
+        public OrdersController(IWebHostEnvironment webHostEnvironment,EKhoaHocDbContext khoaHocDbContext, ILogger<OrdersController> logger, IStorageService storageService, UserManager<AppUser> userManager, IWebHostEnvironment hostingEnvironment, IHubContext<ChatHub> hubContext)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger;
             _storageService = storageService;
             _userManager = userManager;
             _hostingEnvironment = hostingEnvironment;
+            _hubContext = hubContext;
         }
 
         [HttpGet("filter")]
@@ -141,6 +146,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PutStatusOrder(int statusType, List<int> request)
         {
+            var lstAnnouncementToUser = new List<AnnouncementToUserViewModel>();
             foreach (var orderId in request)
             {
                 var order = await _khoaHocDbContext.Orders.FindAsync(orderId);
@@ -165,12 +171,75 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     order.Status = OrderStatus.Completed;
                 }
                 _khoaHocDbContext.Orders.Update(order);
-
+                if (!string.IsNullOrEmpty(order.UserId.ToString()))
+                {
+                    var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
+                    var announceId = Guid.NewGuid();
+                    var announcement = new Announcement();
+                    announcement.UserId = userCurrent.Id;
+                    announcement.Status = 1;
+                    if (statusType == 1)
+                    {
+                        announcement.Content = $"Đơn hàng của bạn đã được tiếp nhận và đang trong quá trình xử lý";
+                    }
+                    else if (statusType == 2)
+                    {
+                        announcement.Content = $"Đơn hàng của bạn đã được trả lại";
+                    }
+                    else if (statusType == 3)
+                    {
+                        announcement.Content = $"Đơn hàng của bạn đã bị hủy";
+                    }
+                    else
+                    {
+                        announcement.Content = $"Đơn hàng của bạn đã được giao";
+                    }
+                    announcement.Title = "Thông báo đơn hàng";
+                    announcement.Id = announceId;
+                    announcement.EntityId = order.Id.ToString();
+                    announcement.EntityType = "orders";
+                    announcement.Image = "images/defaultAvatar.png";
+                    await _khoaHocDbContext.Announcements.AddAsync(announcement);
+                    var announceUser = new AnnouncementUser()
+                    {
+                        UserId = order.UserId!.Value,
+                        AnnouncementId = announceId,
+                        HasRead = false
+                    };
+                    await _khoaHocDbContext.AnnouncementUsers.AddAsync(announceUser);
+                    var result = await _khoaHocDbContext.SaveChangesAsync();
+                    var announcementViewmodel = new AnnouncementViewModel();
+                    announcementViewmodel.UserId = announcement.UserId;
+                    announcementViewmodel.Status = announcement.Status;
+                    announcementViewmodel.Content = announcement.Content;
+                    announcementViewmodel.Title = announcement.Title;
+                    announcementViewmodel.Id = announcement.Id;
+                    announcementViewmodel.EntityId = announcement.EntityId;
+                    announcementViewmodel.EntityType = announcement.EntityType;
+                    announcementViewmodel.Image = announcement.Image;
+                    announcementViewmodel.CreationTime = announcement.CreationTime;
+                    announcementViewmodel.LastModificationTime = announcement.LastModificationTime;
+                    lstAnnouncementToUser.Add(new AnnouncementToUserViewModel()
+                    {
+                        AnnouncementViewModel = announcementViewmodel,
+                        UserId = order.UserId!.Value.ToString()
+                    });
+                    if (result < 0)
+                    {
+                        return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
+                    }
+                       
+                }
+                else
+                {
+                    var result = await _khoaHocDbContext.SaveChangesAsync();
+                    if (result < 0)
+                    {
+                        return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
+                    }
+                }
             }
-            var result = await _khoaHocDbContext.SaveChangesAsync();
-            if (result > 0)
-                return Ok();
-            return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
+            return Ok(lstAnnouncementToUser);
         }
 
         [HttpPut("status-type/client")]
@@ -182,28 +251,49 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy đơn hàng với id: {request.OrderId}"));
             }
-            if (request.StatusType == 1)
-            {
-                order.Status = OrderStatus.InProgress;
-            }
-            else if (request.StatusType == 2)
-            {
-                order.Status = OrderStatus.Returned;
-            }
-            else if (request.StatusType == 3)
-            {
-                order.Status = OrderStatus.Cancelled;
-            }
-            else
+            if (request.StatusType == 4)
             {
                 order.Status = OrderStatus.Completed;
             }
+            else
+            {
+                order.Status = OrderStatus.Cancelled;
+            }
             _khoaHocDbContext.Orders.Update(order);
+            var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
+            var announceId = Guid.NewGuid();
+            var announcement = new Announcement();
+            announcement.UserId = userCurrent.Id;
+            announcement.Status = 1;
+            if (request.StatusType == 4)
+            {
+                announcement.Content = $"Đơn hàng của bạn đã được giao";
+            }
+            else
+            {
+                announcement.Content = $"Đơn hàng của bạn đã bị hủy";
+            }
+            announcement.Title = "Thông báo đơn hàng";
+            announcement.Id = announceId;
+            announcement.EntityId = order.Id.ToString();
+            announcement.EntityType = "orders";
+            announcement.Image = "images/defaultAvatar.png";
+            await _khoaHocDbContext.Announcements.AddAsync(announcement);
+            var announceUser = new AnnouncementUser()
+            {
+                UserId = order.UserId!.Value,
+                AnnouncementId = announceId,
+                HasRead = false
+            };
+            await _khoaHocDbContext.AnnouncementUsers.AddAsync(announceUser);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
+            {
                 return Ok();
+            }
             return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
         }
+        
         [HttpPost("export-excel")]
         public IActionResult PostExportOrder(OrderViewModel order)
         {
@@ -545,5 +635,106 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
 
+        [HttpPost("create-delivery")]
+        public async Task<IActionResult> PostOrderForDelivery(OrderCreateRequest request)
+        {
+            var order = new Order();
+            order.Status = request.Status;
+            order.Message = request.Message;
+            order.Name = request.Name;
+            order.Address = request.Address;
+            order.Email = request.Email;
+            order.PaymentMethod = request.PaymentMethod;
+            order.PhoneNumber = request.PhoneNumber;
+            order.UserId = request.UserId;
+            order.Total = request.OrderDetails.Sum(x => x.PromotionPrice ?? x.Price);
+            await _khoaHocDbContext.Orders.AddAsync(order);
+            await _khoaHocDbContext.SaveChangesAsync();
+            var lstOrderDetails = new List<OrderDetail>();
+            foreach (var orderDetailCreateRequest in request.OrderDetails)
+            {
+                var detail = new OrderDetail();
+                detail.Price = orderDetailCreateRequest.Price;
+                detail.PromotionPrice = orderDetailCreateRequest.PromotionPrice;
+                detail.ActiveCourseId = orderDetailCreateRequest.ActiveCourseId;
+                detail.OrderId = order.Id;
+                orderDetailCreateRequest.OrderId = order.Id;
+                lstOrderDetails.Add(detail);
+            }
+            await _khoaHocDbContext.OrderDetails.AddRangeAsync(lstOrderDetails);
+
+            var announceOrderClient = new AnnouncementToUserForOrderClientViewModel();
+            var announceId = Guid.NewGuid();
+            var announcement = new Announcement();
+            if (!string.IsNullOrEmpty(order.UserId.ToString()))
+            {
+                var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
+                announcement.UserId = userCurrent.Id;
+            }
+            announcement.Status = 1;
+            announcement.Content = $"Bạn có 1 đơn hàng mới từ {request.Name} với tin nhắn: {request.Message.formatData(30)}";
+            announcement.Title = "Thông báo đơn hàng mới";
+            announcement.Id = announceId;
+            announcement.EntityId = order.Id.ToString();
+            announcement.EntityType = "orders";
+            announcement.Image = "images/defaultAvatar.png";
+            await _khoaHocDbContext.Announcements.AddAsync(announcement);
+            var users = await _userManager.GetUsersInRoleAsync("Admin");
+            foreach (var user in users)
+            {
+                var announceUser = new AnnouncementUser()
+                {
+                    UserId = user.Id,
+                    AnnouncementId = announceId,
+                    HasRead = false
+                };
+                await _khoaHocDbContext.AnnouncementUsers.AddAsync(announceUser);
+            }
+            var result = await _khoaHocDbContext.SaveChangesAsync();
+            var announcementViewmodel = new AnnouncementViewModel();
+            announcementViewmodel.UserId = announcement.UserId;
+            announcementViewmodel.Status = announcement.Status;
+            announcementViewmodel.Content = announcement.Content;
+            announcementViewmodel.Title = announcement.Title;
+            announcementViewmodel.Id = announcement.Id;
+            announcementViewmodel.EntityId = announcement.EntityId;
+            announcementViewmodel.EntityType = announcement.EntityType;
+            announcementViewmodel.Image = announcement.Image;
+            announcementViewmodel.CreationTime = announcement.CreationTime;
+            announcementViewmodel.LastModificationTime = announcement.LastModificationTime;
+            announceOrderClient.AnnouncementViewModel = announcementViewmodel;
+            var orderViewModel = new OrderViewModel();
+            orderViewModel.Id = order.Id;
+            orderViewModel.CreationTime = orderViewModel.CreationTime;
+            orderViewModel.Status = order.Status;
+            orderViewModel.Message = order.Message;
+            orderViewModel.Name = order.Name;
+            orderViewModel.Address = order.Address;
+            orderViewModel.Email = order.Email;
+            orderViewModel.PaymentMethod = order.PaymentMethod;
+            orderViewModel.PhoneNumber = order.PhoneNumber;
+            orderViewModel.UserId = order.UserId;
+            orderViewModel.Total = order.OrderDetails.Sum(x => x.PromotionPrice ?? x.Price);
+           
+            foreach (var detailViewModel in request.OrderDetails)
+            {
+                orderViewModel.OrderDetails.Add(new OrderDetailViewModel
+                {
+                    ActiveCourseId = detailViewModel.ActiveCourseId,
+                    Price = detailViewModel.Price,
+                    PromotionPrice = detailViewModel.PromotionPrice,
+                    OrderId = detailViewModel.OrderId,
+                    CourseName = detailViewModel.CourseName
+                });
+            }
+            announceOrderClient.OrderViewModel = orderViewModel;
+            await _hubContext.Clients.All.SendAsync("ReceiveMessageFromServer", users.Select(x => x.Id).ToList(), announcementViewmodel);
+            if (result > 0)
+            {
+                return Ok(announceOrderClient);
+            }
+
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
+        }
     }
 }

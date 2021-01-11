@@ -15,7 +15,7 @@
                 var template = $("#tmpl_comments").html();
                 var newComment = Mustache.render(template, {
                     content: response.content,
-                    creationTime: formatRelativeTime(response.creationTime),
+                    creationTime: moment(response.creationTime).fromNow(),
                     ownerUser: response.ownerUser
                 });
                 $("#reviewer-text").val("");
@@ -53,7 +53,7 @@
                         var newComment = Mustache.render(template, {
                             id: response.id,
                             content: response.content,
-                            creationTime: formatRelativeTime(response.creationTime),
+                            creationTime: moment(response.creationTime).fromNow(),
                             ownerUser: response.ownerUser
                         });
 
@@ -115,7 +115,7 @@
                             $.each(item.children.items, function (childIndex, childItem) {
                                 childrenHtml += Mustache.render(childrenTemplate, {
                                     content: childItem.content,
-                                    creationTime: formatRelativeTime(childItem.creationTime),
+                                    creationTime: moment(childItem.creationTime).fromNow(),
                                     ownerUser: childItem.ownerUser,
                                     id: childItem.id
                                 });
@@ -131,7 +131,7 @@
                         html += Mustache.render(template, {
                             childrenHtml: childrenHtml,
                             content: item.content,
-                            creationTime: formatRelativeTime(item.creationTime),
+                            creationTime: moment(item.creationTime).fromNow(),
                             ownerUser: item.ownerUser,
                             id: item.id
                         });
@@ -159,7 +159,7 @@
                     $.each(response.items, function (index, item) {
                         html += Mustache.render(childrenTemplate, {
                             content: item.content,
-                            creationTime: formatRelativeTime(item.creationTime),
+                            creationTime: moment(item.creationTime).fromNow(),
                             ownerUser: item.ownerUser,
                             id: item.id
                         });

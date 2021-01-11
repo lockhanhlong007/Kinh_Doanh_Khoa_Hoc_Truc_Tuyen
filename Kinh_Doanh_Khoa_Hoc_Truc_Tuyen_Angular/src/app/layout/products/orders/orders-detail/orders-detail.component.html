@@ -3,74 +3,74 @@
     <p-panel #pnl header="Information" [toggleable]="true" [collapsed]="false" styleClass="m-b-10">
         <div *ngIf="res" class="p-grid-pad p-fluid p-grid-responsive">
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Tên khách hàng:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.name}}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Địa chỉ:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.address}}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Email:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.email}}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Số điện thoại:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.phoneNumber}}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Tin nhắn:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.message}}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Phương thức thanh toán:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.paymentMethod | formatOrder: 'paymentMethod'}}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Tổng cộng:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.total | currency:'VND':'symbol':'1.0-3' }}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Trạng thái:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.status | formatOrder}}</span>
                 </div>
             </div>
             <div class="p-field p-grid">
-                <div class="p-col-3">
+                <div class="p-col-4">
                     <span class="required">Ngày tạo:</span>
                 </div>
-                <div class="p-col-9">
+                <div class="p-col-8">
                     <span>{{res.creationTime | date: 'dd/MM/yyyy hh:mm:ss'}}</span>
                 </div>
             </div>

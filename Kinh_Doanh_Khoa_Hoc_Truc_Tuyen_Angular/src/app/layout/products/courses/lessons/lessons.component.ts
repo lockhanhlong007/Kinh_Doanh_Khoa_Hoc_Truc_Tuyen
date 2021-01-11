@@ -4,7 +4,7 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
 import { MessageConstants } from '../../../../shared';
 import { Lessons, Pagination } from '../../../../shared/models';
-import { AuthService, LessonsService, NotificationService } from '../../../../shared/services';
+import { AuthService, LessonsService, NotificationService, SignalRService } from '../../../../shared/services';
 
 @Component({
   selector: 'app-lessons',
@@ -32,6 +32,7 @@ export class LessonsComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notificationService: NotificationService,
     private modalService: BsModalService,
+    private signalRSevice: SignalRService,
     private activeRoute: ActivatedRoute,
     private router: Router) { }
 
@@ -119,10 +120,15 @@ export class LessonsComponent implements OnInit, OnDestroy {
     this.selectedItems.map(data => {
       entity.push(data.id);
     });
-    this.subscription.add(this.lessonsService.approve(entity).subscribe(() => {
-      this.notificationService.showSuccess(MessageConstants.Updated_Ok);
-      this.loadData();
-      this.selectedItems = [];
+    this.subscription.add(this.lessonsService.approve(entity).subscribe((response: any[]) => {
+      if (response.length > 0) {
+        response.map(data => {
+          this.signalRSevice.SendMessageToUser('SendToUserAsync', data.userId, data.announcementViewModel);
+        });
+        this.loadData();
+        this.selectedItems = [];
+        this.notificationService.showSuccess(MessageConstants.Approve_Ok);
+      }
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     }, error => {
       this.notificationService.showError(error);

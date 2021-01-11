@@ -26,7 +26,6 @@
     <!--====== App ======-->
     <link rel="stylesheet" href="~/assets/css/app.css">
     @await RenderSectionAsync("CssLinks", required: false)
-
 </head>
 
 <body class="config">
@@ -135,8 +134,11 @@
     <script src="~/assets/js/app.js"></script>
 
     <!--====== SignalR ======-->
-    <script src="~/lib/signalr.js/jquery.signalR.js"></script>
-
+    <script src="~/lib/microsoft-signalr/signalr.js"></script>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script src="~/assets/js/custom/customSignalR.js" asp-append-version="true"></script>
+    }
     <!--====== Moment Js ======-->
     <script src="~/lib/moment.js/moment.js"></script>
     <script src="~/lib/moment.js/locale/vi.js"></script>
@@ -168,7 +170,7 @@
             </div>
         </div>
     </noscript>
-<script src="~/lib/jqueryui/jquery-ui.min.js"></script>
+    <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
 
     <!--Header Shop Cart-->
     <script src="~/assets/js/custom/customBase.js"></script>

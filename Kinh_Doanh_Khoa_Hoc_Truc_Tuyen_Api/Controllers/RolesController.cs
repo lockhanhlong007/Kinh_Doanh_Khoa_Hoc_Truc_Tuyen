@@ -167,7 +167,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     await _khoaHocDbContext.SaveChangesAsync();
                 }
                 var result = await _roleManager.DeleteAsync(role);
-                if (result.Succeeded)
+                if (!result.Succeeded)
                 {
                     _logger.LogError("Delete role failed");
                     return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));

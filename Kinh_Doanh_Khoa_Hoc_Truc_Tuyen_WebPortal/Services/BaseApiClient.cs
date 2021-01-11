@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 using Microsoft.AspNetCore.Authentication;
@@ -36,7 +37,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.GetAsync(url);
@@ -51,7 +52,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.GetAsync(url);
@@ -66,7 +67,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.GetAsync(url);
@@ -89,7 +90,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
 
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.PostAsync(url, httpContent);
@@ -115,7 +116,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
 
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.PostAsync(url, httpContent);
@@ -141,7 +142,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
 
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.PostAsync(url, httpContent);
@@ -159,7 +160,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.PostAsync(url, requestContent);
@@ -178,7 +179,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.PutAsync(url, requestContent);
@@ -204,7 +205,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
 
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.PutAsync(url, httpContent);
@@ -216,13 +217,38 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
         }
 
+        public async Task<TResponse> PutHasResponseAsync<TRequest, TResponse>(string url, TRequest requestContent, bool requiredLogin = true)
+        {
+            var client = _httpClientFactory.CreateClient("BackendApi");
+            client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
+            HttpContent httpContent = null;
+            if (requestContent != null)
+            {
+                var json = JsonConvert.SerializeObject(requestContent);
+                httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            }
+
+            if (requiredLogin)
+            {
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            var response = await client.PutAsync(url, httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                return JsonConvert.DeserializeObject<TResponse>(body);
+
+            throw new Exception(JsonConvert.DeserializeObject<ApiResponse>(body).Message);
+        }
+
         public async Task<bool> Delete(string url, bool requiredLogin = true)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration[SystemConstants.BaseAddress]);
             if (requiredLogin)
             {
-                var token = await _httpContextAccessor.HttpContext.GetTokenAsync(SystemConstants.Token);
+                var token = _httpContextAccessor.HttpContext.User.GetToken();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             var response = await client.DeleteAsync(url);

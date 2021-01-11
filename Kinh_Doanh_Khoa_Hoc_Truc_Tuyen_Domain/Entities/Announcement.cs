@@ -13,7 +13,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         {
         }
 
-        public Announcement(Guid id, string title, string content, string image, Guid userId, int status)
+        public Announcement(Guid id, string title, string content, string image, Guid? userId, int status)
         {
             Id = id;
             Title = title;
@@ -35,7 +35,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public string EntityId { get; set; }
 
-        public Guid UserId { set; get; }
+        public Guid? UserId { set; get; }
 
         public DateTime CreationTime { get; set; }
 

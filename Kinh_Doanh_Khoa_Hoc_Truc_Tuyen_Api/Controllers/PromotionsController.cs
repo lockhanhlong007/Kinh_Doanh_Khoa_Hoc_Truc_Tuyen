@@ -52,7 +52,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 FromDate = result.FromDate,
                 DiscountAmount = result.DiscountAmount,
                 ApplyForAll = result.ApplyForAll,
-                Id = result.Id
+                Id = result.Id,
+                Content = result.Content
             });
         }
 
@@ -77,6 +78,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 ApplyForAll = false,
                 DiscountAmount = request.DiscountAmount,
                 DiscountPercent = request.DiscountPercent,
+                Content = request.Content
             };
             await _khoaHocDbContext.Promotions.AddAsync(promotion);
             var result = await _khoaHocDbContext.SaveChangesAsync();
@@ -109,6 +111,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 ApplyForAll = false,
                 DiscountAmount = (int?)_.DiscountAmount,
                 DiscountPercent = _.DiscountPercent,
+                Content = _.Content
             }).ToListAsync();
             var pagination = new Pagination<PromotionCreateRequest>
             {
@@ -140,6 +143,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             promotion.ToDate = DateTime.Parse(request.ToDate);
             promotion.DiscountAmount = request.DiscountAmount;
             promotion.DiscountPercent = request.DiscountPercent;
+            promotion.Content = request.Content;
             _khoaHocDbContext.Promotions.Update(promotion);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
@@ -199,7 +203,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     Description = x.Course.Description,
                     Price = x.Course.Price,
                     Status = x.Course.Status,
-                    CategoryName = x.Course.Category.Name
+                    CategoryName = x.Course.Category.Name,
                 });
             return Ok(promotionCourses);
         }

@@ -4,7 +4,7 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
 import { MessageConstants } from '../../../shared';
 import { Pagination, Comments } from '../../../shared/models';
-import { AuthService, NotificationService } from '../../../shared/services';
+import { AuthService, NotificationService, SignalRService } from '../../../shared/services';
 import { CommentsService } from '../../../shared/services/comments.service';
 import { OrdersService } from '../../../shared/services/orders.service';
 import { Order } from '../../../shared/models/oder.model';
@@ -36,6 +36,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   constructor(private orderService: OrdersService,
     private commentService: CommentsService,
     private authService: AuthService,
+    private signalRSevice: SignalRService,
     private notificationService: NotificationService,
     private modalService: BsModalService,
     private activeRoute: ActivatedRoute,
@@ -95,10 +96,16 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
   confirmStatusConfirm(status: number, ids: any[]) {
     this.blockedPanel = true;
-    this.subscription.add(this.orderService.updateStatusOrder(status, ids).subscribe(() => {
-      this.notificationService.showSuccess(MessageConstants.Updated_Ok);
-      this.loadData();
-      this.selectedItems = [];
+    this.subscription.add(this.orderService.updateStatusOrder(status, ids).subscribe((response: any[]) => {
+      console.log(response);
+      if (response.length > 0) {
+        response.map(data => {
+          this.signalRSevice.SendMessageToUser('SendToUserAsync', data.userId, data.announcementViewModel);
+        });
+        this.loadData();
+        this.selectedItems = [];
+        this.notificationService.showSuccess(MessageConstants.Updated_Ok);
+      }
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     }, error => {
       this.notificationService.showError(error);

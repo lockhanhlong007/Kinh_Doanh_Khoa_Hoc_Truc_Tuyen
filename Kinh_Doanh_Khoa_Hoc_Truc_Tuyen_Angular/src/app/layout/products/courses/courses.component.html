@@ -5,7 +5,7 @@
                 <div class="p-col-12">
                     <h3>Danh sách khóa học</h3>
                 </div>
-                <div class="p-col-6">
+                <div class="p-col-7">
                     <button style="margin-right: 5px;" apPermission appFunction="Courses" appAction="Create" pButton type="button" label="Thêm" icon="fa fa-plus" (click)="showAddModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="Courses" appAction="Update" pButton type="button" label="Sửa" icon="fa fa-edit" class="p-button-warning" *ngIf="selectedItems.length== 1" (click)="showEditModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="Courses" appAction="Delete" pButton type="button" label="Xóa" icon="fa fa-trash" class="p-button-danger" *ngIf="selectedItems.length > 0" (click)="deleteItems()"></button>
@@ -18,7 +18,7 @@
                     <p-checkbox label="Kích Hoạt Khóa Học" class="p-pt-2 p-text-center" [(ngModel)]="showActivateCourses" (click)="showHideActivateCoursesTable()" binary="true">
                     </p-checkbox>
                 </div>
-                <div class="p-col-4">
+                <div class="p-col-3">
                     <input style="width: 100%;" pInputText (keyup.enter)="loadData()" [(ngModel)]="keyword" placeholder="Nhập từ khóa..." type="text">
                 </div>
             </div>

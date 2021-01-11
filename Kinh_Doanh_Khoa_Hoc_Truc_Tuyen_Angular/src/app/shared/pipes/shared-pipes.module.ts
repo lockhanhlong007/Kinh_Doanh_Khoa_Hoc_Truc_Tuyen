@@ -6,6 +6,7 @@ import { FormatStatusCoursesPipe } from './format-status-courses.pipe';
 import { FormatStatusBasePipe } from './format-status-base.pipe';
 import { FormatOrderPipe } from './format-order.pipe';
 import { FormatStatusAnnouncePipe } from './format-status-announce.pipe';
+import { ConvertDatePipe } from './convert-date.pipe';
 
 @NgModule({
     imports: [CommonModule],
@@ -15,13 +16,15 @@ import { FormatStatusAnnouncePipe } from './format-status-announce.pipe';
         FormatStatusCoursesPipe,
         FormatStatusBasePipe,
         FormatOrderPipe,
-        FormatStatusAnnouncePipe],
+        FormatStatusAnnouncePipe,
+        ConvertDatePipe],
     exports: [
         FormatDataPipe,
         ConvertPathPipe,
         FormatStatusAnnouncePipe,
         FormatStatusCoursesPipe,
         FormatStatusBasePipe,
+        ConvertDatePipe,
         FormatOrderPipe]
 })
 export class SharedPipesModule {}

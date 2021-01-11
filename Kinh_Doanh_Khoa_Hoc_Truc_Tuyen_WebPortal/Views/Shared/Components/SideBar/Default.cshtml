@@ -1,12 +1,5 @@
-﻿@model List<CategoryViewModel>
-@section CommonScripts{
-
-    <script src="~/assets/js/custom/customScriptSlideBar.js" asp-append-version="true"></script>
-    <script>
-        var slideBar = new SlideBarAjax();
-        slideBar.initialize();
-    </script>
-}
+﻿@using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
+@model List<CategoryViewModel>
 
 <header class="header--style-1">
 <input type="hidden" id="hid_check_auth" value="@User.Identity.IsAuthenticated" />
@@ -50,50 +43,45 @@
                             @if (User.Identity.IsAuthenticated)
                             {
                                 <li class="has-dropdown" data-tooltip="tooltip" data-placement="left" title="Thông báo">
-
-                                    <a><i class="far fa-bell"></i></a>
+                                    <input hidden id="accessToken" type="text" value="@User.GetToken()" />
+                                    <a>
+                                        <i class="far fa-bell"></i>
+                                        <span id="totalAnnouncement" class="total-item-round" style="top: 20px">0</span>
+                                    </a>
 
                                     <!--====== Dropdown ======-->
-
+                                   
                                     <span class="js-menu-toggle"></span>
-                                    <ul style="width: 500px;right: 55px;padding: 0; margin: 0">
+                                    <ul id="announcementList" style="width: 500px;right: 55px;padding: 0; margin: 0">
+                                    </ul>
+                                    <!--====== End - Dropdown ======-->
+                                    <script id="announcement-template" type="x-tmpl-mustache">
                                         <li style="border-bottom: 1px solid #f7f7f7">
-                                            <a style="display:inline-flex;align-items: center;" href="signup.html">
+                                            <a class="checkRead" style="display:inline-flex;align-items: center;" data-id="{{Id}}" href="#">
                                                 <div class="description__img-wrap">
-                                                    <img class="u-img-fluid" style="width: auto;" src="~/assets/images/product/electronic/product3.jpg" alt="">
+                                                    <img class="u-img-fluid" style="width: auto;height: 100%;" src="{{Image}}" alt="">
                                                 </div>
-                                                <div class="description-title" style="display: grid; white-space: initial; text-align: justify;font-size: 12px;font-weight: 600">
-                                                    Tiki miễn phí giao tiêu chuẩn cho đơn hàng từ 250k, áp dụng phí 19k cho đơn hàng dưới 250k.
-                                                    Thay đổi áp dụng cho khách hàng không phải là thành viên TikiNOW.
+                                                <div class="description-title" style="display: grid; white-space: initial; text-align: justify;font-size: 16px;font-weight: 600">
+                                                    {{Title}}
                                                     <span class="manage-o__text-2 u-c-silver" style="line-height: 1.9; text-align: justify;font-size: 12px;font-weight: 600">
-                                                        29/2/2021
+                                                        {{CreationTime}}
+                                                    </span>
+                                                    <span class="manage-o__text-2 u-c-silver" style="line-height: 1.3; text-align: justify">
+                                                      {{Content}}
                                                     </span>
                                                 </div>
                                             </a>
                                         </li>
-                                        <li style="border-bottom: 1px solid #f7f7f7">
-                                            <a style="display:inline-flex;align-items: center;" href="signup.html">
-                                                <div class="description__img-wrap">
-                                                    <img class="u-img-fluid" style="width: auto;" src="~/assets/images/product/electronic/product3.jpg" alt="">
-                                                </div>
-                                                <div class="description-title" style="display: grid; white-space: initial; text-align: justify;font-size: 12px;font-weight: 600">
-                                                    Tiki miễn phí giao tiêu chuẩn cho đơn hàng từ 250k, áp dụng phí 19k cho đơn hàng dưới 250k.
-                                                    Thay đổi áp dụng cho khách hàng không phải là thành viên TikiNOW.
-                                                    <span class="manage-o__text-2 u-c-silver" style="line-height: 1.9; text-align: justify;font-size: 12px;font-weight: 600">
-                                                        29/2/2021
-                                                    </span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li style="text-align:center;align-items: center;">
-                                            <a href="signup.html">
+                                    </script>
+                                    <script id="announcement-tag-template" type="x-tmpl-mustache">
+                                         <li style="text-align:center;align-items: center;">
+                                            <a href="/manage-orders.html">
                                                 <span class="description-title" style="text-align:center;align-items: center; line-height: 1.9; text-align: justify; font-size: 12px; font-weight: 600">
                                                     Xem Tất Cả
                                                 </span>
                                             </a>
                                         </li>
-                                    </ul>
-                                    <!--====== End - Dropdown ======-->
+                                    </script>
                                 </li>
                                 <li class="has-dropdown" data-tooltip="tooltip" data-placement="left" title="@User.Identity.Name">
 

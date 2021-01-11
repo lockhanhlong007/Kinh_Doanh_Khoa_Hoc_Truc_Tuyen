@@ -4,8 +4,8 @@ import { CoursesService } from '../../../shared/services/courses.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
 import { MessageConstants } from '../../../shared';
-import { Pagination } from '../../../shared/models';
-import { AuthService, NotificationService } from '../../../shared/services';
+import { AnnouncementCreateRequest, Pagination } from '../../../shared/models';
+import { AuthService, NotificationService, SignalRService } from '../../../shared/services';
 import { CoursesDetailComponent } from './courses-detail/courses-detail.component';
 import { Router } from '@angular/router';
 import { ActiveCoursesComponent } from './active-courses/active-courses.component';
@@ -41,6 +41,7 @@ export class CoursesComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private notificationService: NotificationService,
     private modalService: BsModalService,
+    private signalRSevice: SignalRService,
     private router: Router) { }
 
   ngOnInit(): void {
@@ -191,8 +192,6 @@ export class CoursesComponent implements OnInit, OnDestroy {
     }));
   }
 
-
-
   showAddModal() {
     this.router.navigateByUrl('/products/courses/courses-detail');
   }
@@ -237,10 +236,15 @@ export class CoursesComponent implements OnInit, OnDestroy {
     this.selectedItems.map(data => {
       entity.push(data.id);
     });
-    this.subscription.add(this.coursesService.approve(entity).subscribe(() => {
-      this.notificationService.showSuccess(MessageConstants.Updated_Ok);
-      this.loadData();
-      this.selectedItems = [];
+    this.subscription.add(this.coursesService.approve(entity).subscribe((response: any[]) => {
+      if (response.length > 0) {
+        response.map(data => {
+          this.signalRSevice.SendMessageToUser('SendToUserAsync', data.userId, data.announcementViewModel);
+        });
+        this.loadData();
+        this.selectedItems = [];
+        this.notificationService.showSuccess(MessageConstants.Approve_Ok);
+      }
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     }, error => {
       this.notificationService.showError(error);
