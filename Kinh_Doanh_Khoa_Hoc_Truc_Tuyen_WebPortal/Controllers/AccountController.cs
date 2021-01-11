@@ -271,7 +271,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     Password = request.OldPassword,
                     Id = request.Id
                 };
-                await _apiClient.PostAsync<AccountPasswordCheckRequest, bool>(
+                await _apiClient.PostReturnBooleanAsync(
                         $"/api/users/{request.Id}/check-password", checkPassword);
                 var data = new UserPasswordChangeRequest();
                 data.NewPassword = request.NewPassword;
@@ -326,11 +326,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 };
                 var result = await _apiClient.PostAsync<LoginViewModel, TokenResponseFromServer>($"/api/TokenAuth/Authenticate", loginViewModel,false);
                 var principal = ValidateToken(result);
-                //if (!principal.IsInRole("Teacher"))
-                //{
-                //    ModelState.AddModelError("", "Không Thể Đăng Nhập Tài Khoản Này");
-                //    return View();
-                //}
+                if (principal.IsInRole("Teacher"))
+                {
+                    ModelState.AddModelError("", "Không Thể Đăng Nhập Tài Khoản Này");
+                    return View();
+                }
                 var authProperties = new AuthenticationProperties();
                 if (request.RememberMe)
                 {

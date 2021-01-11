@@ -25,6 +25,48 @@
 
         $("body").on("click", ".add-product-in-cart", function (e) {
             e.preventDefault();
+            var status = parseInt($(this).data("status"));
+            if (status === 1) {
+                var id = parseInt($(this).data("id"));
+                $.ajax({
+                    url: "/Cart/AddToCart",
+                    type: "post",
+                    data: {
+                        courseId: id
+                    },
+                    success: function (res) {
+                        var template = $("#template-modal-cart").html();
+                        var render = "";
+                        var valueZero = 0;
+                        var env = "https://localhost:44342";
+                        render += Mustache.render(template,
+                            {
+                                checkPromotion: !res.promotionPrice ? false : true,
+                                modalCartImage: env + res.courseViewModel.image,
+                                modalCartName: res.courseViewModel.name,
+                                modalOwnerUser: res.courseViewModel.createdName,
+                                modalCartPrice: res.price.toLocaleString("vi", { style: "currency", currency: "VND" }),
+                                modalCartPromotion: !res.promotionPrice ? valueZero.toLocaleString("vi", { style: "currency", currency: "VND" }) : res.promotionPrice.toLocaleString("vi", { style: "currency", currency: "VND" })
+                            });
+                        $("#modal-add-to-cart").html(render);
+
+                        loadHeaderCart();
+                    },
+                    error: function (res) {
+                        $("#modal-add-to-cart").html('<div class="description-title" style="text-align: justify;font-size: 16px;font-weight: 600">Sản phẩm này đã có trong giỏ hàng</div>');
+                        return false;
+                    }
+                });
+            }
+            else if (status === 2) {
+                $("#modal-add-to-cart").html('<div class="description-title" style="text-align: justify;font-size: 16px;font-weight: 600">Khóa học này chưa phát hành</div>');
+                return false;
+            } 
+            else
+            {
+                $("#modal-add-to-cart").html('<div class="description-title" style="text-align: justify;font-size: 16px;font-weight: 600">Khóa học này đã ngừng kình doanh</div>');
+                return false;
+            }
             //var auth = $("#hid_check_auth").val();
             //if (auth) {
             //    var id = parseInt($(this).data("id"));
@@ -56,36 +98,7 @@
             //} else {
             //    window.location.href = "/login.html";
             //}
-            var id = parseInt($(this).data("id"));
-            $.ajax({
-                url: "/Cart/AddToCart",
-                type: "post",
-                data: {
-                    courseId: id
-                },
-                success: function (res) {
-                    var template = $("#template-modal-cart").html();
-                    var render = "";
-                    var valueZero = 0;
-                    var env = "https://localhost:44342";
-                    render += Mustache.render(template,
-                        {
-                            checkPromotion: !res.promotionPrice ? false : true,
-                            modalCartImage: env + res.courseViewModel.image,
-                            modalCartName: res.courseViewModel.name,
-                            modalOwnerUser: res.courseViewModel.createdName,
-                            modalCartPrice: res.price.toLocaleString("vi", { style: "currency", currency: "VND" }),
-                            modalCartPromotion: !res.promotionPrice ? valueZero.toLocaleString("vi", { style: "currency", currency: "VND" }) : res.promotionPrice.toLocaleString("vi", { style: "currency", currency: "VND" })
-                        });
-                    $("#modal-add-to-cart").html(render);
-
-                    loadHeaderCart();
-                },
-                error: function (res) {
-                    $("#modal-add-to-cart").html('<div class="description-title" style="text-align: justify;font-size: 16px;font-weight: 600">Sản phẩm này đã có trong giỏ hàng</div>');
-                    return false;
-                }
-            });
+        
         });
 
         $("#main-search").autocomplete({

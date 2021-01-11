@@ -87,7 +87,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
             {
@@ -112,8 +112,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     }
                 };
             });
-
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddTransient<IStorageService, StorageService>();
             services.AddTransient<IViewRenderService, ViewRenderService>();
@@ -138,7 +136,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                         .SetIsOriginAllowed((host) => true);
                 });
             });
-
 
             services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -233,8 +230,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHub<ChatHub>("/notification");
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/notification");
             });
         }
     }

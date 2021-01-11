@@ -11,5 +11,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models
         public List<CategoryViewModel> HomeCategoryViewModels { get; set; }
 
         public List<CourseViewModel> NewCourses { get; set; }
+
+        public List<ActiveCoursesViewModel> ActiveCoursesViewModels { get; set; }
     }
 }

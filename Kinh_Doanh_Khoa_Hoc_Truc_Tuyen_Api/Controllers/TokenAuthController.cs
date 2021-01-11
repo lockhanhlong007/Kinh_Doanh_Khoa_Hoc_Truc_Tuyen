@@ -68,40 +68,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return BadRequest(new ApiBadRequestResponse("Tài khoản hoặc mật khẩu không đúng"));
             }
-
-            //var principal = ValidateToken(tokenResponse);
-            //var authProperties = new AuthenticationProperties();
-            //if (!model.ClientId.Equals("client_angular"))
-            //{
-            //    if (model.RememberMe)
-            //    {
-            //        authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1);
-            //        authProperties.IsPersistent = true;
-            //    }
-            //    else
-            //    {
-            //        authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10);
-            //        authProperties.IsPersistent = false;
-            //    }
-            //}
-            //else
-            //{
-            //    authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1);
-            //    authProperties.IsPersistent = true;
-            //}
-            //await HttpContext.SignInAsync(
-            //    CookieAuthenticationDefaults.AuthenticationScheme,
-            //    principal,
-            //    authProperties);
-
-            //var abc = serverClient.GetUserInfoAsync(new UserInfoRequest
-            //{
-            //    Address = "https://localhost:44342/connect/userinfo",
-            //    Token = tokenResponse.AccessToken
-            //});
-
-
-
             return Ok(new TokenResponseFromServer()
             {
                 AccessToken = tokenResponse.AccessToken,
@@ -111,39 +77,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             });
         }
 
-        [HttpGet("test-authen")]
-        [AllowAnonymous]
-        public IActionResult TexstAuthenticate()
-        {
-            return Ok(HttpContext.User.Identity.IsAuthenticated);
-        }
 
-        #region private method
-        private ClaimsPrincipal ValidateToken(TokenResponse result)
-        {
-            var stream = result.AccessToken;
-            var handler = new JwtSecurityTokenHandler();
-            var jsonToken = handler.ReadToken(stream);
-            var tokenS = handler.ReadToken(stream) as JwtSecurityToken;
-            var claims = new List<Claim>
-            {
-                new Claim("access_token", result.AccessToken),
-                new Claim("token_type", result.TokenType),
-                new Claim("expires_in", result.ExpiresIn.ToString())
-            };
-            if (!string.IsNullOrEmpty(result.RefreshToken))
-            {
-                claims.Add(new Claim("refresh_token", result.RefreshToken));
-            }
-            claims.AddRange(tokenS!.Claims);
-            var claimsIdentity = new ClaimsIdentity(
-                claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            ClaimsPrincipal principal = new ClaimsPrincipal(claimsIdentity);
-
-            return principal;
-        }
-
-
-        #endregion
     }
 }

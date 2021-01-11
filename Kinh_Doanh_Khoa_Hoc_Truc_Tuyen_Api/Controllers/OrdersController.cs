@@ -668,8 +668,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var announcement = new Announcement();
             if (!string.IsNullOrEmpty(order.UserId.ToString()))
             {
-                var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
-                announcement.UserId = userCurrent.Id;
+                announcement.UserId = Guid.Parse(User.GetUserId());
             }
             announcement.Status = 1;
             announcement.Content = $"Bạn có 1 đơn hàng mới từ {request.Name} với tin nhắn: {request.Message.formatData(30)}";

@@ -171,10 +171,23 @@ else
 
                                                         <img class="aspect__img" src="@img" alt="">
                                                     </a>
-                                                    <div class="product-m__add-cart">
-                                                        <a class="btn--e-brand add-product-in-cart" data-id="@item.Id">Thêm vào giỏ</a>
-                                                        @*<a class="btn--e-brand" data-modal="modal" data-modal-id="#add-to-cart">Add to Cart</a>*@
-                                                    </div>
+                                                    @if (User.Identity.IsAuthenticated)
+                                                    {
+                                                        if (Model.ActiveCoursesViewModels.All(x => x.CourseId != item.Id))
+                                                        {
+                                                            <div class="product-m__add-cart">
+                                                                <a class="btn--e-brand add-product-in-cart" data-modal="modal" data-modal-id="#add-to-cart" data-status="@item.Status" data-id="@item.Id">Thêm vào giỏ</a>
+                                                                @*<a class="btn--e-brand" data-modal="modal" data-modal-id="#add-to-cart">Add to Cart</a>*@
+                                                            </div>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="product-m__add-cart">
+                                                            <a class="btn--e-brand add-product-in-cart" data-modal="modal" data-modal-id="#add-to-cart" data-status="@item.Status" data-id="@item.Id">Thêm vào giỏ</a>
+                                                            @*<a class="btn--e-brand" data-modal="modal" data-modal-id="#add-to-cart">Add to Cart</a>*@
+                                                        </div>
+                                                    }
                                                 </div>
                                                 <div class="product-m__content">
                                                     <div class="product-m__category">

@@ -35,6 +35,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             courseCatalog.Filter = filter;
             courseCatalog.CategoryViewModels = await _apiClient.GetListAsync<CategoryViewModel>($"/api/categories/side-bar");
             courseCatalog.Data = await _apiClient.GetAsync<Pagination<CourseViewModel>>($"/api/courses/client-filter?categoryId={categoryId}" + $"&pageIndex={page}" + $"&pageSize={pageSize}" + $"&priceMin={priceMin}" + $"&priceMax={priceMax}" + $"&sortBy={sortBy}" + $"&filter={filter}");
+            if (User.Identity.IsAuthenticated)
+            {
+                courseCatalog.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/check-active-courses/user-{User.GetUserId()}");
+            }
             return View(courseCatalog);
         }
 
@@ -48,7 +52,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             detail.CommentViewModels = await _apiClient.GetListAsync<CommentViewModel>($"/api/comments/courses/client?entityId={id}&entityType=courses");
             detail.RelatedCourses = await _apiClient.GetListAsync<CourseViewModel>($"/api/courses/related-courses/{id}");
             detail.UserViewModel = await _apiClient.GetAsync<UserViewModel>($"/api/users/course-{id}");
-            detail.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/{id}/active-courses?coursesId={id}");
+            if (User.Identity.IsAuthenticated)
+            {
+                detail.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/check-active-courses/user-{User.GetUserId()}");
+            }
             return View(detail);
         }
 

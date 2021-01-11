@@ -1,6 +1,7 @@
 export class MessageConstants {
     public static System_Error = 'Có lỗi kết nối đến máy chủ';
     public static Confirm_Delete = 'Bạn có chắc muốn xóa bản ghi này?';
+    public static Confirm_Reset_Password = 'Bạn có chắc muốn khôi phục mật khẩu cho người dùng này?';
     public static Confirm_Update = 'Bạn có chắc muốn cập nhật bản ghi này?';
     public static Confirm_Set_Is_Home = 'Bạn có chắc muốn hiển thị bản ghi này tại trang chủ?';
     public static Confirm_Set_Is_Not_Home = 'Bạn có chắc muốn bỏ hiển thị bản ghi này tại trang chủ?';
@@ -29,4 +30,5 @@ export class MessageConstants {
     public static Export_File_Failed = 'Xuất file thất bại';
     public static Send_Notification_OK = 'Gửi thông báo thành công';
     public static Send_Notification_Failed = 'Gửi thông báo thất bại';
+    public static Reset_Password_OK = 'Khôi phục mật khẩu thành công';
 }

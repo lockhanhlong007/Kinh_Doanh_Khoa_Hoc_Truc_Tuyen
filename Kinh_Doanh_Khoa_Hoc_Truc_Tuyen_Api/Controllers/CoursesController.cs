@@ -671,6 +671,26 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Update kích hoạt khóa học thất bại"));
         }
 
+
+        [HttpGet("check-active-courses/user-{userId}")]
+        public IActionResult GetActiveCourses(string userId)
+        {
+            var data = _khoaHocDbContext.ActivateCourses.Where(x => x.Status && x.UserId.Equals(Guid.Parse(userId)));
+            var result = new List<ActiveCoursesViewModel>();
+            foreach (var activateCourse in data)
+            {
+                var activateCourseVm = new ActiveCoursesViewModel();
+                activateCourseVm.CourseId = activateCourse.CourseId;
+                activateCourseVm.Status = activateCourse.Status;
+                activateCourseVm.Id = activateCourse.Id.ToString();
+                activateCourseVm.UserId = activateCourse.UserId.ToString();
+                result.Add(activateCourseVm);
+            }
+
+            return Ok(result);
+        }
+
+
         [HttpPut("user-active-course")]
         public async Task<IActionResult> PutActiveCourseForUser(ActiveCourseRequest request)
         {
