@@ -3,12 +3,13 @@ import { Router } from '@angular/router';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { Subscription } from 'rxjs';
 import { MessageConstants } from '../../../shared';
-import { Pagination } from '../../../shared/models';
-import { PromotionsService, NotificationService } from '../../../shared/services';
+import { Announcement, AnnouncementCreateRequest, Pagination } from '../../../shared/models';
+import { PromotionsService, NotificationService, AuthService, AnnouncementService } from '../../../shared/services';
 import { Promotions } from '../../../shared/models/promotions.model';
 import { CoursesInPromotionComponent } from './courses-in-promotion/courses-in-promotion.component';
 import { environment } from '../../../../environments/environment';
 import { PromotionsDetailComponent } from './promotions-detail/promotions-detail.component';
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-promotions',
@@ -37,6 +38,8 @@ export class PromotionsComponent implements OnInit, OnDestroy {
   public backendApiUrl = environment.ApiUrl;
   public totalCoursesRecords: number;
   constructor(private promotionsService: PromotionsService,
+    private authenService: AuthService,
+    private announcementService: AnnouncementService,
     private notificationService: NotificationService,
     private modalService: BsModalService) { }
 
@@ -55,6 +58,46 @@ export class PromotionsComponent implements OnInit, OnDestroy {
         setTimeout(() => { this.blockedPanel = false; }, 1000);
       }));
   }
+
+  checkPromotion() {
+    if (this.selectedItems.length === 1) {
+      const item = this.selectedItems[0];
+      if (item.status) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  sendAnnouncement() {
+    const decode = this.authenService.getDecodedAccessToken(this.authenService.getToken());
+    const item = this.selectedItems[0];
+    const announce = new AnnouncementCreateRequest();
+    announce.content = item.content;
+    announce.title = item.name;
+    announce.entityId = item.id.toString();
+    announce.entityType = 'promotion';
+    announce.userId = decode.sub;
+    announce.status = 1;
+    this.subscription.add(this.announcementService.postAnnouncement(announce).subscribe((response: any) => {
+      if (response) {
+        this.announcementService.getAnnounceForServer(response.id).subscribe((res: any) => {
+          this.notificationService.showSuccess(MessageConstants.Send_Notification_OK);
+        }, (error) => {
+          console.log('Gửi thất bại');
+          this.notificationService.showError(error);
+        });
+      }
+    }, (error) => {
+      console.log('Gửi thất bại');
+      this.notificationService.showError(error);
+    }));
+  }
+
+
   private processLoadData(selectedId = null, response: Pagination<Promotions>) {
     this.items = response.items;
     this.pageIndex = this.pageIndex;

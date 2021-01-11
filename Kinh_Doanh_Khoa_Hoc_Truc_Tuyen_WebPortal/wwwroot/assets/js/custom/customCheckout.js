@@ -64,7 +64,8 @@
                     window.location.href = "/login.html";
                 }
 
-            } else {
+            }
+            else {
                 if (phone.length < 1) {
                     $("#billing-phone-message").show();
                 } else if (name.length < 1) {
@@ -90,7 +91,10 @@
                             Email: email
                         },
                         success: function (response) {
-                            var s = "Thanh toán không thành công";
+                            //connection.invoke("SendMessageToGroup", "Admin", response).catch(function (err) {
+                            //    return console.error(err.toString());
+                            //});
+                            var s = "Thanh toán thành công";
                             window.location.href = "/checkout-confirm.html?message=" + s;
                         },
                         error: function(response) {

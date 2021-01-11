@@ -7,4 +7,5 @@ export class Promotions {
     discountPercent: any;
     discountAmount: any;
     status: boolean;
+    content: string;
 }

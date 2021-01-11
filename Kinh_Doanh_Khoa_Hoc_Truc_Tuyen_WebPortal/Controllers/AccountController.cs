@@ -321,7 +321,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     ClientSecret = _configuration["Authorization:ClientSecret"],
                     Scope = _configuration["Authorization:Scope"],
                     Password = request.Password,
-                    UserName = request.UserName
+                    UserName = request.UserName,
+                    RememberMe = request.RememberMe
                 };
                 var result = await _apiClient.PostAsync<LoginViewModel, TokenResponseFromServer>($"/api/TokenAuth/Authenticate", loginViewModel,false);
                 var principal = ValidateToken(result);
@@ -344,7 +345,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 HttpContext.Session.Remove(SystemConstants.AttachmentSession);
                 HttpContext.Session.Remove(SystemConstants.EmailSession);
                 HttpContext.Session.Remove(SystemConstants.CartSession);
-                HttpContext.Session.SetString("access_token", result.AccessToken);
+                HttpContext.Session.Set("access_token", result.AccessToken);
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     principal,
@@ -589,5 +590,23 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             return principal;
         }
         #endregion Helpers
+
+        #region Ajax Method
+
+        public async Task<IActionResult> GetAnnouncements(int? pageSize, string filterBy = "false", int page = 1)
+        {
+            var userId = ((ClaimsIdentity)User.Identity)?.Claims
+                .SingleOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            pageSize ??= 3;
+            var announce = await _apiClient.GetAsync<Pagination<AnnouncementViewModel>>($"/api/announcements/private-paging/filter?userId={userId}&pageSize={pageSize}&pageIndex={page}&filter={filterBy}");
+            return new OkObjectResult(announce);
+        }
+
+        public async Task<IActionResult> MarkAsRead(string announceId)
+        {
+            await _apiClient.PutAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest { AnnounceId = announceId, UserId = User.GetUserId() });
+            return Ok();
+        }
+        #endregion
     }
 }

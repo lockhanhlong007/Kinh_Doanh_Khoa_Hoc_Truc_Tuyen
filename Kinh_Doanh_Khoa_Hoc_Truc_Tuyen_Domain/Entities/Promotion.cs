@@ -25,6 +25,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public string Name { set; get; }
 
+        public string Content { get; set; }
+
         public List<PromotionInCourse> PromotionInCourses { get; set; }
     }
 }

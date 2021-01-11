@@ -45,6 +45,10 @@
     {
       "library": "notify@0.4.2",
       "destination": "wwwroot/lib/notify/"
+    },
+    {
+      "library": "microsoft-signalr@5.0.1",
+      "destination": "wwwroot/lib/microsoft-signalr/"
     }
   ]
 }

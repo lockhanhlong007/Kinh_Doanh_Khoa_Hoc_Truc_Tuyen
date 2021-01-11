@@ -1,23 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
+using IdentityModel.Client;
 using IdentityServer4.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.HubConfig;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.FluentValidation;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,6 +87,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
             {
@@ -86,10 +95,29 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 o.Authority = "https://localhost:44342/";
                 o.RequireHttpsMetadata = false;
                 o.Audience = "api.khoahoc";
+                /* This block was missing */
+                o.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notification"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddTransient<IStorageService, StorageService>();
             services.AddTransient<IViewRenderService, ViewRenderService>();
+            services.AddTransient<IOneSignalService, OneSignalService>();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
@@ -103,7 +131,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             {
                 options.AddPolicy("KhoaHocPolicy", builder =>
                 {
-                    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                    //builder.AllowAnyMethod()
+                    //    .AllowAnyHeader()
+                    //    .WithOrigins("*;http://localhost:4200;https://localhost:44352;https://localhost:44342")
+                    //    .AllowCredentials();
+                    builder.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+                        .SetIsOriginAllowed((host) => true);
                 });
             });
 
@@ -161,6 +194,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             });
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateRequestValidator>());
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -173,6 +207,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
             app.UseErrorMiddleware();
 
+            app.UseCors("KhoaHocPolicy");
+
             app.UseRouting();
 
             app.UseStaticFiles();
@@ -184,8 +220,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             app.UseAuthentication();
 
             app.UseAuthorization();
-
-            app.UseCors("KhoaHocPolicy");
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
@@ -200,6 +234,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<ChatHub>("/notification");
                 endpoints.MapControllers();
             });
         }

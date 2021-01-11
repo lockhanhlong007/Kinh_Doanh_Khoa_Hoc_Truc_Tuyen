@@ -11,3 +11,4 @@ export * from './lessons.service';
 export * from './statistics.service';
 export * from './promotions.service';
 export * from './announcement.service';
+export * from './signal-r.service';

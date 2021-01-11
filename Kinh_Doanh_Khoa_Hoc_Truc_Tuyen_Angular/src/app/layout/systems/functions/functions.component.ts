@@ -198,7 +198,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
       this.notificationService.showError(MessageConstants.Not_Choose_Any_Record);
       return;
     }
-    this.blockedPanelCommand = true;
     const initialState = {
       existingCommands: this.commands.map(x => x.id),
       functionId: this.selectedItems[0].data.id
@@ -214,7 +213,6 @@ export class FunctionsComponent implements OnInit, OnDestroy {
       this.loadDataCommand();
       this.notificationService.showSuccess(MessageConstants.Created_Ok);
       this.selectedCommandItems = [];
-      setTimeout(() => { this.blockedPanel = false; }, 1000);
     }, error => {
       this.notificationService.showError(MessageConstants.Created_Failed);
     });

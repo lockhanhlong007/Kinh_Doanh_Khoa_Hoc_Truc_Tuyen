@@ -25,5 +25,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements
         Task<string> GetStringAsync(string url, bool requiredLogin = false);
 
         Task<string> PostReturnStringAsync<TRequest>(string url, TRequest requestContent, bool requiredLogin = true);
+        Task<TResponse> PutHasResponseAsync<TRequest, TResponse>(string url, TRequest requestContent, bool requiredLogin = true);
     }
 }

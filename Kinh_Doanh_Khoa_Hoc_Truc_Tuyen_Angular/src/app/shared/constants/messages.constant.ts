@@ -8,6 +8,7 @@ export class MessageConstants {
     public static Login_Again = 'Bạn hết phiên đăng nhập. Mời đăng nhập lại.';
     public static Created_Ok = 'Thêm mới thành công';
     public static Updated_Ok = 'Cập nhật thành công';
+    public static Approve_Ok = 'Duyệt thành công';
     public static Delete_Ok = 'Xóa thành công';
     public static Set_Default_Ok = 'Đặt mặc định thành công';
     public static Set_Is_Home_Ok = 'Đặt hiển thị trang chủ thành công';
@@ -26,4 +27,6 @@ export class MessageConstants {
     public static Set_Is_Not_Home_Failed = 'Bỏ hiển thị trang chủ thất bại';
     public static Upload_Failed = 'Tải lên thất bại';
     public static Export_File_Failed = 'Xuất file thất bại';
+    public static Send_Notification_OK = 'Gửi thông báo thành công';
+    public static Send_Notification_Failed = 'Gửi thông báo thất bại';
 }

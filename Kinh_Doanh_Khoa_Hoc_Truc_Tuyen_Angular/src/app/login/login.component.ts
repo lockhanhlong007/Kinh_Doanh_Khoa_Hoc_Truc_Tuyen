@@ -27,7 +27,8 @@ export class LoginComponent implements OnInit {
         private spinner: NgxSpinnerService) {
                     // redirect to home if already logged in
         if (this.auThenService.isAuthenticated()) {
-            this.router.navigate(['/']);
+            // this.router.navigate(['/']);
+            window.location.href = '/';
         }
         }
 
@@ -58,10 +59,11 @@ export class LoginComponent implements OnInit {
        client.clientId = 'client_angular';
        client.clientSecret = 'secret';
        client.scope = 'openid email profile api.khoahoc';
+       client.rememberMe = false;
        this.auThenService.login(client).subscribe(res => {
         this.auThenService.saveToken(res.accessToken);
-        const check = this.auThenService.getDecodedAccessToken(res.accessToken);
-        this.router.navigate([this.returnUrl]);
+        window.location.href = this.returnUrl;
+        // this.router.navigate([this.returnUrl]);
        }, error => {
            this.error = error;
            this.loading = false;

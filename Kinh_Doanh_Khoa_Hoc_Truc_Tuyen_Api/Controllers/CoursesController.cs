@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Dapper;
+using IdentityServer4.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
@@ -397,8 +398,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(courses);
         }
 
-
-
         [HttpPut("{id}")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Update)]
         [ValidationFilter]
@@ -425,10 +424,52 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             course.Content = request.Content;
             course.Price = request.Price;
             _khoaHocDbContext.Courses.Update(course);
-            var result = await _khoaHocDbContext.SaveChangesAsync();
+            var sendUser = new AnnouncementToUserViewModel();
+            int result;
+            if (request.Status == 1)
+            {
+                var userCreated = await _userManager.FindByNameAsync(course.CreatedUserName);
+                var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
+                var announceId = Guid.NewGuid();
+                var announcement = new Announcement();
+                announcement.UserId = userCurrent.Id;
+                announcement.Status = 1;
+                announcement.Content = $"{userCurrent.Name} đã duyệt khóa học {course.Name}";
+                announcement.Title = "Khóa học đã được duyệt";
+                announcement.Id = announceId;
+                announcement.EntityId = course.Id.ToString();
+                announcement.EntityType = "courses";
+                announcement.Image = course.Image;
+                await _khoaHocDbContext.Announcements.AddAsync(announcement);
+                var announceUser = new AnnouncementUser()
+                {
+                    UserId = userCreated.Id,
+                    AnnouncementId = announceId,
+                    HasRead = false
+                };
+                await _khoaHocDbContext.AnnouncementUsers.AddAsync(announceUser);
+                result = await _khoaHocDbContext.SaveChangesAsync();
+                var announcementViewmodel = new AnnouncementViewModel();
+                announcementViewmodel.UserId = announcement.UserId;
+                announcementViewmodel.Status = announcement.Status;
+                announcementViewmodel.Content = announcement.Content;
+                announcementViewmodel.Title = announcement.Title;
+                announcementViewmodel.Id = announcement.Id;
+                announcementViewmodel.EntityId = announcement.EntityId;
+                announcementViewmodel.EntityType = announcement.EntityType;
+                announcementViewmodel.Image = announcement.Image;
+                announcementViewmodel.CreationTime = announcement.CreationTime;
+                announcementViewmodel.LastModificationTime = announcement.LastModificationTime;
+                sendUser.UserId = userCreated.Id.ToString();
+                sendUser.AnnouncementViewModel = announcementViewmodel;
+            }
+            else
+            {
+                result = await _khoaHocDbContext.SaveChangesAsync();
+            }
             if (result > 0)
             {
-                return NoContent();
+                return Ok(sendUser);
             }
             _logger.LogError("Update course failed");
             return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
@@ -439,6 +480,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PutCourseApprove(List<int> input)
         {
+            var lstAnnouncement = new List<AnnouncementToUserViewModel>();
             foreach (var id in input)
             {
                 var course = await _khoaHocDbContext.Courses.FindAsync(id);
@@ -449,14 +491,50 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 }
                 course.Status = 1;
                 _khoaHocDbContext.Courses.Update(course);
+                var userCreated = await _userManager.FindByNameAsync(course.CreatedUserName);
+                var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
+                var announceId = Guid.NewGuid();
+                var announcement = new Announcement();
+                announcement.UserId = userCurrent.Id;
+                announcement.Status = 1;
+                announcement.Content = $"{userCurrent.Name} đã duyệt khóa học {course.Name}";
+                announcement.Title = "Khóa học đã được duyệt";
+                announcement.Id = announceId;
+                announcement.EntityId = course.Id.ToString();
+                announcement.EntityType = "courses";
+                announcement.Image = course.Image;
+                await _khoaHocDbContext.Announcements.AddAsync(announcement);
+                var announceUser = new AnnouncementUser()
+                {
+                    UserId = userCreated.Id,
+                    AnnouncementId = announceId,
+                    HasRead = false
+                };
+                await _khoaHocDbContext.AnnouncementUsers.AddAsync(announceUser);
+                var result = await _khoaHocDbContext.SaveChangesAsync();
+                var announcementViewmodel = new AnnouncementViewModel();
+                announcementViewmodel.UserId = announcement.UserId;
+                announcementViewmodel.Status = announcement.Status;
+                announcementViewmodel.Content = announcement.Content;
+                announcementViewmodel.Title = announcement.Title;
+                announcementViewmodel.Id = announcement.Id;
+                announcementViewmodel.EntityId = announcement.EntityId;
+                announcementViewmodel.EntityType = announcement.EntityType;
+                announcementViewmodel.Image = announcement.Image;
+                announcementViewmodel.CreationTime = announcement.CreationTime;
+                announcementViewmodel.LastModificationTime = announcement.LastModificationTime;
+                lstAnnouncement.Add(new AnnouncementToUserViewModel()
+                {
+                    AnnouncementViewModel = announcementViewmodel,
+                    UserId = userCreated.Id.ToString()
+                });
+                if (result < 0)
+                {
+                    _logger.LogError("Update course failed");
+                    return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
+                }
             }
-            var result = await _khoaHocDbContext.SaveChangesAsync();
-            if (result > 0)
-            {
-                return NoContent();
-            }
-            _logger.LogError("Update course failed");
-            return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
+            return Ok(lstAnnouncement);
         }
 
         [HttpPost("delete-multi-items")]
@@ -515,14 +593,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (courses == null)
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {id}"));
             var activateCourses = _khoaHocDbContext.ActivateCourses.Include(x => x.AppUser)
-                .Where(x => x.CourseId == courses.Id).Select(u => new UserViewModel()
+                .Where(x => x.CourseId == courses.Id && x.Status).Select(u => new UserViewModel()
                 {
                     UserName = u.AppUser.UserName,
                     Email = u.AppUser.Email,
                     PhoneNumber = u.AppUser.PhoneNumber,
                     Name = u.AppUser.Name,
                     Dob = u.AppUser.Dob,
-                    Id = u.UserId,
+                    Id = u.UserId.Value ,
                     Avatar = u.AppUser.Avatar ?? "/img/defaultAvatar.png",
                     Biography = u.AppUser.Biography
                 });

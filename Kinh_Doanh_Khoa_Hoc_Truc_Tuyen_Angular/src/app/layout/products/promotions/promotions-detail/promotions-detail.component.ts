@@ -90,6 +90,7 @@ ngOnInit() {
         ])),
         'discountPercent': new FormControl('0'),
         'discountAmount': new FormControl('0'),
+        'content': new FormControl(''),
         'status': new FormControl('')
     });
     if (this.entityId) {
@@ -164,7 +165,8 @@ loadPromotionDetail(id: any) {
                 toDate: toDate,
                 fromDate: fromDate,
                 chooseDiscount: check,
-                status: response.status
+                status: response.status,
+                content: response.content
             });
             setTimeout(() => {
                 this.btnDisabled = false;
@@ -189,6 +191,7 @@ saveChange() {
         promotion.fromDate = rawValues.fromDate.toString();
         promotion.toDate = rawValues.toDate.toString();
         promotion.name = rawValues.name;
+        promotion.content = rawValues.content;
         promotion.applyForAll = false;
      if (rawValues.chooseDiscount === 1) {
         promotion.discountPercent = rawValues.discountPercent;

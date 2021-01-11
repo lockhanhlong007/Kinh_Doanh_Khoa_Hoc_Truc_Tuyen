@@ -22,5 +22,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public bool Status { set; get; }
 
         public string Name { set; get; }
+
+        public string Content { get; set; }
     }
 }

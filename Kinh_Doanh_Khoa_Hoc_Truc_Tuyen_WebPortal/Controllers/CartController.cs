@@ -13,9 +13,12 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
@@ -92,7 +95,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 {
                     if (vnp_ResponseCode == "00")
                     {
-                        //Thanh toan thanh cong
                         await _apiClient.PutAsync("/api/orders/status-type/client", new OrderStatusRequest { OrderId = orderId, StatusType = 4 });
                         var email = HttpContext.Session.Get<string>(SystemConstants.EmailSession);
                         if (email != null)
@@ -112,6 +114,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                             }
                        
                         }
+
                     }
                     else
                     {
@@ -170,14 +173,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
                     model.Status = OrderStatus.New;
                     model.OrderDetails = listOrderDetails;
-                    var result = await _apiClient.PostAsync<OrderCreateRequest, OrderViewModel>($"/api/orders/create", model);
-                    var exportBill = await _apiClient.PostAsync<OrderViewModel, ApiResponse>($"/api/orders/export-excel", result);
-                    var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
+                    var result = await _apiClient.PostAsync<OrderCreateRequest, AnnouncementToUserForOrderClientViewModel>($"/api/orders/create-delivery", model);
+                    //var exportBill = await _apiClient.PostAsync<OrderViewModel, ApiResponse>($"/api/orders/export-excel", result.OrderViewModel);
+                    //var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
+                    //HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
+                    //await _emailSender.SendEmailAsync(model.Email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn mua hàng của bạn");
+                    //HttpContext.Session.Remove(SystemConstants.AttachmentSession);
                     HttpContext.Session.Remove(SystemConstants.CartSession);
-                    HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
-                    await _emailSender.SendEmailAsync(model.Email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn mua hàng của bạn");
-                    HttpContext.Session.Remove(SystemConstants.AttachmentSession);
-                    return Ok();
+                    return Ok(result.AnnouncementViewModel);
                 }
                 catch (Exception e)
                 {

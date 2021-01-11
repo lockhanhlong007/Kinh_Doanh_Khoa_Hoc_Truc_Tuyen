@@ -7,4 +7,5 @@ export class PromotionsRequest {
     discountAmount: number;
     status: boolean;
     applyForAll: boolean;
+    content: string;
 }

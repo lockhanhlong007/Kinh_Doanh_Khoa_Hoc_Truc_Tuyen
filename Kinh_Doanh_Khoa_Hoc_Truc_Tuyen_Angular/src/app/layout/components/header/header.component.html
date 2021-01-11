@@ -9,16 +9,16 @@
         <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown" ngbDropdown>
                 <a class="nav-link" href="javascript:void(0)" ngbDropdownToggle>
-                    <i class="fa fa-bell"></i> <b class="caret"></b><span class="sr-only">(current)</span>
+                    <i class="fa fa-bell" style="margin-right: 20px;"> <span class="badge badge-info" style="position: absolute; top: 0px;">{{totalUnred}}</span></i> <b class="caret"></b><span class="sr-only">(current)</span>
                 </a>
-                <div class="dropdown-menu-right" ngbDropdownMenu>
-                    <a class="dropdown-item" href="javascript:void(0)">
+                <div class="dropdown-menu-right" style="width: 350px;" ngbDropdownMenu>
+                    <a *ngFor="let item of announcement" class="dropdown-item" href="javascript:void(0)" (click)="markAsRead(item.id)">
                         <div class="media">
-                            <img alt="Generic placeholder image" class="d-flex align-self-center mr-3" src="http://i.huffpost.com/gadgets/slideshows/461162/slide_461162_6224974_sq50.jpg" />
+                            <img alt="Generic placeholder image" width="50px" class="d-flex align-self-center mr-3" src="{{backendApiUrl + item.image}}" />
                             <div class="media-body">
-                                <h5 class="mt-0 mb-1" style="margin: 0; font-size: 13px; font-weight: 600;">{{userName}}</h5>
-                                <p class="small text-muted" style="margin: 0;"><i class="fa fa-clock-o"></i> Yesterday at 4:32 PM</p>
-                                <p class="last" style="font-size: 12px;margin: 0;">Lorem ipsum dolor sit amet, consectetur...</p>
+                                <h5 class="mt-0 mb-1" style="margin: 0; font-size: 13px; font-weight: 600;">{{item.title}}</h5>
+                                <p class="small text-muted" style="margin: 0;"><i class="fa fa-clock-o"></i> {{item.creationTime | convertDate}}</p>
+                                <p class="last" style="font-size: 12px;margin: 0; white-space: initial;">{{item.content}}</p>
                             </div>
                         </div>
                     </a>

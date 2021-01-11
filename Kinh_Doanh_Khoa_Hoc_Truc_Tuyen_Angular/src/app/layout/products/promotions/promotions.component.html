@@ -5,16 +5,17 @@
                 <div class="p-col-12">
                     <h3>Danh sách sự kiện</h3>
                 </div>
-                <div class="p-col-4">
+                <div class="p-col-6">
                     <button style="margin-right: 5px;" apPermission appFunction="Promotions" appAction="Create" pButton type="button" label="Thêm" icon="fa fa-plus" (click)="showAddModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="Promotions" appAction="Update" pButton type="button" label="Sửa" icon="fa fa-edit" class="p-button-warning" *ngIf="selectedItems.length== 1" (click)="showEditModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="Promotions" appAction="Delete" pButton type="button" label="Xóa" icon="fa fa-trash" class="p-button-danger" *ngIf="selectedItems.length > 0" (click)="deleteItems()"></button>
+                    <button style="margin-right: 5px;" appPermission appFunction="Promotions" appAction="Update" pButton type="button" label="Thông báo sự kiện" icon="fa fa-bell" class="p-button-help" *ngIf="selectedItems.length == 1 && checkPromotion()" (click)="sendAnnouncement()"></button>
                 </div>
                 <div class="p-col-3">
                     <p-checkbox label="Áp dụng cho khóa học" class="p-pt-2 p-text-center" [(ngModel)]="showCourses" (click)="showHideCourseTable()" binary="true">
                     </p-checkbox>
                 </div>
-                <div class="p-col-5">
+                <div class="p-col-3">
                     <input style="width: 100%;" pInputText (keyup.enter)="loadData()" [(ngModel)]="keyword" placeholder="Nhập từ khóa..." type="text">
                 </div>
             </div>
@@ -28,6 +29,9 @@
                     </th>
                     <th class="p-text-center" [pSortableColumn]="'name'">Tên sự kiện
                         <p-sortIcon [field]="'name'"></p-sortIcon>
+                    </th>
+                    <th class="p-text-center" [pSortableColumn]="'content'">Nội dung
+                        <p-sortIcon [field]="'content'"></p-sortIcon>
                     </th>
                     <th class="p-text-center" [pSortableColumn]="'fromDate'">Từ ngày
                         <p-sortIcon [field]="'fromDate'"></p-sortIcon>
@@ -49,11 +53,14 @@
                     <td style="width: 50px">
                         <p-tableCheckbox [value]="row"></p-tableCheckbox>
                     </td>
-                    <td>{{row.name | formatData: 30}}</td>
+                    <td hidden>{{row.id}}</td>
+                    <td>{{row.name | formatData: 25}}</td>
+                    <td>{{row.content | formatData: 30}}</td>
                     <td>{{row.fromDate}}</td>
                     <td>{{row.toDate}}</td>
                     <td style="width: 150px">{{row.discountAmount}}</td>
                     <td style="width: 150px">{{row.discountPercent}}</td>
+                    <td hidden>{{row.status}</td>
                 </tr>
             </ng-template>
             <ng-template pTemplate="summary">

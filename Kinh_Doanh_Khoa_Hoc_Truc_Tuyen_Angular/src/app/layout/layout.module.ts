@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { TranslateModule } from '@ngx-translate/core';
+import { SharedPipesModule } from '../shared';
 import { ConvertPathPipe } from '../shared/pipes/convert-path.pipe';
 import { FormatDataPipe } from '../shared/pipes/format-data.pipe';
 import { FormatOrderPipe } from '../shared/pipes/format-order.pipe';
@@ -18,6 +19,7 @@ import { LayoutComponent } from './layout.component';
          LayoutRoutingModule,
           TranslateModule,
            NgbDropdownModule,
+           SharedPipesModule,
         ],
     declarations: [LayoutComponent,
          SidebarComponent,

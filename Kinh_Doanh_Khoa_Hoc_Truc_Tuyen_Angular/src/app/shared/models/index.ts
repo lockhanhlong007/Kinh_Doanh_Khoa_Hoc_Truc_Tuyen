@@ -24,3 +24,4 @@ export * from './user-change-password.model';
 export * from './announcement-mark-read-request.model';
 export * from './announcement-user.model';
 export * from './announcement.model';
+export * from './announcement-create-request.model';

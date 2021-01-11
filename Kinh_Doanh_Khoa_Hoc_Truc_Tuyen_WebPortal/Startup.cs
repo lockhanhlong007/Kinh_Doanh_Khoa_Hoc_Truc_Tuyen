@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Claims;
@@ -12,6 +13,8 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -21,6 +24,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using PaulMiami.AspNetCore.Mvc.Recaptcha;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal
@@ -44,14 +48,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal
                 handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
                 return handler;
             });
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddTransient<IBaseApiClient, BaseApiClient>();
-            services.AddTransient<IEmailSender, EmailSender>();
-            services.AddTransient<IViewRenderService, ViewRenderService>();
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+            });
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                 })
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
@@ -108,7 +114,54 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal
                     options.LoginPath = new PathString("/Account/Login");
                     options.ReturnUrlParameter = "RequestPath";
                     options.SlidingExpiration = true;
+                })
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.Authority = Configuration["Authorization:AuthorityUrl"];
+                    options.RequireHttpsMetadata = false;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+
+                    options.ClientId = Configuration["Authorization:ClientId"];
+                    options.ClientSecret = Configuration["Authorization:ClientSecret"];
+                    options.SaveTokens = true;
+
+                    options.Scope.Add("openid");
+                    options.Scope.Add("email");
+                    options.Scope.Add("profile");
+                    options.Scope.Add("offline_access");
+                    options.Scope.Add("api.khoahoc");
+
+                    options.Events = new OpenIdConnectEvents
+                    {
+                        // that event is called after the OIDC middleware received the auhorisation code,
+                        // redeemed it for an access token and a refresh token,
+                        // and validated the identity token
+                        OnTokenValidated = x =>
+                        {
+                            // store both access and refresh token in the claims - hence in the cookie
+                            var identity = (ClaimsIdentity)x.Principal.Identity;
+                            identity.AddClaims(new[]
+                            {
+                                new Claim("access_token", x.TokenEndpointResponse.AccessToken),
+                                new Claim("refresh_token", x.TokenEndpointResponse.RefreshToken)
+                            });
+
+                            // so that we don't issue a session cookie but one with a fixed expiration
+                            x.Properties.IsPersistent = true;
+
+                            // align expiration of the cookie with expiration of the
+                            // access token
+                            var accessToken = new JwtSecurityToken(x.TokenEndpointResponse.AccessToken);
+                            x.Properties.ExpiresUtc = accessToken.ValidTo;
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<IBaseApiClient, BaseApiClient>();
+            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IViewRenderService, ViewRenderService>();
             services.AddRecaptcha(new RecaptchaOptions
             {
                 SiteKey = Configuration["Recaptcha:SiteKey"],
@@ -119,10 +172,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal
                 options.ForwardedHeaders =
                     ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             });
-            services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
-            });
+           
             var builder = services.AddControllersWithViews().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<LoginRequestValidator>()); ;
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             if (env == Environments.Development)
@@ -148,13 +198,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal
                 app.UseHsts();
             }
             app.UseErrorMiddleware();
-            // app.UseHttpsRedirection();
+
+            app.UseHttpsRedirection();
+
             app.UseStaticFiles();
+
             app.UseAuthentication();
 
             app.UseRouting();
 
             app.UseAuthorization();
+
             app.UseSession();
 
             app.UseEndpoints(endpoints =>

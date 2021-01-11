@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SelectItem } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import { Category } from '../../../../shared/models';
-import { CoursesService, CategoriesService, NotificationService, UtilitiesService, AuthService } from '../../../../shared/services';
+import { CoursesService, CategoriesService, NotificationService, UtilitiesService, AuthService, SignalRService } from '../../../../shared/services';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -19,6 +19,7 @@ export class CoursesDetailComponent implements OnInit, OnDestroy {
     private coursesService: CoursesService,
     private authService: AuthService,
     private categoriesService: CategoriesService,
+    private signalRSevice: SignalRService,
     private notificationService: NotificationService,
     private utilitiesService: UtilitiesService,
     private activeRoute: ActivatedRoute,
@@ -163,10 +164,11 @@ export class CoursesDetailComponent implements OnInit, OnDestroy {
     if (this.entityId) {
       this.subscription.add(this.coursesService.update(this.entityId, formData)
         .subscribe((response: any) => {
-          console.log('Delete nek1: ' + response);
-          console.log('StatusCode Delete nek2: ' + response.StatusCode);
-          console.log('status Delete nek3: ' + response.status);
-          if (response.status === 204) {
+          console.log(response);
+          if (response.status === 200 && response.body) {
+            if (response.body.announcementViewModel) {
+              this.signalRSevice.SendMessageToUser('SendToUserAsync', response.body.userId, response.body.announcementViewModel);
+            }
             this.notificationService.showSuccess(MessageConstants.Updated_Ok);
             this.router.navigateByUrl('/products/courses');
           }
