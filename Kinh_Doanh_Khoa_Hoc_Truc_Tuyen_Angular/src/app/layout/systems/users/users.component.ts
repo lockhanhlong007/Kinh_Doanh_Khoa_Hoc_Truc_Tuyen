@@ -146,6 +146,25 @@ public keyword = '';
     }));
   }
 
+  resetPassword() {
+     this.notificationService.showConfirmation(MessageConstants.Confirm_Reset_Password,
+       () => this.resetPasswordConfirm(this.selectedItems[0].id));
+  }
+
+  resetPasswordConfirm(id: string) {
+    this.blockedPanel = true;
+    this.subscription.add(this.usersService.resetPassword(id).subscribe(() => {
+      this.notificationService.showSuccess(MessageConstants.Reset_Password_OK);
+      this.loadData();
+      this.selectedItems = [];
+      this.loadUserRoles();
+      setTimeout(() => { this.blockedPanel = false; }, 1000);
+    }, error => {
+      this.notificationService.showError(error);
+      setTimeout(() => { this.blockedPanel = false; }, 1000);
+    }));
+ }
+
   deleteItems() {
     if (this.selectedItems.length === 0) {
       this.notificationService.showError(MessageConstants.Not_Choose_Any_Record);

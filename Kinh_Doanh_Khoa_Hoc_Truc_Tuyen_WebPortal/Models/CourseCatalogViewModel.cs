@@ -24,6 +24,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models
 
         public int? PageSize { get; set; }
 
+        public List<ActiveCoursesViewModel> ActiveCoursesViewModels { get; set; }
+
         public List<SelectListItem> SortTypes { get; } = new List<SelectListItem>
         {
             new SelectListItem(){Value = "lastest",Text = "Sắp Xếp: Mới Nhất"},

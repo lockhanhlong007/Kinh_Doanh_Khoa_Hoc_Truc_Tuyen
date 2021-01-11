@@ -5,12 +5,13 @@
                 <div class="p-col-12">
                     <h3>Danh sách người dùng</h3>
                 </div>
-                <div class="p-col-4">
+                <div class="p-col-5">
                     <button style="margin-right: 5px;" appPermission appFunction="User" appAction="Create" pButton type="button" label="Thêm" icon="fa fa-plus" (click)="showAddModal()"></button>
-                    <button style="margin-right: 5px;" appPermission appFunction="User" appAction="Update" pButton type="button" label="Sửa" icon="fa fa-edit" class="p-button-warning" *ngIf="selectedItems.length== 1" (click)="showEditModal()"></button>
+                    <button style="margin-right: 5px;" appPermission appFunction="User" appAction="Update" pButton type="button" label="Sửa" icon="fa fa-edit" class="p-button-warning" *ngIf="selectedItems.length == 1" (click)="showEditModal()"></button>
                     <button style="margin-right: 5px;" appPermission appFunction="User" appAction="Delete" pButton type="button" label="Xóa" icon="fa fa-trash" class="p-button-danger" *ngIf="selectedItems.length > 0" (click)="deleteItems()"></button>
+                    <button style="margin-right: 5px;" appPermission appFunction="User" appAction="Update" pButton type="button" label="Khôi phục mật khẩu" icon="fa fa-refresh" class="p-button-help" *ngIf="selectedItems.length == 1" (click)="resetPassword()"></button>
                 </div>
-                <div class="p-col-4">
+                <div class="p-col-3">
                     <p-checkbox label="Gán quyền" class="p-pt-2" [(ngModel)]="showRoleAssign" (click)="showHideRoleTable()" binary="true">
                     </p-checkbox>
                 </div>

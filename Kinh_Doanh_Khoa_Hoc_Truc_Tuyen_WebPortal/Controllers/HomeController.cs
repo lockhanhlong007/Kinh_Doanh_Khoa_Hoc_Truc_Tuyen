@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
@@ -24,14 +25,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var newCourses = await _apiClient.GetListAsync<CourseViewModel>($"/api/courses/new-courses");
-            var homeCategories = await _apiClient.GetListAsync<CategoryViewModel>($"/api/categories/home-categories");
-
-            return View(new HomeViewModel()
+            var homeViewModel = new HomeViewModel();
+            homeViewModel.NewCourses = await _apiClient.GetListAsync<CourseViewModel>($"/api/courses/new-courses");
+            homeViewModel.HomeCategoryViewModels = await _apiClient.GetListAsync<CategoryViewModel>($"/api/categories/home-categories");
+            if (User.Identity.IsAuthenticated)
             {
-                HomeCategoryViewModels = homeCategories,
-                NewCourses = newCourses
-            });
+                homeViewModel.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/check-active-courses/user-{User.GetUserId()}");
+            }
+            return View(homeViewModel);
         }
 
         public IActionResult RefreshCart()

@@ -17,6 +17,12 @@ export class UsersService extends BaseService {
     this._sharedHeaders = this._sharedHeaders.set('Content-Type', 'application/json');
 
 }
+
+  resetPassword(id: string) {
+    return this.http.get(`${environment.ApiUrl}/api/users/${id}/administrator/reset-password`, { headers: this._sharedHeaders })
+    .pipe(catchError(this.handleError));
+  }
+
   updatePassword(entity: UserChangePassword) {
     return this.http.put(`${environment.ApiUrl}/api/users/${entity.id}/change-password`, entity, { headers: this._sharedHeaders })
     .pipe(catchError(this.handleError));

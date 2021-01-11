@@ -6,8 +6,13 @@
     var env = "https://localhost:44342";
     var imageCourse = env + Model.CourseViewModel.Image;
     var imageUser = env + Model.UserViewModel.Avatar;
-    var user = @User.GetUserId();
-    var checkActiveCourse = Model.ActiveCoursesViewModels.Any(x => x.UserId.ToLower() == user);
+    var user = "";
+    var checkActiveCourse = false;
+    if (User.Identity.IsAuthenticated)
+    {
+        user = User.GetUserId();
+        checkActiveCourse = Model.ActiveCoursesViewModels.Any(x => x.CourseId == Model.CourseViewModel.Id);
+    }
 }
 @section Scripts{
     <script src="~/assets/js/custom/customCourseDetail.js" asp-append-version="true"></script>
@@ -135,7 +140,20 @@
                                     }
                                     else
                                     {
-                                        <button class="btn btn--e-brand-b-2 add-product-in-cart" data-id="@Model.CourseViewModel.Id" type="submit">Thêm vào giỏ</button>
+                                        if (Model.CourseViewModel.Status == 1)
+                                        {
+                                            <button class="btn btn--e-brand-b-2 add-product-in-cart" data-modal="modal" data-modal-id="#add-to-cart" data-status="@Model.CourseViewModel.Status" data-id="@Model.CourseViewModel.Id" type="button">Thêm vào giỏ</button>
+                                        }
+                                        else if(Model.CourseViewModel.Status == 2)
+                                        {
+                                            <button class="btn btn--e-brand-b-2 add-product-in-cart" data-modal="modal" data-modal-id="#add-to-cart" data-status="@Model.CourseViewModel.Status" data-id="@Model.CourseViewModel.Id" type="button">Chưa phát hành</button>
+
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn--e-brand-b-2 add-product-in-cart" data-modal="modal" data-modal-id="#add-to-cart" data-status="@Model.CourseViewModel.Status" data-id="@Model.CourseViewModel.Id" type="button">Ngừng kinh doanh</button>
+
+                                        }
                                     }
                                 </div>
                             </div>
@@ -373,15 +391,34 @@
                                     <a class="aspect aspect--bg-grey aspect--square u-d-block" href="/courses-@(courseViewModel.Id).html">
                                         <img class="aspect__img" src="@img" alt="">
                                     </a>
-                                    <div class="product-o__action-wrap">
-                                        <ul class="product-o__action-list">
-                                            <li>
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        if (Model.ActiveCoursesViewModels.All(x => x.CourseId != courseViewModel.Id))
+                                        {
+                                            <div class="product-o__action-wrap">
+                                            <ul class="product-o__action-list">
+                                                <li>
 
-                                                <a class="add-product-in-cart" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
-                                                @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
-                                            </li>
-                                        </ul>
-                                    </div>
+           
+                                                    <a class="add-product-in-cart" data-status="@courseViewModel.Status" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
+                                                    @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="product-o__action-wrap">
+                                            <ul class="product-o__action-list">
+                                                <li>
+                                                    <a class="add-product-in-cart" data-status="@courseViewModel.Status" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
+                                                    @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    }
+
                                 </div>
 
                                 <span class="product-o__category">

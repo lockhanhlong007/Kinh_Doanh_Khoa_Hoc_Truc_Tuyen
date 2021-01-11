@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
@@ -464,6 +465,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> DeleteUser(List<string> ids)
         {
+            if (ids.Contains(User.GetUserId()))
+            {
+                return BadRequest(new ApiBadRequestResponse("Bạn không thể xóa chính tài khoản bạn đang sử dụng được"));
+            }
             foreach (var id in ids)
             {
                 var user = await _userManager.FindByIdAsync(id);
@@ -479,6 +484,23 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _logger.LogError("You cannot remove the only admin user remaining.");
                     return BadRequest(new ApiBadRequestResponse("Bạn không thể xóa hết tất cả user có quyền admin"));
                 }
+                var announcements = _khoaHocDbContext.Announcements.Where(x => x.UserId.Equals(user.Id));
+                if (announcements.Any())
+                {
+                    var announcementUsers = _khoaHocDbContext.AnnouncementUsers.Where(x => x.UserId.Equals(user.Id));
+                    _khoaHocDbContext.Announcements.RemoveRange(announcements);
+                    _khoaHocDbContext.AnnouncementUsers.RemoveRange(announcementUsers);
+                }
+                var orders = _khoaHocDbContext.Orders.Where(x => x.UserId.Equals(user.Id));
+                if (orders.Any())
+                {
+                    foreach (var order in orders)
+                    {
+                        order.UserId = null;
+                    }
+                    _khoaHocDbContext.Orders.UpdateRange(orders);
+                }
+
                 var result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)
                 {
@@ -488,6 +510,25 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
 
             return Ok();
+        }
+
+        [HttpGet("{id}/administrator/reset-password")]
+        [ClaimRequirement(FunctionConstant.User, CommandConstant.Update)]
+        [ValidationFilter]
+        public async Task<IActionResult> ResetPasswordForAdmin(string id)
+        {
+            if (id.Equals(User.GetUserId()))
+            {
+                return BadRequest(new ApiBadRequestResponse("Bạn không thể khôi phục mật khẩu tài khoản bạn đang sử dụng được"));
+            }
+            var user = await _userManager.FindByIdAsync(id);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await _userManager.ResetPasswordAsync(user, token, "123@qwe");
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+            return BadRequest(new ApiBadRequestResponse("Khôi phục password thất bại"));
         }
 
         [HttpDelete("{id}-delete-avatar")]
@@ -509,7 +550,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
-
 
         [HttpGet("{userId}/menu")]
         public async Task<IActionResult> GetMenuByUserPermission(string userId)
