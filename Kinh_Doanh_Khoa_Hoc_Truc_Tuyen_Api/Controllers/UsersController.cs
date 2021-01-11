@@ -51,11 +51,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> PostUser([FromForm] UserCreateRequest request)
         {
-            var check112 = await _userManager.FindByEmailAsync("long0072017@gmail.com");
-            if (check112 != null)
-            {
-                await _userManager.DeleteAsync(check112);
-            }
+            //var check112 = await _userManager.FindByEmailAsync("long0072017@gmail.com");
+            //if (check112 != null)
+            //{
+            //    await _userManager.DeleteAsync(check112);
+            //}
             var user = new AppUser
             {
                 Id = Guid.NewGuid(),
