@@ -117,7 +117,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddTransient<IStorageService, StorageService>();
             services.AddTransient<IViewRenderService, ViewRenderService>();
-            services.AddTransient<IOneSignalService, OneSignalService>();
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(JwtBearerDefaults.AuthenticationScheme, policy =>
