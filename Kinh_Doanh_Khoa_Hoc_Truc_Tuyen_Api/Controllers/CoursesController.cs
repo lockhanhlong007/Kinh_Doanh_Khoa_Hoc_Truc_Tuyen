@@ -121,6 +121,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 await _storageService.SaveFileAsync(request.Image.OpenReadStream(), fileName, "images");
                 course.Image = "images/" + fileName;
             }
+            else
+            {
+                course.Image = "images/defaultAvatar.png";
+            }
             await _khoaHocDbContext.Courses.AddAsync(course);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)

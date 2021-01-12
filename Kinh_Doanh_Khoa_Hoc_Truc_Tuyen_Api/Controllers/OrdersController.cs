@@ -254,12 +254,25 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (request.StatusType == 4)
             {
                 order.Status = OrderStatus.Completed;
+                var orderDetails = _khoaHocDbContext.OrderDetails.Where(x => x.OrderId == order.Id);
+                foreach (var orderDetail in orderDetails)
+                {
+                    var activeCourse = _khoaHocDbContext.ActivateCourses.FirstOrDefault(x => x.Id.Equals(orderDetail.ActiveCourseId));
+                    if (activeCourse != null)
+                    {
+                        activeCourse.Status = true;
+                        _khoaHocDbContext.Update(activeCourse);
+                    }
+                }
             }
             else
             {
                 order.Status = OrderStatus.Cancelled;
             }
             _khoaHocDbContext.Orders.Update(order);
+
+
+
             var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
             var announceId = Guid.NewGuid();
             var announcement = new Announcement();
