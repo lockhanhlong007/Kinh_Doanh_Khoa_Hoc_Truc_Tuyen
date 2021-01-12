@@ -59,16 +59,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             services.Configure<IdentityOptions>(options =>
             {
                 // Default Lockout settings.
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
                 options.SignIn.RequireConfirmedAccount = true;
                 options.SignIn.RequireConfirmedEmail = true;
                 options.Password.RequiredLength = 3;
-                options.Password.RequireDigit = true;
+                options.Password.RequireDigit = false;
                 options.Password.RequireUppercase = false;
-                options.User.RequireUniqueEmail = true;
+                options.User.RequireUniqueEmail = false;
             });
 
             services.AddIdentityServer(options =>
@@ -130,7 +130,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 {
                     //builder.AllowAnyMethod()
                     //    .AllowAnyHeader()
-                    //    .WithOrigins("*;http://localhost:4200;https://localhost:44352;https://localhost:44342")
+                    //    .WithOrigins("*;http://localhost:4200;https://localhost:44352;http://localhost:6717")
                     //    .AllowCredentials();
                     builder.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
                         .SetIsOriginAllowed((host) => true);

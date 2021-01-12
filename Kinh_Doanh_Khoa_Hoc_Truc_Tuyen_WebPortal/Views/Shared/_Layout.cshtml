@@ -26,6 +26,8 @@
     <!--====== App ======-->
     <link rel="stylesheet" href="~/assets/css/app.css">
     @await RenderSectionAsync("CssLinks", required: false)
+    <!-- Load Facebook SDK for JavaScript -->
+
 </head>
 
 <body class="config">
@@ -182,7 +184,54 @@
     <!--====== Custom Script ======-->
     @await RenderSectionAsync("CommonScripts", required: false)
     @await RenderSectionAsync("Scripts", required: false)
+    @*<div class="powr-chat" id="6cc7942f_1610378590"></div>
+        <script src="https://www.powr.io/powr.js?platform=aspdotnet"></script>*@
+    <!-- Start of  Zendesk Widget script -->
+<script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=6a2d619c-5838-4ba8-a00c-cf7f0c9f4dec"></script>
+    <!-- End of  Zendesk Widget script -->
+    <!-- Start of REVE Chat Script-->
+    <!--<script type='text/javascript'>
+        window.$_REVECHAT_API || (function(d, w) { var r = $_REVECHAT_API = function(c) {r._.push(c);}; w.__revechat_account='2252923';w.__revechat_version=2;
+            r._= []; var rc = d.createElement('script'); rc.type = 'text/javascript'; rc.async = true; rc.setAttribute('charset', 'utf-8');
+            rc.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'static.revechat.com/widget/scripts/new-livechat.js?'+new Date().getTime();
+            var s = d.getElementsByTagName('script')[0]; s.parentNode.insertBefore(rc, s);
+        })(document, window);
+    </script>-->
+    <!-- End of REVE Chat Script -->
+    <!-- Start of LiveChat (www.livechatinc.com) code -->
+    @*<script>
+        window.__lc = window.__lc || {};
+        window.__lc.license = 12503349;
+        ; (function (n, t, c) { function i(n) { return e._h ? e._h.apply(null, n) : e._q.push(n) } var e = { _q: [], _h: null, _v: "2.0", on: function () { i(["on", c.call(arguments)]) }, once: function () { i(["once", c.call(arguments)]) }, off: function () { i(["off", c.call(arguments)]) }, get: function () { if (!e._h) throw new Error("[LiveChatWidget] You can't use getters before load."); return i(["get", c.call(arguments)]) }, call: function () { i(["call", c.call(arguments)]) }, init: function () { var n = t.createElement("script"); n.async = !0, n.type = "text/javascript", n.src = "https://cdn.livechatinc.com/tracking.js", t.head.appendChild(n) } }; !n.__lc.asyncInit && e.init(), n.LiveChatWidget = n.LiveChatWidget || e }(window, document, [].slice))
+    </script>
+    <noscript><a href="https://www.livechatinc.com/chat-with/12503349/" rel="nofollow">Chat with us</a>, powered by <a href="https://www.livechatinc.com/?welcome" rel="noopener nofollow" target="_blank">LiveChat</a></noscript>*@
+    <!-- End of LiveChat code -->
+<!-- Load Facebook SDK for JavaScript -->
+<!--<div id="fb-root"></div>
+<script>
+    window.fbAsyncInit = function() {
+        FB.init({
+            xfbml            : true,
+            version          : 'v9.0'
+        });
+    };
 
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = 'https://connect.facebook.net/vi_VN/sdk/xfbml.customerchat.js';
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>-->
+
+<!-- Your Chat Plugin code -->
+<!--<div class="fb-customerchat"
+     attribution=setup_tool
+     page_id="106940628026418"
+     theme_color="#20cef5"
+     logged_in_greeting="Xin chào! mình có thể giúp gì cho bạn?"
+     logged_out_greeting="Xin chào! mình có thể giúp gì cho bạn?">
+</div>-->
 </body>
 
 </html>

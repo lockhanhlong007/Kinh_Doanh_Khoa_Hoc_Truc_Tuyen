@@ -231,6 +231,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     HttpContext.Session.Set(SystemConstants.EmailSession, user.Email);
                     //Get Config Info
                     string vnp_Returnurl = _configuration["VnPaySettings:vnp_Returnurl"]; //URL nhan ket qua tra ve 
+                    //string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
                     string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
                     string vnp_TmnCode = _configuration["VnPaySettings:vnp_TmnCode"]; //Ma website
                     string vnp_HashSecret = _configuration["VnPaySettings:vnp_HashSecret"]; //Chuoi bi mat
