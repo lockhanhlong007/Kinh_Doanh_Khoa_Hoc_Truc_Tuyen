@@ -7,6 +7,7 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using System.Net.Http;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
@@ -44,14 +45,25 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             mailMessage.Body = message;
             mailMessage.Subject = subject;
             mailMessage.IsBodyHtml = true;
-            var session = _httpContextAccessor.HttpContext.Session.Get<string>(SystemConstants.AttachmentSession);
+            var session = _httpContextAccessor.HttpContext.Session.Get<ResultFileResponse>(SystemConstants.AttachmentSession);
             if (session != null)
             {
-                var fileName = Path.GetFileName(session);
-                var myClient = new WebClient();
-                var bytes = myClient.DownloadData(session);
-                var web = new MemoryStream(bytes);
-                mailMessage.Attachments.Add(new Attachment(web, fileName));
+                if (!string.IsNullOrEmpty(session.FileExcel))
+                {
+                    var fileNameExcel = Path.GetFileName(session.FileExcel);
+                    var myClient = new WebClient();
+                    var bytes = myClient.DownloadData(session.FileExcel);
+                    var webExcel = new MemoryStream(bytes);
+                    mailMessage.Attachments.Add(new Attachment(webExcel, fileNameExcel));
+                }
+                if (!string.IsNullOrEmpty(session.FilePdf))
+                {
+                    var fileNamePdf = Path.GetFileName(session.FilePdf);
+                    var myClient = new WebClient();
+                    var bytes = myClient.DownloadData(session.FilePdf);
+                    var webPdf = new MemoryStream(bytes);
+                    mailMessage.Attachments.Add(new Attachment(webPdf, fileNamePdf));
+                }
             }
             client.Send(mailMessage);
             return Task.CompletedTask;

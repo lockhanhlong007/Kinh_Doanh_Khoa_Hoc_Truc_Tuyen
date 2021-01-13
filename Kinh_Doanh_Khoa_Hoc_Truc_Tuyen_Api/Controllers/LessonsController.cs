@@ -33,7 +33,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private readonly EKhoaHocDbContext _khoaHocDbContext;
         private ILogger<LessonsController> _logger;
         public readonly UserManager<AppUser> _userManager;
-        private IStorageService _storageService;
+        private readonly IStorageService _storageService;
 
         public LessonsController(IWebHostEnvironment webHostEnvironment,EKhoaHocDbContext khoaHocDbContext, ILogger<LessonsController> logger, IStorageService storageService, UserManager<AppUser> userManager)
         {
@@ -48,13 +48,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _khoaHocDbContext.Lessons.FindAsync(id);
+            var result = await _khoaHocDbContext.Lessons.FirstOrDefaultAsync(x => x.Id == id);
             if (result == null)
             {
                 _logger.LogError($"Cannot found lesson with id {id}");
                 return NotFound(new ApiNotFoundResponse($"Cannot found lesson with id {id}"));
             }
-
             return Ok(new LessonViewModel
             {
                 Name = result.Name,
@@ -73,13 +72,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Create)]
         public async Task<IActionResult> PostLesson([FromForm] LessonCreateRequest request)
         {
-            var course = await _khoaHocDbContext.Courses.FindAsync(request.CourseId);
+            var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == request.CourseId);
             if (course == null)
             {
                 _logger.LogError($"Course with id {request.CourseId} is existed.");
                 return BadRequest(new ApiBadRequestResponse($"Không tồn tại khóa học với id {request.CourseId}"));
             }
-
+            if (request.VideoPath == null)
+            {
+                _logger.LogError($"Bạn phải thêm video cho bài học.");
+                return BadRequest(new ApiBadRequestResponse($"Bạn phải thêm video cho bài học."));
+            }
             var lesson = new Lesson
             {
                 Name = request.Name,
@@ -124,15 +127,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var lstAnnouncement = new List<AnnouncementToUserViewModel>();
             foreach (var id in input)
             {
-                var lessons = await _khoaHocDbContext.Lessons.FindAsync(id);
+                var lessons = await _khoaHocDbContext.Lessons.FirstOrDefaultAsync(x => x.Id == id);
                 if (lessons == null)
                 {
                     _logger.LogError($"Cannot found lesson with id {id}");
                     return NotFound(new ApiNotFoundResponse($"Không tìm thấy bài học với id {id}"));
                 }
-                lessons.Status = true;
+                lessons.Status = 1;
                 _khoaHocDbContext.Lessons.Update(lessons);
-                var course = await _khoaHocDbContext.Courses.FindAsync(lessons.CourseId);
+                var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == lessons.CourseId);
                 var userCreated = await _userManager.FindByNameAsync(course.CreatedUserName);
                 var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
                 var announceId = Guid.NewGuid();
@@ -183,7 +186,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpGet("course-{id}")]
         public async Task<IActionResult> GetLessons(int id)
         {
-            return Ok(await _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == id).OrderBy(x => x.Status).AsNoTracking().Select(_ => new LessonViewModel
+            return Ok(await _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == id && x.Status == 1).OrderBy(x => x.SortOrder).AsNoTracking().Select(_ => new LessonViewModel
             {
                 Name = _.Name,
                 Status = _.Status,
@@ -204,7 +207,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (lessonId == null)
             {
                 var query = _khoaHocDbContext.Lessons.Include(x => x.Course)
-                    .FirstOrDefault(x => x.CourseId == id && x.SortOrder == 1 && x.Status);
+                    .FirstOrDefault(x => x.CourseId == id && x.SortOrder == 1 && x.Status == 1);
                 if (query == null) return Ok(data);
                 data.Name = query.Name;
                 data.Status = query.Status;
@@ -219,7 +222,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             else
             {
                 var query = _khoaHocDbContext.Lessons.Include(x => x.Course)
-                    .FirstOrDefault(x => x.CourseId == id && x.Id == lessonId && x.Status);
+                    .FirstOrDefault(x => x.CourseId == id && x.Id == lessonId && x.Status == 1);
                 if (query == null) return Ok(data);
                 data.Name = query.Name;
                 data.Status = query.Status;
@@ -236,16 +239,19 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
         [HttpGet("filter")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public async Task<IActionResult> GetLessonsPaging(int courseId,string filter, int pageIndex, int pageSize)
+        public IActionResult GetLessonsPaging(int courseId,string filter, int pageIndex, int pageSize)
         {
-            var query = _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == courseId).OrderBy(x => x.Status).AsNoTracking();
+            var query = _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == courseId).AsNoTracking().AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.Contains(filter));
+                query = query.Where(x =>
+                    x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower()
+                        .Contains(filter.convertToUnSign().ToLower()));
             }
 
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new LessonViewModel
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.OrderBy(x => x.SortOrder).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new LessonViewModel
             {
                 Name = _.Name,
                 Status = _.Status,
@@ -255,7 +261,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Attachment = _storageService.GetFileUrl(_.Attachment),
                 VideoPath = _storageService.GetFileUrl(_.VideoPath),
                 CourseName = _.Course.Name
-            }).ToListAsync();
+            }).ToList();
             var pagination = new Pagination<LessonViewModel>
             {
                 Items = items,
@@ -271,7 +277,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PutLesson(int id, [FromForm] LessonCreateRequest request)
         {
-            var lesson = await _khoaHocDbContext.Lessons.FindAsync(id);
+            var lesson = await _khoaHocDbContext.Lessons.FirstOrDefaultAsync(x => x.Id == id);
             if (lesson == null)
             {
                 _logger.LogError($"Cannot found lesson with id {id}");
@@ -302,9 +308,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _khoaHocDbContext.Lessons.Update(lesson);
             var announcementToUser = new AnnouncementToUserViewModel();
             int result;
-            if (request.Status)
+            if (request.Status == 1)
             {
-                var course = await _khoaHocDbContext.Courses.FindAsync(lesson.CourseId);
+                var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == lesson.CourseId);
                 var userCreated = await _userManager.FindByNameAsync(course.CreatedUserName);
                 var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
                 var announceId = Guid.NewGuid();
@@ -358,7 +364,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var id in input)
             {
-                var lesson = await _khoaHocDbContext.Lessons.FindAsync(id);
+                var lesson = await _khoaHocDbContext.Lessons.FirstOrDefaultAsync(x => x.Id == id);
                 if (lesson == null)
                 {
                     _logger.LogError($"Cannot found lesson with id {id}");
@@ -385,10 +391,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpDelete("course-{coursesId}-lesson-{lessonId}/attachment")]
         public async Task<IActionResult> DeleteAttachment(int coursesId, int lessonId)
         {
-            var lesson = await _khoaHocDbContext.Lessons.FindAsync(lessonId);
+            var lesson = await _khoaHocDbContext.Lessons.FirstOrDefaultAsync(x => x.Id.Equals(lessonId) && x.CourseId == coursesId);
             if (lesson == null)
-                return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy bài học với id {lessonId}"));
-            lesson.Attachment = "";
+                return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy file với id {lessonId}"));
+            lesson.Attachment = null;
             _khoaHocDbContext.Lessons.Update(lesson);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
@@ -401,7 +407,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpDelete("course-{coursesId}-lesson-{lessonId}/video")]
         public async Task<IActionResult> DeleteVideo(int coursesId, int lessonId)
         {
-            var lesson = await _khoaHocDbContext.Lessons.FindAsync(lessonId);
+            var lesson = await _khoaHocDbContext.Lessons.FirstOrDefaultAsync(x => x.Id.Equals(lessonId) && x.CourseId == coursesId);
             if (lesson == null)
                 return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy bài học với id {lessonId}"));
             lesson.VideoPath = "";

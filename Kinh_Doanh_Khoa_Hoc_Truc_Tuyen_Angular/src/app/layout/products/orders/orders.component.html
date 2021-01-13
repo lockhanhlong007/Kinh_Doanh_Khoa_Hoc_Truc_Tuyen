@@ -33,10 +33,10 @@
                     <th class="p-text-center" [pSortableColumn]="'message'">Tin nhắn
                         <p-sortIcon [field]="'message'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'paymentMethod'">Phương thức thanh toán
+                    <th style="width: 250px;" class="p-text-center" [pSortableColumn]="'paymentMethod'">Phương thức thanh toán
                         <p-sortIcon [field]="'paymentMethod'"></p-sortIcon>
                     </th>
-                    <th class="p-text-center" [pSortableColumn]="'total'">Tổng cộngcộng
+                    <th class="p-text-center" [pSortableColumn]="'total'">Tổng cộng
                         <p-sortIcon [field]="'total'"></p-sortIcon>
                     </th>
                     <th class="p-text-center" [pSortableColumn]="'status'">Trạng thái
@@ -56,7 +56,7 @@
                     </td>
                     <td>{{row.name | formatData: 20}}</td>
                     <td>{{row.message}}</td>
-                    <td>{{row.paymentMethod | formatOrder: 'paymentMethod'}}</td>
+                    <td style="width: 250px;">{{row.paymentMethod | formatOrder: 'paymentMethod'}}</td>
                     <td>{{row.total | currency:'VND':'symbol':'1.0-3' }}</td>
                     <td>{{row.status | formatOrder}}</td>
                     <td>{{row.creationTime | date: 'dd/MM/yyyy'}}</td>
@@ -70,7 +70,7 @@
         </p-table>
         <p-footer>
 
-            <p-paginator appendTo="body" [rows]="pageSize" [totalRecords]="totalRecords" (onPageChange)="pageChanged($event)" [rowsPerPageOptions]="[5,10,20,100]"></p-paginator>
+            <p-paginator dropdownAppendTo="body" [rows]="pageSize" [totalRecords]="totalRecords" (onPageChange)="pageChanged($event)" [rowsPerPageOptions]="[5,10,20,100]"></p-paginator>
             <p-blockUI [target]="pnl" [blocked]="blockedPanel">
                 <p-progressSpinner [style]="{width: '100px', height: '100px', position: 'absolute',top: '25%',left: '50%'}" strokeWidth="2 " animationDuration=".5s"></p-progressSpinner>
             </p-blockUI>

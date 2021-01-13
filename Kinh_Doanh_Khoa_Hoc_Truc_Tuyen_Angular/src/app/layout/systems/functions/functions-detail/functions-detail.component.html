@@ -9,7 +9,7 @@
     <div class="modal-body div-scroll">
         <p-panel #pnl header="Thông tin" [toggleable]="true" [collapsed]="false" styleClass="m-b-10">
             <div class="p-grid-pad p-fluid p-grid-responsive">
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Mã duy nhất:</span>
                     </div>
@@ -20,8 +20,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="id" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Tên:</span>
                     </div>
@@ -32,8 +31,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="name" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span>Chọn cấp cha:</span>
                     </div>
@@ -45,8 +43,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="parentId" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Url:</span>
                     </div>
@@ -57,8 +54,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="url" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Icon Class:</span>
                     </div>
@@ -69,8 +65,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="icon" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Thứ tự:</span>
                     </div>
@@ -81,7 +76,6 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="sortOrder" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-
             </div>
             <p-blockUI [target]="pnl" [blocked]="blockedPanel">
                 <p-progressSpinner [style]="{width: '100px', height: '100px', position:'absolute',top:'25%',left:'50%'}" strokeWidth="2" animationDuration=".5s"></p-progressSpinner>

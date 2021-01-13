@@ -35,17 +35,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IBaseApiClient _apiClient;
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
 
         public AccountController(IBaseApiClient apiClient,
-            IConfiguration configuration, IHttpClientFactory httpClientFactory, IEmailSender emailSender)
+            IConfiguration configuration, IEmailSender emailSender)
         {
             _apiClient = apiClient;
             _configuration = configuration;
-            _httpClientFactory = httpClientFactory;
             _emailSender = emailSender;
         }
 

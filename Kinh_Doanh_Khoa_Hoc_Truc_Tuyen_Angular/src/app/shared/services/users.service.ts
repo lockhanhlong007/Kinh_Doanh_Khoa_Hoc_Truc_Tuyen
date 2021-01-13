@@ -47,7 +47,7 @@ export class UsersService extends BaseService {
   }
 
   add(entity) {
-    return this.http.post(`${environment.ApiUrl}/api/users`, entity,   {
+    return this.http.post(`${environment.ApiUrl}/api/users/server`, entity,   {
       reportProgress: true,
       observe: 'events'
     })

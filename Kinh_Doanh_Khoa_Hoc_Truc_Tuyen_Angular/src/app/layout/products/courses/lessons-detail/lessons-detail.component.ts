@@ -38,8 +38,9 @@ export class LessonsDetailComponent implements OnInit, OnDestroy {
   public fileAttachName: string;
   public backendApiUrl = environment.ApiUrl;
   public isStatus: any[] = [
-    {value: true, label : 'Duyệt'},
-    {value: false, label : 'Không Duyệt'}
+    {value: 0, label : 'Chưa Duyệt'},
+    {value: 1, label : 'Duyệt'},
+    {value: 2, label : 'Không Duyệt'}
   ];
   // Validate
   validation_messages = {
@@ -115,9 +116,6 @@ export class LessonsDetailComponent implements OnInit, OnDestroy {
     this.blockedPanel = true;
     this.subscription.add(this.lessonsService.deleteAttachment(this.courseId, this.lessonId)
       .subscribe((res: any) => {
-        console.log('Attachment Delete nek1: ' + res);
-        console.log('Attachment StatusCode Delete nek2: ' + res.StatusCode);
-        console.log('Attachment status Delete nek3: ' + res.status);
         if (res.StatusCode === 200) {
           this.notificationService.showSuccess(MessageConstants.Delete_Ok);
           this.fileAttachName = '';
@@ -143,23 +141,25 @@ export class LessonsDetailComponent implements OnInit, OnDestroy {
     }
 
   }
-  public deleteVideo() {
-    this.blockedPanel = true;
-    this.subscription.add(this.lessonsService.deleteVideo(this.courseId, this.lessonId)
-      .subscribe((res: any) => {
-        console.log('Video Delete nek1: ' + res);
-        console.log('Video StatusCode Delete nek2: ' + res.StatusCode);
-        console.log('Video status Delete nek3: ' + res.status);
-        if (res.StatusCode === 200) {
-          this.notificationService.showSuccess(MessageConstants.Delete_Ok);
-          this.fileVideoName = '';
-          this.fileVideoPath = '';
-        }
-        setTimeout(() => { this.blockedPanel = false; }, 1000);
-      }, error => {
-        this.notificationService.showError(MessageConstants.Delete_Failed);
-        setTimeout(() => { this.blockedPanel = false; }, 1000);
-      }));
+  public changeVideo() {
+    this.fileVideoName = '';
+    this.fileVideoPath = '';
+    // this.blockedPanel = true;
+    // this.subscription.add(this.lessonsService.deleteVideo(this.courseId, this.lessonId)
+    //   .subscribe((res: any) => {
+    //     console.log('Video Delete nek1: ' + res);
+    //     console.log('Video StatusCode Delete nek2: ' + res.StatusCode);
+    //     console.log('Video status Delete nek3: ' + res.status);
+    //     if (res.StatusCode === 200) {
+    //       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
+    //       this.fileVideoName = '';
+    //       this.fileVideoPath = '';
+    //     }
+    //     setTimeout(() => { this.blockedPanel = false; }, 1000);
+    //   }, error => {
+    //     this.notificationService.showError(MessageConstants.Delete_Failed);
+    //     setTimeout(() => { this.blockedPanel = false; }, 1000);
+    //   }));
   }
   goBackToList() {
     this.router.navigateByUrl('/products/courses/' + this.courseId + '/lessons');

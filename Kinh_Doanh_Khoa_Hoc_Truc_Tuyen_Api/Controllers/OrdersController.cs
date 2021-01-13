@@ -48,15 +48,20 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-        public async Task<IActionResult> GetOrdersPaging(string filter, int pageIndex, int pageSize)
+        public IActionResult GetOrdersPaging(string filter, int pageIndex, int pageSize)
         {
-            var query = _khoaHocDbContext.Orders.Include(x => x.AppUser).AsNoTracking();
+            var query = _khoaHocDbContext.Orders.AsNoTracking().AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.AppUser.UserName.Contains(filter) || x.AppUser.Name.ToString().Contains(filter));
+
+                query = query.Where(x =>
+                    x.Email.ToLower().Equals(filter.ToLower()) || x.Name.ToLower().Contains(filter.ToLower()) ||
+                    x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
             }
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new OrderViewModel
+
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new OrderViewModel
             {
                 Id = x.Id,
                 UserId = x.UserId,
@@ -65,12 +70,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Status = x.Status,
                 Message = x.Message,
                 Address = x.Address,
-                PhoneNumber = x.PhoneNumber ?? x.AppUser.PhoneNumber,
-                Name = x.Name ?? x.AppUser.Name,
-                Email = x.Email ?? x.AppUser.Email,
+                PhoneNumber = x.PhoneNumber,
+                Name = x.Name,
+                Email = x.Email,
                 PaymentMethod = x.PaymentMethod,
                 Total = x.Total
-            }).ToListAsync();
+            }).ToList();
 
             var pagination = new Pagination<OrderViewModel>
             {
@@ -149,7 +154,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var lstAnnouncementToUser = new List<AnnouncementToUserViewModel>();
             foreach (var orderId in request)
             {
-                var order = await _khoaHocDbContext.Orders.FindAsync(orderId);
+                var order = await _khoaHocDbContext.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
                 if (order == null)
                 {
                     return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy đơn hàng với id: {orderId}"));
@@ -246,7 +251,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PutStatusForClientOrder(OrderStatusRequest request)
         {
-            var order = await _khoaHocDbContext.Orders.FindAsync(request.OrderId);
+            var order = await _khoaHocDbContext.Orders.FirstOrDefaultAsync(x => x.Id == request.OrderId);
             if (order == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy đơn hàng với id: {request.OrderId}"));
@@ -339,7 +344,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     {
                         throw new Exception("Không kết nối được với file");
                     }
-                    worksheet.Cells[4, 3].Value = User.GetFullName();
+                    worksheet.Cells[4, 3].Value = User.GetFullName() ?? "Hệ Thống";
                     worksheet.Cells[5, 3].Value = order.Name;
                     worksheet.Cells[6, 3].Value = order.Email;
                     worksheet.Cells[7, 3].Value = order.PhoneNumber;
@@ -432,8 +437,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     workbook.LoadFromFile(templateResultDocument);
                     //Save excel file to pdf file.  
                     workbook.SaveToFile(templatePdfResultDocument, FileFormat.PDF);
+
                 }
-                return Ok(new ApiResponse(200, resultFile));
+                var resultFileRes = new ResultFileResponse()
+                {
+                    FileExcel = resultFile,
+                    FilePdf = resultFilePdf
+                };
+                return Ok(resultFileRes);
             }
             catch (Exception e)
             {
@@ -443,14 +454,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDetail(int id)
+        public IActionResult GetDetail(int id)
         {
             var order = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.Id == id);
             if (order == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy đơn hàng với id: {id}"));
             }
-            var user = await _userManager.FindByIdAsync(order.UserId.ToString());
             var orderDetailViewModel = order.OrderDetails?.Select(x => new OrderDetailViewModel()
             {
                 ActiveCourseId = x.ActiveCourseId,
@@ -459,18 +469,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 OrderId = x.OrderId,
                 CourseName = _khoaHocDbContext.ActivateCourses.Include(y => y.Course).FirstOrDefault(y => y.Id == x.ActiveCourseId)?.Course.Name
             }).ToList();
-
             var orderViewModel = new OrderViewModel
             {
                 Id = order.Id,
                 Address = order.Address,
-                PhoneNumber = order.PhoneNumber ?? user.PhoneNumber,
+                PhoneNumber = order.PhoneNumber,
                 UserId = order.UserId,
                 CreationTime = order.CreationTime,
                 LastModificationTime = order.LastModificationTime,
                 Status = order.Status,
                 Message = order.Message,
-                Name = order.Name ?? user?.Name + "(" + user?.Email + ")",
+                Email = order.Email,
+                Name = order.Name,
                 PaymentMethod = order.PaymentMethod,
                 Total = order.Total,
                 OrderDetails = orderDetailViewModel
@@ -479,14 +489,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}/user-{userId}")]
-        public async Task<IActionResult> GetDetailByUserId(int id,string userId)
+        public IActionResult GetDetailByUserId(int id,string userId)
         {
             var order = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.Id == id && x.UserId == Guid.Parse(userId));
             if (order == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy đơn hàng với id: {id}"));
             }
-            var user = await _userManager.FindByIdAsync(order.UserId.ToString());
             var lstOrderDetailViewModel = new List<OrderDetailViewModel>();
             foreach (var orderDetail in order.OrderDetails)
             {
@@ -504,13 +513,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 Id = order.Id,
                 Address = order.Address,
-                PhoneNumber = order.PhoneNumber ?? user.PhoneNumber,
+                PhoneNumber = order.PhoneNumber,
                 UserId = order.UserId,
                 CreationTime = order.CreationTime,
                 LastModificationTime = order.LastModificationTime,
                 Status = order.Status,
                 Message = order.Message,
-                Name = order.Name ?? user?.Name + "(" + user?.Email + ")",
+                Email = order.Email,
+                Name = order.Name,
                 PaymentMethod = order.PaymentMethod,
                 Total = order.Total,
                 OrderDetails = lstOrderDetailViewModel
@@ -551,7 +561,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 PhoneNumber = x.PhoneNumber,
                 Name = x.Name,
                 Email = x.Email,
-                Id = x.Id,
+                Id = x.Id
             }).ToListAsync();
             return Ok(orderViewModel);
         }

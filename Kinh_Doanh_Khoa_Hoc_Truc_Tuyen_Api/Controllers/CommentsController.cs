@@ -35,16 +35,21 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{entityType}/{entityId}/filter")]
-        public async Task<IActionResult> GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex, int pageSize)
+        public IActionResult GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex, int pageSize)
         {
-            var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsQueryable();
+            var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Content.Contains(filter) || x.UserId.ToString().Contains(filter));
+                query = query.Where(x =>
+                    x.AppUser.Name.ToLower().Contains(filter.ToLower()) ||
+                    x.AppUser.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()) ||
+                    x.AppUser.Email.ToLower().Equals(filter.ToLower()) || x.Content.ToLower().Contains(filter.ToLower()) ||
+                    x.Content.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
             }
 
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new CommentViewModel()
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new CommentViewModel()
             {
                 Id = x.Id,
                 Content = x.Content,
@@ -54,7 +59,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 EntityType = x.EntityType,
                 UserId = x.UserId,
                 OwnerUser = x.AppUser.Name + " (" + x.AppUser.Email + ")"
-            }).ToListAsync();
+            }).ToList();
                 var pagination = new Pagination<CommentViewModel>
             {
                 Items = items,
@@ -186,7 +191,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpGet("{commentId}")]
         public async Task<IActionResult> GetCommentDetail(int commentId)
         {
-            var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
+            var comment = await _khoaHocDbContext.Comments.FirstOrDefaultAsync(x => x.Id == commentId);
             if (comment == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy bình luận với id: {commentId}"));
@@ -218,7 +223,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             comment.UserId = Guid.Parse(request.UserId);
             if (request.EntityType.Equals("courses"))
             {
-                var course = await _khoaHocDbContext.Courses.FindAsync(request.EntityId);
+                var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == request.EntityId);
                 if (course == null)
                 {
                     return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy khóa học với id: {request.EntityId}"));
@@ -227,7 +232,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             else
             {
-                var lesson = await _khoaHocDbContext.Lessons.FindAsync(request.EntityId);
+                var lesson = await _khoaHocDbContext.Lessons.FirstOrDefaultAsync(x => x.Id == request.EntityId);
                 if (lesson == null)
                 {
                     return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy bài học với id: {request.EntityId}"));
@@ -257,7 +262,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PutComment(int commentId, [FromBody] CommentCreateRequest request)
         {
-            var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
+            var comment = await _khoaHocDbContext.Comments.FirstOrDefaultAsync(x => x.Id == commentId);
             if (comment == null)
             {
                 return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy bình luận với id: {commentId}"));
@@ -282,7 +287,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var commentId in request)
             {
-                var comment = await _khoaHocDbContext.Comments.FindAsync(commentId);
+                var comment = await _khoaHocDbContext.Comments.FirstOrDefaultAsync(x => x.Id == commentId);
                 if (comment == null)
                 {
                     return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy comment với id: {commentId}"));

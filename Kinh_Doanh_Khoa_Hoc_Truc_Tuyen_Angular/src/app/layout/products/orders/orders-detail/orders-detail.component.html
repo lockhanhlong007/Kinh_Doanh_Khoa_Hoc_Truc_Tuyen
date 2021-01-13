@@ -2,7 +2,7 @@
 <div class="modal-body div-scroll">
     <p-panel #pnl header="Information" [toggleable]="true" [collapsed]="false" styleClass="m-b-10">
         <div *ngIf="res" class="p-grid-pad p-fluid p-grid-responsive">
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Tên khách hàng:</span>
                 </div>
@@ -10,15 +10,7 @@
                     <span>{{res.name}}</span>
                 </div>
             </div>
-            <div class="p-field p-grid">
-                <div class="p-col-4">
-                    <span class="required">Địa chỉ:</span>
-                </div>
-                <div class="p-col-8">
-                    <span>{{res.address}}</span>
-                </div>
-            </div>
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Email:</span>
                 </div>
@@ -26,7 +18,7 @@
                     <span>{{res.email}}</span>
                 </div>
             </div>
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Số điện thoại:</span>
                 </div>
@@ -34,7 +26,15 @@
                     <span>{{res.phoneNumber}}</span>
                 </div>
             </div>
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
+                <div class="p-col-4">
+                    <span class="required">Địa chỉ:</span>
+                </div>
+                <div class="p-col-8">
+                    <span>{{res.address}}</span>
+                </div>
+            </div>
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Tin nhắn:</span>
                 </div>
@@ -42,7 +42,7 @@
                     <span>{{res.message}}</span>
                 </div>
             </div>
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Phương thức thanh toán:</span>
                 </div>
@@ -50,7 +50,7 @@
                     <span>{{res.paymentMethod | formatOrder: 'paymentMethod'}}</span>
                 </div>
             </div>
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Tổng cộng:</span>
                 </div>
@@ -58,7 +58,7 @@
                     <span>{{res.total | currency:'VND':'symbol':'1.0-3' }}</span>
                 </div>
             </div>
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Trạng thái:</span>
                 </div>
@@ -66,7 +66,7 @@
                     <span>{{res.status | formatOrder}}</span>
                 </div>
             </div>
-            <div class="p-field p-grid">
+            <div style="align-items: center;" class="p-field p-grid">
                 <div class="p-col-4">
                     <span class="required">Ngày tạo:</span>
                 </div>

@@ -12,7 +12,7 @@
         </p-header>
         <form class="form-horizontal form-label-left" novalidate [formGroup]="entityForm" (ngSubmit)="saveChange()">
             <div class="p-grid-pad p-fluid p-grid-responsive">
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Tên bài học:</span>
                     </div>
@@ -23,44 +23,39 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="name" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Video:</span>
                     </div>
                     <div class="p-col-7">
                         <p-fileUpload *ngIf="this.fileVideoPath === ''" [showUploadButton]="false" (onRemove)="removeVideo($event)" (onSelect)="selectVideo($event)" [showCancelButton]="false" accept=".mp4,.avi,.mkv,.ts,.mov,.flv,.wmv" maxFileSize="1000000000">
                         </p-fileUpload>
-                        <ul *ngIf="this.fileVideoPath !== ''">
-                            <li>
+                        <ul style="padding: 0; margin: 0;" *ngIf="this.fileVideoPath !== ''">
+                            <li style="list-style: none; display: flex; align-items: center;">
                                 <a href="{{backendApiUrl + fileVideoPath}}">{{fileVideoName}}</a>
-                                <button icon="pi pi-trash" pButton type="button" (click)="deleteVideo()" class="p-button-danger p-ml-2"></button>
+                                <button icon="pi pi-upload" pButton type="button" (click)="changeVideo()" class="p-button-help p-ml-2"></button>
                             </li>
                         </ul>
                     </div>
-                    <div class="p-col-3">
-
-                    </div>
+                    <div class="p-col-3"></div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Tệp đính kèm:</span>
                     </div>
                     <div class="p-col-7">
                         <p-fileUpload *ngIf="this.fileAttachPath === ''" [showUploadButton]="false" (onRemove)="removeAttachments($event)" (onSelect)="selectAttachments($event)" [showCancelButton]="false" accept=".doc,.docx.,.xls,.ppt,.pptx,xlsx,.pdf,.rar,.zip,.7z,.ios" maxFileSize="1000000000">
                         </p-fileUpload>
-                        <ul *ngIf="this.fileAttachPath !== ''">
-                            <li>
+                        <ul style="padding: 0; margin: 0;" *ngIf="this.fileAttachPath !== ''">
+                            <li style="list-style: none; display: flex; align-items: center;">
                                 <a href="{{backendApiUrl + fileAttachPath}}">{{fileAttachName}}</a>
                                 <button icon="pi pi-trash" pButton type="button" (click)="deleteAttachment()" class="p-button-danger p-ml-2"></button>
                             </li>
                         </ul>
                     </div>
-                    <div class="p-col-3">
-
-                    </div>
+                    <div class="p-col-3"></div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Thứ tự:</span>
                     </div>
@@ -71,7 +66,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="sortOrder" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div *ngIf="role !== 'Teacher'" class="p-field p-grid">
+                <div style="align-items: center;" *ngIf="role !== 'Teacher'" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Trạng thái:</span>
                     </div>

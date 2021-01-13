@@ -52,6 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="logs\debug\" />
     <Folder Include="wwwroot\attachments\export-files\" />
   </ItemGroup>
 

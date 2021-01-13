@@ -36,7 +36,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.View)]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _khoaHocDbContext.Promotions.FindAsync(id);
+            var result = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == id);
             if (result == null)
             {
                 _logger.LogError($"Cannot found Course with id {id}");
@@ -63,7 +63,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             if (DateTime.Compare(DateTime.Parse(request.FromDate).Date, DateTime.Parse(request.ToDate).Date) > 0)
                 return BadRequest(new ApiBadRequestResponse("Ngày kết thúc phải lớn hơn ngày bắt đầu"));
-            var dbPromotion = await _khoaHocDbContext.Promotions.FindAsync(request.Id);
+            var dbPromotion = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (dbPromotion != null)
             {
                 _logger.LogError($"Course with id {request.Id} is existed.");
@@ -92,27 +92,32 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpGet("filter")]
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.View)]
-        public async Task<IActionResult> GetPromotionsPaging(string filter, int pageIndex, int pageSize)
+        public IActionResult GetPromotionsPaging(string filter, int pageIndex, int pageSize)
         {
-            var query = _khoaHocDbContext.Promotions.OrderBy(x => x.Status).ThenBy(x => x.ToDate).AsNoTracking();
+            var query = _khoaHocDbContext.Promotions.AsNoTracking().AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.Contains(filter));
+                query = query.Where(x =>
+                    x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower()
+                        .Contains(filter.convertToUnSign().ToLower()) || x.Content.ToLower().Contains(filter.ToLower()) || x.Content.convertToUnSign().ToLower()
+                        .Contains(filter.convertToUnSign().ToLower()));
             }
 
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new PromotionCreateRequest()
-            {
-                Id = _.Id,
-                Name = _.Name,
-                Status = _.Status,
-                FromDate = _.FromDate.ToString("dd/MM/yyyy"),
-                ToDate = _.ToDate.ToString("dd/MM/yyyy"),
-                ApplyForAll = false,
-                DiscountAmount = (int?)_.DiscountAmount,
-                DiscountPercent = _.DiscountPercent,
-                Content = _.Content
-            }).ToListAsync();
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.OrderBy(x => x.Status).ThenBy(x => x.ToDate).Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize).Select(_ => new PromotionCreateRequest()
+                {
+                    Id = _.Id,
+                    Name = _.Name,
+                    Status = _.Status,
+                    FromDate = _.FromDate.ToString("dd/MM/yyyy"),
+                    ToDate = _.ToDate.ToString("dd/MM/yyyy"),
+                    ApplyForAll = false,
+                    DiscountAmount = (int?) _.DiscountAmount,
+                    DiscountPercent = _.DiscountPercent,
+                    Content = _.Content
+                }).ToList();
             var pagination = new Pagination<PromotionCreateRequest>
             {
                 Items = items,
@@ -130,7 +135,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             if (DateTime.Compare(DateTime.Parse(request.FromDate).Date, DateTime.Parse(request.ToDate).Date) > 0)
                 return BadRequest(new ApiBadRequestResponse("Ngày kết thúc phải lớn hơn ngày bắt đầu"));
-            var promotion = await _khoaHocDbContext.Promotions.FindAsync(request.Id);
+            var promotion = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (promotion == null)
             {
                 _logger.LogError($"Cannot found promotion with id {request.Id}");
@@ -154,14 +159,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
 
-
         [HttpPost("delete-multi-items")]
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.Delete)]
         public async Task<IActionResult> DeletePromotion(List<int> input)
         {
             foreach (var id in input)
             {
-                var promotion = await _khoaHocDbContext.Promotions.FindAsync(id);
+                var promotion = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == id);
                 if (promotion == null)
                 {
                     _logger.LogError($"Cannot found promotion with id {id}");
@@ -183,13 +187,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
 
-
-
         [HttpGet("{id}/courses")]
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.Update)]
         public async Task<IActionResult> GetPromotionCourses(int id)
         {
-            var promotion = await _khoaHocDbContext.Promotions.FindAsync(id);
+            var promotion = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == id);
             if (promotion == null)
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {id}"));
             var promotionCourses = _khoaHocDbContext.PromotionInCourses.Include(x => x.Course)
@@ -212,7 +214,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.Update)]
         public async Task<IActionResult> PostPromotionInCourses(int promotionId, List<int> request)
         {
-            var promotion = await _khoaHocDbContext.Promotions.FindAsync(promotionId);
+            var promotion = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == promotionId);
             if (promotion == null)
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {promotionId}"));
             var existingPromotion = _khoaHocDbContext.Promotions.Include(x => x.PromotionInCourses)
@@ -221,8 +223,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 if (existingPromotion.Any(x => x.PromotionInCourses.Any(pic => pic.CourseId == promotionCourses.CourseId)))
                 {
-                    var detail = await _khoaHocDbContext.Courses.FindAsync(promotionCourses.CourseId);
-                    return BadRequest(new ApiBadRequestResponse($"Không thể tạo khóa học (Id: {detail.Id} - Tên: {detail.Name}) trong sự kiện với id: {promotion.Id}"));
+                    var detail = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == promotionCourses.CourseId);
+                    return BadRequest(new ApiBadRequestResponse(
+                        $"Không thể tạo khóa học (Id: {detail.Id} - Tên: {detail.Name}) trong sự kiện với id: {promotion.Id} vì khóa học này đã tồn tại trong sự kiện khác"));
                 }
                 await _khoaHocDbContext.PromotionInCourses.AddAsync(promotionCourses);
             }
@@ -234,16 +237,19 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpGet("filter/courses")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public async Task<IActionResult> GetCoursesPaging(string filter, int pageIndex, int pageSize)
+        public IActionResult GetCoursesPaging(string filter, int pageIndex, int pageSize)
         {
-            var query = _khoaHocDbContext.Courses.Include(x => x.Category).Where(x => x.Status != 3).OrderBy(x => x.Name).AsNoTracking();
+            var query = _khoaHocDbContext.Courses.Include(x => x.Category).Where(x => x.Status != 3).AsNoTracking().AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.Contains(filter));
+                query = query.Where(x =>
+                    x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower()
+                        .Contains(filter.convertToUnSign().ToLower()));
             }
 
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new CourseViewModel
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.OrderBy(x => x.Name).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new CourseViewModel
             {
                 Id = _.Id,
                 Image = _storageService.GetFileUrl(_.Image),
@@ -254,7 +260,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Content = _.Content,
                 Price = _.Price,
                 CategoryName = _.Category.Name
-            }).ToListAsync();
+            }).ToList();
             var pagination = new Pagination<CourseViewModel>
             {
                 Items = items,
@@ -271,12 +277,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> RemovePromotionInCourses(int promotionId, List<int> request)
         {
 
-            var promotion = await _khoaHocDbContext.Promotions.FindAsync(promotionId);
+            var promotion = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == promotionId);
             if (promotion == null)
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {promotionId}"));
             foreach (var id in request)
             {
-                var promotionInCourses = await _khoaHocDbContext.PromotionInCourses.FindAsync(promotionId, id);
+                var promotionInCourses =
+                    await _khoaHocDbContext.PromotionInCourses.FirstOrDefaultAsync(x =>
+                        x.PromotionId == promotionId && x.CourseId == id);
                 _khoaHocDbContext.PromotionInCourses.Remove(promotionInCourses);
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();

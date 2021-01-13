@@ -88,20 +88,23 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpGet("filter")]
         [ClaimRequirement(FunctionConstant.Role, CommandConstant.View)]
-        public async Task<IActionResult> GetRolesPaging(string filter, int pageIndex, int pageSize)
+        public IActionResult GetRolesPaging(string filter, int pageIndex, int pageSize)
         {
-            var query = _roleManager.Roles;
+            var query = _roleManager.Roles.AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x=> x.Name.Contains(filter));
+                query = query.Where(x =>
+                    x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower()
+                        .Contains(filter.convertToUnSign().ToLower()));
             }
 
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(r => new RoleViewModel
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(r => new RoleViewModel
             {
                 Name = r.Name,
                 Id = r.Id
-            }).ToListAsync();
+            }).ToList();
             var pagination = new Pagination<RoleViewModel>
             {
                 Items = items,

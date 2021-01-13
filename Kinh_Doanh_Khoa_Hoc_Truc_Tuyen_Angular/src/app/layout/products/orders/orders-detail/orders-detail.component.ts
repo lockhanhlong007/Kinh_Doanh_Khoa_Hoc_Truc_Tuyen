@@ -47,12 +47,12 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     this.blockedPanel = true;
     this.subscription.add(this.ordersService.export(this.res)
       .subscribe((response: any) => {
-      if (response.statusCode === 200) {
-        const url = this.backendApiUrl + '/attachments/export-files/' + response.message;
-        window.open(url);
+        const urlPdf = this.backendApiUrl + '/attachments/export-files/' + response.filePdf;
+        window.open(urlPdf);
+        const urlExcel = this.backendApiUrl + '/attachments/export-files/' + response.fileExcel;
+        setTimeout(() => { window.open(urlExcel); }, 1000);
         this.notificationService.showSuccess(MessageConstants.Export_File_Ok);
-        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
-      }
+        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 2000);
 
       }, error => {
         this.notificationService.showError(MessageConstants.Export_File_Failed);

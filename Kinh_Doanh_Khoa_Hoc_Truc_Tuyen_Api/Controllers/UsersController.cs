@@ -51,11 +51,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> PostUser([FromForm] UserCreateRequest request)
         {
-            //var check112 = await _userManager.FindByEmailAsync("long0072017@gmail.com");
-            //if (check112 != null)
-            //{
-            //    await _userManager.DeleteAsync(check112);
-            //}
             var user = new AppUser
             {
                 Id = Guid.NewGuid(),
@@ -65,6 +60,54 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Name = request.Name,
                 PhoneNumber = request.PhoneNumber,
                 Biography = request.Biography
+            };
+            if (request.Avatar != null)
+            {
+                var originalFileName = ContentDispositionHeaderValue.Parse(request.Avatar.ContentDisposition).FileName.Trim('"');
+                var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
+                await _storageService.SaveFileAsync(request.Avatar.OpenReadStream(), fileName, "images");
+                user.Avatar = "images/" + fileName;
+            }
+            else
+            {
+                user.Avatar = "images/defaultAvatar.png";
+            }
+            var result = await _userManager.CreateAsync(user, request.Password);
+            if (result.Succeeded)
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    try
+                    {
+                        var userCheck = await _userManager.FindByNameAsync(request.UserName);
+                        await _userManager.AddToRoleAsync(userCheck, "Student");
+                    }
+                    catch (Exception e)
+                    {
+                        return BadRequest(new ApiBadRequestResponse(e.Message));
+                    }
+                }
+                return Ok();
+            }
+            _logger.LogError("Create user failed");
+            return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
+        }
+
+        [HttpPost("server")]
+        [ValidationFilter]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> PostUserByAdmin([FromForm] UserCreateRequest request)
+        {
+            var user = new AppUser
+            {
+                Id = Guid.NewGuid(),
+                Email = request.Email,
+                Dob = DateTime.Parse(request.Dob),
+                UserName = request.UserName,
+                Name = request.Name,
+                PhoneNumber = request.PhoneNumber,
+                Biography = request.Biography,
+                EmailConfirmed = true
             };
             if (request.Avatar != null)
             {
@@ -254,7 +297,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpGet("course-{id}")]
         public async Task<IActionResult> GetByCourseId(int id)
         {
-            var course = await _khoaHocDbContext.Courses.FindAsync(id);
+            var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == id);
             if (course == null)
             {
                 _logger.LogError($"Cannot found course with id: {id}");
@@ -308,17 +351,21 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         [HttpGet("filter")]
         [ClaimRequirement(FunctionConstant.User, CommandConstant.View)]
-        public async Task<IActionResult> GetUsersPaging(string filter, int pageIndex, int pageSize)
+        public IActionResult GetUsersPaging(string filter, int pageIndex, int pageSize)
         {
-            var query = _userManager.Users;
+            var query = _userManager.Users.AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
                 query = query.Where(x =>
-                    x.Email.Contains(filter) || x.UserName.Contains(filter) || x.PhoneNumber.Contains(filter));
+                    x.Email.ToLower().Equals(filter.ToLower()) || x.UserName.ToLower().Contains(filter.ToLower()) ||
+                    x.Name.ToLower().Contains(filter.ToLower()) ||
+                    x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()) ||
+                    x.PhoneNumber.Contains(filter));
             }
 
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(u => new UserViewModel
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(u => new UserViewModel
             {
                 UserName = u.UserName,
                 Email = u.Email,
@@ -328,7 +375,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Id = u.Id,
                 Avatar = u.Avatar == null ? "images/defaultAvatar.png" : _storageService.GetFileUrl(u.Avatar),
                 Biography = u.Biography
-            }).ToListAsync();
+            }).ToList();
             var pagination = new Pagination<UserViewModel>
             {
                 Items = items,
@@ -484,6 +531,24 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _logger.LogError("You cannot remove the only admin user remaining.");
                     return BadRequest(new ApiBadRequestResponse("Bạn không thể xóa hết tất cả user có quyền admin"));
                 }
+                var orders = _khoaHocDbContext.Orders.Where(x => x.UserId.Equals(user.Id));
+                if (orders.Any())
+                {
+                    _logger.LogError("You cannot remove orders.");
+                    return BadRequest(new ApiBadRequestResponse("Bạn không thể xóa user này vì tài khoản này vì user này vì tài khoản này có hóa đơn đặt hàng"));
+                }
+                var courses = _khoaHocDbContext.Courses.Where(x => x.CreatedUserName.Equals(user.UserName));
+                if (courses.Any())
+                {
+                    _logger.LogError("You cannot remove courses.");
+                    return BadRequest(new ApiBadRequestResponse("Bạn không thể xóa user này vì tài khoản này vì tài khoản này có khóa học"));
+                }
+                var activeCourses = _khoaHocDbContext.ActivateCourses.Where(x => x.UserId.Equals(user.Id));
+                if (activeCourses.Any())
+                {
+                    _logger.LogError("You cannot remove activeCourses.");
+                    return BadRequest(new ApiBadRequestResponse("Bạn không thể xóa user này vì tài khoản này vì user này có mã khóa học"));
+                }
                 var announcements = _khoaHocDbContext.Announcements.Where(x => x.UserId.Equals(user.Id));
                 if (announcements.Any())
                 {
@@ -491,16 +556,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _khoaHocDbContext.Announcements.RemoveRange(announcements);
                     _khoaHocDbContext.AnnouncementUsers.RemoveRange(announcementUsers);
                 }
-                var orders = _khoaHocDbContext.Orders.Where(x => x.UserId.Equals(user.Id));
-                if (orders.Any())
+                var roles = _roleManager.Roles;
+                foreach (var role in roles)
                 {
-                    foreach (var order in orders)
+                    if ( await _userManager.IsInRoleAsync(user, role.Name))
                     {
-                        order.UserId = null;
+                        await _userManager.RemoveFromRoleAsync(user, role.Name);
                     }
-                    _khoaHocDbContext.Orders.UpdateRange(orders);
                 }
-
                 var result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)
                 {

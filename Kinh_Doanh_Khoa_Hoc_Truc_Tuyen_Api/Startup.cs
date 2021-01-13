@@ -68,7 +68,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 options.Password.RequiredLength = 3;
                 options.Password.RequireDigit = false;
                 options.Password.RequireUppercase = false;
-                options.User.RequireUniqueEmail = false;
+                options.User.RequireUniqueEmail = true;
             });
 
             services.AddIdentityServer(options =>

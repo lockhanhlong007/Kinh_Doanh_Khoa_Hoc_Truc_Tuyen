@@ -32,8 +32,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         private readonly EKhoaHocDbContext _khoaHocDbContext;
         private ILogger<CategoriesController> _logger;
-        private readonly IStorageService _storageService;
         private readonly IConfiguration _configuration;
+        private readonly IStorageService _storageService;
 
         public CategoriesController(EKhoaHocDbContext khoaHocDbContext, ILogger<CategoriesController> logger, IStorageService storageService, IConfiguration configuration)
         {
@@ -46,7 +46,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _khoaHocDbContext.Categories.FindAsync(id);
+            var result = await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == id);
             if (result == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không tìm thầy danh mục với id: {id}"));
@@ -214,7 +214,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Categories, CommandConstant.Update)]
         public async Task<IActionResult> PutCategory(int id, [FromBody] CategoryCreateRequest request)
         {
-            var category = await _khoaHocDbContext.Categories.FindAsync(id);
+            var category = await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == id);
             if (category == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy danh mục với id: {id}"));
@@ -254,7 +254,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var id in ids)
             {
-                var category = await _khoaHocDbContext.Categories.FindAsync(id);
+                var category = await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == id);
                 if (category == null)
                 {
                     return NotFound(new ApiNotFoundResponse($"Không tìm thấy danh mục với id: {id}"));
