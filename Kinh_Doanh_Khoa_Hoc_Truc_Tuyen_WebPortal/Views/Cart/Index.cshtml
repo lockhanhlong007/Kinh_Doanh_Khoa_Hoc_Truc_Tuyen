@@ -2,7 +2,7 @@
 @using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common
 @inject IHttpContextAccessor HttpContextAccessor
 @section Scripts{
-    <script src="~/assets/js/custom/customCart.js" asp-append-version="true"></script>
+    <script src="~/assets/js/custom/customCart.min.js" asp-append-version="true"></script>
     <script>
         var cartObj = new CartAjax();
         cartObj.initialize();
@@ -167,7 +167,8 @@ else
 
                                 <span class="empty__text-1">Không có sản phẩm nào trong giỏ hàng.</span>
 
-                                <a class="empty__redirect-link btn--e-brand" href="/courses.html">Tiếp tục mua hàng</a></div>
+                                <a class="empty__redirect-link btn--e-brand" href="/courses.html">Tiếp tục mua hàng</a>
+                            </div>
                         </div>
                     </div>
                 </div>

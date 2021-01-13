@@ -1,24 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using IdentityModel.Client;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
+﻿using IdentityModel.Client;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -27,7 +16,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class TokenAuthController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
+
         private readonly UserManager<AppUser> _userManager;
+
         private readonly SignInManager<AppUser> _signInManager;
 
         public TokenAuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHttpClientFactory httpClientFactory)
@@ -36,6 +27,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _signInManager = signInManager;
             _httpClientFactory = httpClientFactory;
         }
+
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout()
         {
@@ -48,7 +40,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> Authenticate(LoginViewModel model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
-            if (user == null) 
+            if (user == null)
                 return NotFound(new ApiNotFoundResponse("Username không tồn tại"));
             var serverClient = _httpClientFactory.CreateClient();
 
@@ -76,7 +68,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 TokenType = tokenResponse.TokenType
             });
         }
-
-
     }
 }

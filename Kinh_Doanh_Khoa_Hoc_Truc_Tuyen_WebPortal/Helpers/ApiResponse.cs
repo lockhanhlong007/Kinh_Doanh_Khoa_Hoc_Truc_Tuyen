@@ -6,7 +6,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
     {
         public int StatusCode { get; }
 
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore )]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string Message { get; }
 
         public ApiResponse(int statusCode, string message = null)
@@ -21,8 +21,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
             {
                 case 404:
                     return "Không tìm thấy trang này";
+
                 case 500:
                     return "Lỗi server";
+
                 default:
                     return null;
             }

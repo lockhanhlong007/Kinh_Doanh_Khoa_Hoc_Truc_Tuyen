@@ -12,6 +12,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions
                 .FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
             return claim?.Value;
         }
+
         public static string GetUserName(this ClaimsPrincipal claimsPrincipal)
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
@@ -19,6 +20,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions
                 .FirstOrDefault(x => x.Type == ClaimTypes.Name);
             return claim?.Value;
         }
+
         public static string GetFullName(this ClaimsPrincipal claimsPrincipal)
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
@@ -26,6 +28,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions
                 .FirstOrDefault(x => x.Type == "FullName");
             return claim?.Value;
         }
+
         public static string GetRole(this ClaimsPrincipal claimsPrincipal)
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)

@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Interfaces;
+using System;
+using System.Collections.Generic;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 {
@@ -31,7 +30,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public DateTime CreationTime { get; set; }
 
         public DateTime? LastModificationTime { get; set; }
-
 
         public List<OrderDetailCreateRequest> OrderDetails { set; get; }
     }

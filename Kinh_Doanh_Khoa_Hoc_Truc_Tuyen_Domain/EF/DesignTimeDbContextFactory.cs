@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.IO;
-
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
 {

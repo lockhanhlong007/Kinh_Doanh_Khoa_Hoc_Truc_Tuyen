@@ -1,28 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Xabe.FFmpeg;
-
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -31,11 +28,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class LessonsController : ControllerBase
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<LessonsController> _logger;
+
         public readonly UserManager<AppUser> _userManager;
+
         private readonly IStorageService _storageService;
 
-        public LessonsController(IWebHostEnvironment webHostEnvironment,EKhoaHocDbContext khoaHocDbContext, ILogger<LessonsController> logger, IStorageService storageService, UserManager<AppUser> userManager)
+        public LessonsController(IWebHostEnvironment webHostEnvironment, EKhoaHocDbContext khoaHocDbContext, ILogger<LessonsController> logger, IStorageService storageService, UserManager<AppUser> userManager)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger ?? throw new ArgumentException(nameof(logger));
@@ -64,7 +64,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 CourseId = result.CourseId,
                 Id = result.Id
             });
-
         }
 
         [HttpPost]
@@ -178,7 +177,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _logger.LogError("Update lesson failed");
                     return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
                 }
-
             }
             return Ok(lstAnnouncement);
         }
@@ -199,7 +197,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Times = _.Times
             }).ToListAsync());
         }
-        
+
         [HttpGet("course-{id}/detail")]
         public IActionResult GetLessonsByCourseId(int id, int? lessonId)
         {
@@ -237,9 +235,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             return Ok(data);
         }
+
         [HttpGet("filter")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.View)]
-        public IActionResult GetLessonsPaging(int courseId,string filter, int pageIndex, int pageSize)
+        public IActionResult GetLessonsPaging(int courseId, string filter, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Lessons.Include(x => x.Course).Where(x => x.CourseId == courseId).AsNoTracking().AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
@@ -376,7 +375,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _khoaHocDbContext.Comments.RemoveRange(comments);
                 }
                 _khoaHocDbContext.Lessons.Remove(lesson);
-
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
@@ -386,7 +384,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _logger.LogError("Delete lesson failed");
             return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
-
 
         [HttpDelete("course-{coursesId}-lesson-{lessonId}/attachment")]
         public async Task<IActionResult> DeleteAttachment(int coursesId, int lessonId)

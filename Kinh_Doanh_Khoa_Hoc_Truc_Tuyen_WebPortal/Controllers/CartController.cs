@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
@@ -13,20 +6,25 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
-using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.AspNetCore.SignalR.Client;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
     public class CartController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
+
         private readonly IBaseApiClient _apiClient;
+
         private readonly IConfiguration _configuration;
+
         private readonly IEmailSender _emailSender;
 
         public CartController(IHttpClientFactory httpClientFactory, IConfiguration configuration, IBaseApiClient apiClient, IEmailSender emailSender)
@@ -78,7 +76,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     }
                 }
             }
-            //vnp_TxnRef: Ma don hang merchant gui VNPAY tai command=pay    
+            //vnp_TxnRef: Ma don hang merchant gui VNPAY tai command=pay
             string vnp_TxnRef = vnpay.GetResponseData("vnp_TxnRef");
             var checkOrderId = vnp_TxnRef.Split("-");
             int orderId = int.Parse(checkOrderId[0]);
@@ -112,9 +110,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                                 HttpContext.Session.Remove(SystemConstants.AttachmentSession);
                                 return View();
                             }
-                       
                         }
-
                     }
                     else
                     {
@@ -137,8 +133,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             }
             return View();
         }
-        
+
         #region Ajax Method
+
         [HttpPost]
         public async Task<IActionResult> CheckoutForDelivery(OrderCreateRequest model)
         {
@@ -236,8 +233,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     HttpContext.Session.Set(SystemConstants.AttachmentSession, responseFile);
                     HttpContext.Session.Set(SystemConstants.EmailSession, user.Email);
                     //Get Config Info
-                    string vnp_ReturnUrl = _configuration["VnPaySettings:vnp_ReturnUrl"]; //URL nhan ket qua tra ve 
-                    string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
+                    string vnp_ReturnUrl = _configuration["VnPaySettings:vnp_ReturnUrl"]; //URL nhan ket qua tra ve
+                    string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY
                     string vnp_TmnCode = _configuration["VnPaySettings:vnp_TmnCode"]; //Ma website
                     string vnp_HashSecret = _configuration["VnPaySettings:vnp_HashSecret"]; //Chuoi bi mat
                     var ip = Request.HttpContext.Connection.RemoteIpAddress.ToString();
@@ -304,7 +301,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         public IActionResult RemoveFromCart(int courseId)
         {
             var session = HttpContext.Session.Get<List<CartViewModel>>(SystemConstants.CartSession);
-            if (session == null) 
+            if (session == null)
                 return new EmptyResult();
             if (session.Any(item => item.CourseViewModel.Id == courseId))
             {
@@ -384,6 +381,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             return new OkResult();
         }
 
-        #endregion
+        #endregion Ajax Method
     }
 }

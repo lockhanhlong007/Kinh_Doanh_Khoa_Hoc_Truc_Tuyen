@@ -1,25 +1,25 @@
-﻿using System;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
 {
     public class BaseApiClient : IBaseApiClient
     {
         private readonly IHttpClientFactory _httpClientFactory;
+
         private readonly IConfiguration _configuration;
+
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public BaseApiClient(IHttpClientFactory httpClientFactory,
@@ -75,7 +75,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
             var data = body;
             return data;
         }
-
 
         public async Task<TResponse> PostAsync<TRequest, TResponse>(string url, TRequest requestContent, bool requiredLogin = true)
         {

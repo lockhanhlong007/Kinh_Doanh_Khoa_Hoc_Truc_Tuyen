@@ -1,16 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
-using System.Net.Http;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
 {
@@ -19,13 +16,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services
     public class EmailSender : IEmailSender
     {
         private readonly IConfiguration _configuration;
+
         private readonly IHttpContextAccessor _httpContextAccessor;
+
         public EmailSender(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
         }
-
 
         public Task SendEmailAsync(string email, string subject, string message)
         {

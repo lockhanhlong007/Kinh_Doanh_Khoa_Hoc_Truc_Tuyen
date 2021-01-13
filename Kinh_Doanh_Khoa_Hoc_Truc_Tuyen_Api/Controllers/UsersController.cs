@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
@@ -15,11 +8,16 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -37,6 +35,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         private readonly ILogger<UsersController> _logger;
 
         private readonly IStorageService _storageService;
+
         public UsersController(UserManager<AppUser> userManager, EKhoaHocDbContext khoaHocDbContext, RoleManager<AppRole> roleManager, ILogger<UsersController> logger, IStorageService storageService)
         {
             _userManager = userManager;
@@ -230,7 +229,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return BadRequest(new ApiBadRequestResponse(e.Message));
             }
-
         }
 
         [HttpPost("reset-password-confirm")]
@@ -271,7 +269,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return BadRequest(new ApiBadRequestResponse(e.Message));
             }
-
         }
 
         [HttpPost("confirm-email")]
@@ -291,7 +288,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
 
             return Ok();
-
         }
 
         [HttpGet("course-{id}")]
@@ -523,7 +519,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 {
                     _logger.LogError($"Cannot found user with id: {id}");
                     return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
-
                 }
                 var adminUsers = await _userManager.GetUsersInRoleAsync(SystemConstants.Admin);
                 if (adminUsers.All(x => x.Id == Guid.Parse(id)))
@@ -559,7 +554,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var roles = _roleManager.Roles;
                 foreach (var role in roles)
                 {
-                    if ( await _userManager.IsInRoleAsync(user, role.Name))
+                    if (await _userManager.IsInRoleAsync(user, role.Name))
                     {
                         await _userManager.RemoveFromRoleAsync(user, role.Name);
                     }
@@ -602,7 +597,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 _logger.LogError($"Cannot found user with id: {id}");
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy user với id: {id}"));
-
             }
             user.Avatar = "";
             _khoaHocDbContext.Users.Update(user);
@@ -683,7 +677,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 {
                     return BadRequest(new ApiBadRequestResponse($"Không thể xóa quyền {SystemConstants.Admin}"));
                 }
-
             }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -694,6 +687,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             return BadRequest(new ApiBadRequestResponse("Tạo thất bại"));
         }
-
     }
 }

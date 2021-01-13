@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
-
-namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
+﻿namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 {
     public class PromotionCreateRequest
     {
         public int Id { get; set; }
+
         public string FromDate { set; get; }
 
         public string ToDate { set; get; }

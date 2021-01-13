@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -17,7 +15,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class FeedBacksController : ControllerBase
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<FeedBacksController> _logger;
+
         private readonly IConfiguration _configuration;
 
         public FeedBacksController(EKhoaHocDbContext khoaHocDbContext, ILogger<FeedBacksController> logger, IConfiguration configuration)

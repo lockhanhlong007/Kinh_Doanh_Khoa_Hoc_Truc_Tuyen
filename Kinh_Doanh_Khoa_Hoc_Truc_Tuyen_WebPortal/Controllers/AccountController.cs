@@ -1,21 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using IdentityModel.Client;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 using Microsoft.AspNetCore.Authentication;
@@ -26,17 +13,24 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using PaulMiami.AspNetCore.Mvc.Recaptcha;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
     public class AccountController : Controller
     {
         private readonly IBaseApiClient _apiClient;
+
         private readonly IConfiguration _configuration;
+
         private readonly IEmailSender _emailSender;
 
         public AccountController(IBaseApiClient apiClient,
@@ -46,7 +40,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             _configuration = configuration;
             _emailSender = emailSender;
         }
-
 
         [HttpGet]
         [Route("my-profile.html")]
@@ -89,8 +82,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             try
             {
                 pageSize ??= 4;
-                await _apiClient.PutAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest {AnnounceId = announceId, UserId = User.GetUserId()});
-                return RedirectToAction(nameof(MyAnnouncements), new{ pageSize , filterBy , page });
+                await _apiClient.PutAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest { AnnounceId = announceId, UserId = User.GetUserId() });
+                return RedirectToAction(nameof(MyAnnouncements), new { pageSize, filterBy, page });
             }
             catch (Exception e)
             {
@@ -109,6 +102,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             data.NameDash = "My Courses";
             return View(data);
         }
+
         [HttpGet]
         [Route("active-course.html")]
         public IActionResult ActiveCourse()
@@ -322,7 +316,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     UserName = request.UserName,
                     RememberMe = request.RememberMe
                 };
-                var result = await _apiClient.PostAsync<LoginViewModel, TokenResponseFromServer>($"/api/TokenAuth/Authenticate", loginViewModel,false);
+                var result = await _apiClient.PostAsync<LoginViewModel, TokenResponseFromServer>($"/api/TokenAuth/Authenticate", loginViewModel, false);
                 var principal = ValidateToken(result);
                 if (principal.IsInRole("Teacher"))
                 {
@@ -405,7 +399,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 requestContent.Add(new StringContent(registerRequest.PhoneNumber), "PhoneNumber");
                 requestContent.Add(new StringContent(registerRequest.Name), "Name");
                 requestContent.Add(new StringContent(registerRequest.Dob.ToString("yyyy/MM/dd")), "Dob");
-                await _apiClient.PostForFileAsync<bool>("/api/users",requestContent,false);
+                await _apiClient.PostForFileAsync<bool>("/api/users", requestContent, false);
                 var user = await _apiClient.GetAsync<UserViewModel>($"/api/users/user-{registerRequest.UserName}");
                 var code = await _apiClient.GetStringAsync($"/api/users/token-user-{user.Id.ToString()}");
                 var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
@@ -440,11 +434,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 throw new ApplicationException($"Không thể load user với id '{userId}'.");
             }
 
-            var result = await _apiClient.PostReturnBooleanAsync($"/api/users/confirm-email",new ConfirmEmailRequest
+            var result = await _apiClient.PostReturnBooleanAsync($"/api/users/confirm-email", new ConfirmEmailRequest
             {
                 Code = code,
                 UserId = userId
-            },false);
+            }, false);
             return View(result ? "ConfirmEmail" : "Error");
         }
 
@@ -549,6 +543,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         }
 
         #region Helpers
+
         private void AddErrors(IdentityResult result)
         {
             foreach (var error in result.Errors)
@@ -566,7 +561,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
-        
+
         private ClaimsPrincipal ValidateToken(TokenResponseFromServer result)
         {
             var stream = result.AccessToken;
@@ -587,6 +582,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
             return principal;
         }
+
         #endregion Helpers
 
         #region Ajax Method
@@ -605,6 +601,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             await _apiClient.PutAsync($"/api/announcements/mark-read", new AnnouncementMarkReadRequest { AnnounceId = announceId, UserId = User.GetUserId() });
             return Ok();
         }
-        #endregion
+
+        #endregion Ajax Method
     }
 }

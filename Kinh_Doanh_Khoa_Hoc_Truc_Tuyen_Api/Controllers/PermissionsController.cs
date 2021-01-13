@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Dapper;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+﻿using Dapper;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -26,7 +21,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet]
-       // [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
+        // [ClaimRequirement(FunctionConstant.Permission, CommandConstant.View)]
         public async Task<IActionResult> GetCommandViews()
         {
             await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
@@ -48,9 +43,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         GROUP BY f.Id,f.Name, f.ParentId
                         order BY f.ParentId";
             var result = await conn.QueryAsync<PermissionScreenViewModel>(query, null, null, 120, CommandType.Text);
-            
-            
-            
+
             return Ok(result.ToList());
         }
     }

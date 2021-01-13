@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.AccessControl;
-using System.Text;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
 {
@@ -31,6 +28,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
         public bool TmpHasRead { get; set; }
 
         public int Status { set; get; }
+
         public List<AnnouncementUserViewModel> AnnouncementUserViewModels { get; set; }
     }
 }

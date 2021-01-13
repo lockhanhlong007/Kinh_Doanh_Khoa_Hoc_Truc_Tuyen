@@ -1,10 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.HubConfig;
@@ -24,6 +18,11 @@ using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using Spire.Xls;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -32,12 +31,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IWebHostEnvironment _hostingEnvironment;
+
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<OrdersController> _logger;
+
         private readonly IStorageService _storageService;
+
         private readonly UserManager<AppUser> _userManager;
+
         private readonly IHubContext<ChatHub> _hubContext;
-        public OrdersController(IWebHostEnvironment webHostEnvironment,EKhoaHocDbContext khoaHocDbContext, ILogger<OrdersController> logger, IStorageService storageService, UserManager<AppUser> userManager, IWebHostEnvironment hostingEnvironment, IHubContext<ChatHub> hubContext)
+
+        public OrdersController(IWebHostEnvironment webHostEnvironment, EKhoaHocDbContext khoaHocDbContext, ILogger<OrdersController> logger, IStorageService storageService, UserManager<AppUser> userManager, IWebHostEnvironment hostingEnvironment, IHubContext<ChatHub> hubContext)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger;
@@ -53,7 +58,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var query = _khoaHocDbContext.Orders.AsNoTracking().AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-
                 query = query.Where(x =>
                     x.Email.ToLower().Equals(filter.ToLower()) || x.Name.ToLower().Contains(filter.ToLower()) ||
                     x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
@@ -88,7 +92,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("account-{userId}-orders")]
-        public async Task<IActionResult> GetOrdersForClientPaging(string userId,string sortBy, int pageIndex, int pageSize)
+        public async Task<IActionResult> GetOrdersForClientPaging(string userId, string sortBy, int pageIndex, int pageSize)
         {
             var lstOrderViewModels = new List<OrderViewModel>();
             var query = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).AsNoTracking().Where(x => x.UserId == Guid.Parse(userId));
@@ -159,7 +163,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 {
                     return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy đơn hàng với id: {orderId}"));
                 }
-                if(statusType == 1)
+                if (statusType == 1)
                 {
                     order.Status = OrderStatus.InProgress;
                 }
@@ -233,7 +237,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     {
                         return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
                     }
-                       
                 }
                 else
                 {
@@ -276,8 +279,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             _khoaHocDbContext.Orders.Update(order);
 
-
-
             var userCurrent = await _userManager.FindByNameAsync(User.Identity.Name);
             var announceId = Guid.NewGuid();
             var announcement = new Announcement();
@@ -311,14 +312,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             return BadRequest(new ApiBadRequestResponse("Cập nhật trạng thái thất bại"));
         }
-        
+
         [HttpPost("export-excel")]
         public IActionResult PostExportOrder(OrderViewModel order)
         {
             try
             {
                 var webRootFolder = _hostingEnvironment.WebRootPath;
-                var resultFile = $"Bill_{order.Name.Replace(" ","_").convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.xlsx";
+                var resultFile = $"Bill_{order.Name.Replace(" ", "_").convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.xlsx";
                 var resultFilePdf = $"Bill_{order.Name.Replace(" ", "_").convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.pdf";
                 var date = DateTime.UtcNow.Date;
                 var templateDocument = Path.Combine(webRootFolder, "attachments\\form", "Hoa_Don_Ban_Hang_Le.xlsx");
@@ -394,7 +395,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         worksheet.Cells[index, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                         worksheet.Cells[index, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
-
                         // Vertical Alignment
                         worksheet.Cells[index, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                         worksheet.Cells[index, 2].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
@@ -433,11 +433,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
                     package.SaveAs(file);
                     Workbook workbook = new Workbook();
-                    //Load excel file  
+                    //Load excel file
                     workbook.LoadFromFile(templateResultDocument);
-                    //Save excel file to pdf file.  
+                    //Save excel file to pdf file.
                     workbook.SaveToFile(templatePdfResultDocument, FileFormat.PDF);
-
                 }
                 var resultFileRes = new ResultFileResponse()
                 {
@@ -448,7 +447,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             catch (Exception e)
             {
-                
                 return BadRequest(e.Message);
             }
         }
@@ -489,7 +487,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{id}/user-{userId}")]
-        public IActionResult GetDetailByUserId(int id,string userId)
+        public IActionResult GetDetailByUserId(int id, string userId)
         {
             var order = _khoaHocDbContext.Orders.Include(x => x.OrderDetails).FirstOrDefault(x => x.Id == id && x.UserId == Guid.Parse(userId));
             if (order == null)
@@ -737,7 +735,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             orderViewModel.PhoneNumber = order.PhoneNumber;
             orderViewModel.UserId = order.UserId;
             orderViewModel.Total = order.OrderDetails.Sum(x => x.PromotionPrice ?? x.Price);
-           
+
             foreach (var detailViewModel in request.OrderDetails)
             {
                 orderViewModel.OrderDetails.Add(new OrderDetailViewModel

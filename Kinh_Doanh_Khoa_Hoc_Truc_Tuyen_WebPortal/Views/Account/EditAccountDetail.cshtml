@@ -4,7 +4,7 @@
     var imageUser = env + Model.Image;
 }
 @section Scripts {
-    <script src="~/assets/js/custom/customProfile.js" asp-append-version="true"></script>
+    <script src="~/assets/js/custom/customProfile.min.js" asp-append-version="true"></script>
     <script>
         var profile = new ProfileJquery();
         profile.initialize();
@@ -55,8 +55,8 @@
                                 <div class="row">
                                     <div class="col-lg-3 u-s-m-b-30">
                                         <form class="dash-edit-p" id="formFile" action="/my-edit-avatar.html" method="post"  enctype="multipart/form-data">
-                                        <img class="dash__text u-s-m-b-30" id="imgAvatar" style="width: 170px; height: 150px; background-image: none; background-repeat: no-repeat; background-position: center center; background-size: cover;" src="@imageUser" alt="Ảnh đại diện"/>
-                                        <input accept="image/*" id="fileAvatar" name="file" type="file" hidden/>
+                                        <img class="dash__text u-s-m-b-30" id="imgAvatar" style="width: 170px; height: 150px; background-image: none; background-repeat: no-repeat; background-position: center center; background-size: cover;" src="@imageUser" alt="Ảnh đại diện" />
+                                        <input accept="image/*" id="fileAvatar" name="file" type="file" hidden />
                                         <button class="btn btn--e-brand-b-2 u-s-m-b-30" id="btnAvatar" style="border-radius: 6px;padding: 16px 0" type="button">Đổi ảnh</button>
                                         </form>
                                     </div>

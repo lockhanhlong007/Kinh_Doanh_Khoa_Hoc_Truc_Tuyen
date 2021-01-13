@@ -1,6 +1,6 @@
-﻿using System;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
 {

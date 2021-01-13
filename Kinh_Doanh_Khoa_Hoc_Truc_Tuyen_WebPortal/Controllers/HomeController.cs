@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
-using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
@@ -45,7 +39,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
-
     }
 }

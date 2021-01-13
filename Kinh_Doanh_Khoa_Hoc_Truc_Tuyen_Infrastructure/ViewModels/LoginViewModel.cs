@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels
 {
@@ -17,8 +14,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels
         public string Scope { get; set; }
 
         public string ClientId { get; set; }
- 
+
         public string ClientSecret { get; set; }
+
         public bool RememberMe { get; set; }
     }
 }

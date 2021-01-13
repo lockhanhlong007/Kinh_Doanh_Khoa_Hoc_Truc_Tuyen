@@ -1,6 +1,6 @@
-﻿using System.Text.Encodings.Web;
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
 {

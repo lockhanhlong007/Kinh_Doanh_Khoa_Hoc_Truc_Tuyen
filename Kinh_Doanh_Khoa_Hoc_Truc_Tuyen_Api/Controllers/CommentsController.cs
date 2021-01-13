@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -22,9 +19,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     [ApiController]
     public class CommentsController : ControllerBase
     {
-
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<CommentsController> _logger;
+
         private readonly UserManager<AppUser> _userManager;
 
         public CommentsController(EKhoaHocDbContext khoaHocDbContext, ILogger<CommentsController> logger, UserManager<AppUser> userManager)
@@ -60,16 +58,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 UserId = x.UserId,
                 OwnerUser = x.AppUser.Name + " (" + x.AppUser.Email + ")"
             }).ToList();
-                var pagination = new Pagination<CommentViewModel>
+            var pagination = new Pagination<CommentViewModel>
             {
                 Items = items,
                 TotalRecords = totalRecords,
                 PageSize = pageSize,
                 PageIndex = pageIndex
-                };
+            };
             return Ok(pagination);
         }
-
 
         [HttpGet("{entityType}/client")]
         public async Task<IActionResult> GetCommentsForClient(int? entityId, string entityType)
@@ -157,7 +154,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(result);
         }
 
-
         [HttpGet("{entityType}/{entityId}/root-{rootCommentId}/replied")]
         public async Task<IActionResult> GetRepliedCommentsPaging(int entityId, string entityType, int rootCommentId, int pageIndex, int pageSize)
         {
@@ -237,7 +233,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 {
                     return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy bài học với id: {request.EntityId}"));
                 }
-             
+
                 await _khoaHocDbContext.Comments.AddAsync(comment);
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();
@@ -258,6 +254,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             return BadRequest(new ApiBadRequestResponse("Tạo bình luận thất bại"));
         }
+
         [HttpPut("{commentId}/{entityType}/{entityId}")]
         [ValidationFilter]
         public async Task<IActionResult> PutComment(int commentId, [FromBody] CommentCreateRequest request)
@@ -293,7 +290,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy comment với id: {commentId}"));
                 }
                 _khoaHocDbContext.Comments.Remove(comment);
-              
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)

@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Interfaces;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 {

@@ -27,7 +27,6 @@
     <link rel="stylesheet" href="~/assets/css/app.css">
     @await RenderSectionAsync("CssLinks", required: false)
     <!-- Load Facebook SDK for JavaScript -->
-
 </head>
 
 <body class="config">
@@ -58,7 +57,6 @@
                 <div class="modal-content modal-radius modal-shadow">
                     <button class="btn dismiss-button fas fa-times" type="button" data-dismiss="modal"></button>
                     <div class="modal-body" id="modal-add-to-cart">
-
                     </div>
                 </div>
             </div>
@@ -120,11 +118,11 @@
     </script>
     <script src="~/lib/google-analytics/analytics.js" async defer></script>
     <!--====== Jquery ======-->
-    <script src="~/lib/jquery/jquery.js"></script>
-    <script src="~/lib/jquery-validate/jquery.validate.js"></script>
-    <script src="~/lib/jquery-validate/additional-methods.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
-    <script src="~/lib/jquery-validate/localization/messages_vi.js"></script>
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/jquery-validate/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validate/additional-methods.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/jquery-validate/localization/messages_vi.min.js"></script>
 
     <!--====== Vendor Js ======-->
     <script src="~/assets/js/vendor.js"></script>
@@ -136,25 +134,25 @@
     <script src="~/assets/js/app.js"></script>
 
     <!--====== SignalR ======-->
-    <script src="~/lib/microsoft-signalr/signalr.js"></script>
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
     @if (User.Identity.IsAuthenticated)
     {
-        <script src="~/assets/js/custom/customSignalR.js" asp-append-version="true"></script>
+        <script src="~/assets/js/custom/customSignalR.min.js" asp-append-version="true"></script>
     }
     <!--====== Moment Js ======-->
-    <script src="~/lib/moment.js/moment.js"></script>
-    <script src="~/lib/moment.js/locale/vi.js"></script>
+    <script src="~/lib/moment.js/moment.min.js"></script>
+    <script src="~/lib/moment.js/locale/vi.min.js"></script>
 
     <!--====== Notify Js ======-->
-    <script src="~/lib/notify/notify.js"></script>
-    <script src="~/lib/notify/styles/metro/notify-metro.js"></script>
+    <script src="~/lib/notify/notify.min.js"></script>
+    <script src="~/lib/notify/styles/metro/notify-metro.min.js"></script>
 
     <!--====== BootBox ======-->
-    <script src="~/lib/bootbox.js/bootbox.js"></script>
+    <script src="~/lib/bootbox.js/bootbox.min.js"></script>
     <script src="~/assets/js/site.js"></script>
 
     <!--Mustache-->
-    <script src="~/lib/mustache.js/mustache.js"></script>
+    <script src="~/lib/mustache.js/mustache.min.js"></script>
 
     <!--====== NoScript ======-->
     <noscript>
@@ -175,7 +173,7 @@
     <script src="~/lib/jqueryui/jquery-ui.min.js"></script>
 
     <!--Header Shop Cart-->
-    <script src="~/assets/js/custom/customBase.js"></script>
+    <script src="~/assets/js/custom/customBase.min.js"></script>
     <script>
         var baseObj = new BaseAjax();
         baseObj.initialize();
@@ -233,5 +231,4 @@
      logged_out_greeting="Xin chào! mình có thể giúp gì cho bạn?">
 </div>-->
 </body>
-
 </html>

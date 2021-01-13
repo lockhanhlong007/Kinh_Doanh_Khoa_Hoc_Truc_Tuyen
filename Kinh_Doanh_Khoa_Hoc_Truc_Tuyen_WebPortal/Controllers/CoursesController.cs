@@ -1,15 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
@@ -72,6 +70,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         }
 
         #region Ajax Method
+
         [HttpGet]
         public async Task<IActionResult> GetCoursesByFilter(string filter)
         {
@@ -105,7 +104,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             try
             {
                 request.UserId = User.GetUserId();
-                var result = await _apiClient.PostAsync<CommentCreateRequest,CommentViewModel>(
+                var result = await _apiClient.PostAsync<CommentCreateRequest, CommentViewModel>(
                     $"/api/comments/courses/{request.EntityId}", request);
                 result.OwnerUser = User.GetFullName() + " (" + User.GetEmail() + ")";
                 return Ok(result);
@@ -146,9 +145,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 return BadRequest(e.Message);
             }
         }
-        
-        #endregion
 
-
+        #endregion Ajax Method
     }
 }

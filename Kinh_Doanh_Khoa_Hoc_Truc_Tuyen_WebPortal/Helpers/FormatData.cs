@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
@@ -15,6 +14,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
 
             return input;
         }
+
         public static string convertToUnSign(this string s)
         {
             var regex = new Regex("\\p{IsCombiningDiacriticalMarks}+");

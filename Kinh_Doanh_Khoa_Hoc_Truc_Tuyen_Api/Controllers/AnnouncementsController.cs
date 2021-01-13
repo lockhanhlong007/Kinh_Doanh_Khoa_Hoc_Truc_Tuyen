@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Dapper;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.HubConfig;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
@@ -12,16 +6,16 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Spire.Xls;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -30,9 +24,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class AnnouncementsController : ControllerBase
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<CategoriesController> _logger;
+
         public readonly IStorageService _storageService;
+
         public readonly UserManager<AppUser> _userManager;
+
         public readonly IHubContext<ChatHub> _hubContext;
 
         public AnnouncementsController(EKhoaHocDbContext khoaHocDbContext, ILogger<CategoriesController> logger, IStorageService storageService, UserManager<AppUser> userManager, IHubContext<ChatHub> hubContext)
@@ -74,7 +72,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var items = query.OrderByDescending(x => x.CreationTime).Skip(pageSize * (pageIndex - 1)).Take(pageSize);
             foreach (var announcement in items.ToList())
             {
-        
                 var announceViewModel = new AnnouncementViewModel();
                 announceViewModel.UserId = announcement.UserId;
                 announceViewModel.Status = announcement.Status;
@@ -130,13 +127,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     result = true;
                 }
             }
-            
+
             return Ok(result);
         }
 
         [HttpPost("create-announce")]
         [ValidationFilter]
-        public async Task<IActionResult> PostAnnouncement([FromBody]AnnouncementCreateRequest request)
+        public async Task<IActionResult> PostAnnouncement([FromBody] AnnouncementCreateRequest request)
         {
             if (request == null)
             {
@@ -179,7 +176,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 return BadRequest(new ApiBadRequestResponse(e.Message));
             }
-        
         }
 
         [HttpGet("send-announce-{id}/server")]
@@ -200,13 +196,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> GetDetailAnnouncement(string announceId, string receiveId)
         {
             var data = await (from x in _khoaHocDbContext.Announcements.AsNoTracking()
-                join y in _khoaHocDbContext.AnnouncementUsers.AsNoTracking()
-                    on x.Id equals y.AnnouncementId
-                    into xy
-                from announceUser in xy.DefaultIfEmpty()
-                where announceUser.UserId == Guid.Parse(receiveId) && x.Id == Guid.Parse(announceId)
-                orderby !announceUser.HasRead descending, x.CreationTime descending
-                select x).FirstOrDefaultAsync();
+                              join y in _khoaHocDbContext.AnnouncementUsers.AsNoTracking()
+                                  on x.Id equals y.AnnouncementId
+                                  into xy
+                              from announceUser in xy.DefaultIfEmpty()
+                              where announceUser.UserId == Guid.Parse(receiveId) && x.Id == Guid.Parse(announceId)
+                              orderby !announceUser.HasRead descending, x.CreationTime descending
+                              select x).FirstOrDefaultAsync();
             var announceViewModel = new AnnouncementViewModel();
             announceViewModel.UserId = data.UserId;
             announceViewModel.Status = data.Status;
@@ -235,6 +231,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             return Ok(announceViewModel);
         }
-
     }
 }

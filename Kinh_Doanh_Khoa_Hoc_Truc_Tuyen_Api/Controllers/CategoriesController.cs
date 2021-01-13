@@ -1,11 +1,4 @@
-﻿
-
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
@@ -15,12 +8,16 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -28,11 +25,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-
-
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<CategoriesController> _logger;
+
         private readonly IConfiguration _configuration;
+
         private readonly IStorageService _storageService;
 
         public CategoriesController(EKhoaHocDbContext khoaHocDbContext, ILogger<CategoriesController> logger, IStorageService storageService, IConfiguration configuration)
@@ -110,20 +108,19 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     SortOrder = x.SortOrder,
                     Id = x.Id
                 }).ToList();
-                    var categoriesViewModel = new CategoryViewModel()
-                    {
-                        Name = category.Name,
-                        ParentId = category.ParentId,
-                        SortOrder = category.SortOrder,
-                        Id = category.Id,
-                        CategoryViewModels = categoriesChild
-                    };
+                var categoriesViewModel = new CategoryViewModel()
+                {
+                    Name = category.Name,
+                    ParentId = category.ParentId,
+                    SortOrder = category.SortOrder,
+                    Id = category.Id,
+                    CategoryViewModels = categoriesChild
+                };
                 listCategories.Add(categoriesViewModel);
             }
 
             return Ok(listCategories);
         }
-
 
         [HttpGet("home-categories")]
         public async Task<IActionResult> GetHomeCategories()
@@ -138,7 +135,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             //var now = DateTime.Now;
             //// lấy ra danh mục cha
-
 
             ////// lấy ra các sự kiện đang diễn ra => mục đích : lấy promotion price
             ////var lstPromotion = _khoaHocDbContext.Promotions.Include(x => x.PromotionInCourses).AsNoTracking()
@@ -169,11 +165,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                         Content = c.Content,
                         Description = c.Description,
                         Id = c.Id,
-                        CategoryName = c.CategoryName.formatData(20), 
+                        CategoryName = c.CategoryName.formatData(20),
                         DiscountAmount = c.DiscountAmount,
                         DiscountPercent = c.DiscountPercent
                     }).ToList(),
-
                 };
                 listCategories.Add(categories);
             }
@@ -208,7 +203,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             };
             return Ok(pagination);
         }
-        
+
         [HttpPut("{id}")]
         [ValidationFilter]
         [ClaimRequirement(FunctionConstant.Categories, CommandConstant.Update)]
@@ -234,6 +229,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             return BadRequest(new ApiBadRequestResponse("Cập nhật thất bại"));
         }
+
         [HttpGet("{functionId}/parents")]
         [ClaimRequirement(FunctionConstant.Categories, CommandConstant.View)]
         public async Task<IActionResult> GetFunctionsByParentId(int id)
@@ -260,7 +256,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     return NotFound(new ApiNotFoundResponse($"Không tìm thấy danh mục với id: {id}"));
                 }
                 _khoaHocDbContext.Categories.Remove(category);
-              
             }
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
@@ -269,6 +264,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             return BadRequest(new ApiBadRequestResponse("Xóa danh mục thất bại"));
         }
-
     }
 }

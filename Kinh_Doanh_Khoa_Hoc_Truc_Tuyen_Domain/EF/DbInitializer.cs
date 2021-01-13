@@ -1,20 +1,24 @@
-﻿
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
 {
     public class DbInitializer
     {
         private readonly EKhoaHocDbContext _applicationDbContext;
+
         private readonly UserManager<AppUser> _userManager;
+
         private readonly RoleManager<AppRole> _roleManager;
+
         private const string AdminRoleName = "Admin";
+
         private const string TeacherRoleName = "Teacher";
+
         private const string StudentRoleName = "Student";
 
         public DbInitializer(EKhoaHocDbContext applicationDbContext,
@@ -29,6 +33,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
         public async Task Seed()
         {
             #region Roles
+
             if (!_roleManager.Roles.Any())
             {
                 await _roleManager.CreateAsync(new AppRole
@@ -50,9 +55,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     NormalizedName = StudentRoleName.ToUpper(),
                 });
             }
-            #endregion
+
+            #endregion Roles
 
             #region Users
+
             if (!_userManager.Users.Any())
             {
                 var result = await _userManager.CreateAsync(new AppUser
@@ -63,7 +70,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     Email = "lockhanhlong007@gmail.com",
                     Avatar = "/img/defaultAvatar.png",
                     EmailConfirmed = true,
-                    Dob = new DateTime(1999,7,11),
+                    Dob = new DateTime(1999, 7, 11),
                     PhoneNumber = "0965453699",
                     LockoutEnabled = false
                 }, "123@qwe");
@@ -125,9 +132,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     await _userManager.AddToRoleAsync(user, StudentRoleName);
                 }
             }
-            #endregion
+
+            #endregion Users
 
             #region Functions
+
             if (!_applicationDbContext.Functions.Any())
             {
                 await _applicationDbContext.Functions.AddRangeAsync(new List<Function>
@@ -154,9 +163,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                 });
                 await _applicationDbContext.SaveChangesAsync();
             }
-            #endregion
+
+            #endregion Functions
 
             #region Commands
+
             if (!_applicationDbContext.Commands.Any())
             {
                 await _applicationDbContext.Commands.AddRangeAsync(new List<Command>
@@ -170,9 +181,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                 });
                 await _applicationDbContext.SaveChangesAsync();
             }
-            #endregion
+
+            #endregion Commands
 
             #region Commands In Functions
+
             var functions = _applicationDbContext.Functions;
             if (!_applicationDbContext.CommandInFunctions.Any())
             {
@@ -191,7 +204,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                         FunctionId = function.Id
                     };
                     await _applicationDbContext.CommandInFunctions.AddAsync(updateAction);
-                    
+
                     var deleteAction = new CommandInFunction
                     {
                         CommandId = "Delete",
@@ -205,7 +218,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                         FunctionId = function.Id
                     };
                     await _applicationDbContext.CommandInFunctions.AddAsync(viewAction);
-
                 }
                 var exportAction = new List<CommandInFunction>
                 {
@@ -243,9 +255,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                 await _applicationDbContext.CommandInFunctions.AddRangeAsync(approveAction);
                 await _applicationDbContext.SaveChangesAsync();
             }
-            #endregion
+
+            #endregion Commands In Functions
 
             #region Permissions
+
             if (!_applicationDbContext.Permissions.Any())
             {
                 var adminRole = await _roleManager.FindByNameAsync(AdminRoleName);
@@ -258,7 +272,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                     await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "ExportExcel"));
                     await _applicationDbContext.Permissions.AddAsync(new Permission(function.Id, adminRole.Id, "Approve"));
                 }
-                
+
                 var teacherRole = await _roleManager.FindByNameAsync(TeacherRoleName);
                 await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Create"));
                 await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Delete"));
@@ -266,7 +280,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
                 await _applicationDbContext.Permissions.AddAsync(new Permission("Courses", teacherRole.Id, "Update"));
             }
             await _applicationDbContext.SaveChangesAsync();
-            #endregion
+
+            #endregion Permissions
         }
     }
 }

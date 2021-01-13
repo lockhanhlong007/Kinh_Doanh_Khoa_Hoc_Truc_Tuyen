@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 {
@@ -9,7 +8,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
     {
         public AppRole()
         {
-            
         }
 
         public AppRole(Guid id, string name)
@@ -17,6 +15,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
             Id = id;
             Name = name;
         }
+
         public List<Permission> Permissions { get; set; }
     }
 }

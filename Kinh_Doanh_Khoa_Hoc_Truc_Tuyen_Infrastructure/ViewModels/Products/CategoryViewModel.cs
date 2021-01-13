@@ -5,6 +5,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
     public class CategoryViewModel
     {
         public int Id { get; set; }
+
         public string Name { get; set; }
 
         public int SortOrder { get; set; }
@@ -16,6 +17,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public List<CategoryViewModel> CategoryViewModels { get; set; }
 
         public List<CourseViewModel> CourseViewModels { get; set; }
-
     }
 }
