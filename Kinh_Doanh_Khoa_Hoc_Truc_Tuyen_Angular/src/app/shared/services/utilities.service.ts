@@ -27,9 +27,8 @@ export class UtilitiesService extends BaseService {
     return roots;
   }
   UnflatteringForTree = (arr: any[]): any[] => {
-    const map = {};
     const roots: any[] = [];
-    for (let i = 0; i < arr.length; i += 1) {
+    for (let i = 0; i < arr.length; i++) {
       const node = {
         data: {
           id: '',
@@ -43,13 +42,16 @@ export class UtilitiesService extends BaseService {
           hasApprove: '',
           hasExportExcel: '',
         },
-        expanded: true,
+        expanded: false,
         children: []
       };
       node.data = arr[i];
-      map[node.data.id] = i; // Khoi Tao Map
       if (node.data.parentId !== null) {
-        roots[map[node.data.parentId]].children.push(node);
+        for (let y = 0; y < roots.length; y++) {
+          if (roots[y].data.id === node.data.parentId) {
+            roots[y].children.push(node);
+          }
+        }
       } else {
         roots.push(node);
       }

@@ -9,7 +9,7 @@
     <div class="modal-body div-scroll">
         <p-panel #pnl header="Thông tin" [toggleable]="true" [collapsed]="false">
             <div class="p-grid-pad p-fluid p-grid-responsive">
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Tài khoản:</span>
                     </div>
@@ -20,7 +20,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="userName" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Mật khẩu:</span>
                     </div>
@@ -31,7 +31,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="password" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Họ và tên:</span>
                     </div>
@@ -42,7 +42,24 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="name" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
+                    <div class="p-col-2">
+                        <span class="required">Ảnh đại diện:</span>
+                    </div>
+                    <div class="p-col-6">
+                        <p-fileUpload *ngIf="this.fileAvatarPath === ''" [showUploadButton]="false" (onRemove)="removeAvatar($event)" (onSelect)="selectAvatar($event)" [showCancelButton]="false" accept="image/*" maxFileSize="1000000000">
+                        </p-fileUpload>
+                        <ul style="padding: 0; margin: 0;" *ngIf="this.fileAvatarPath !== ''">
+                            <li style="list-style: none; display: flex; align-items: center;">
+                                <a href="{{backendApiUrl + fileAvatarPath}}"><img style="width: 60px;" src="{{backendApiUrl + fileAvatarPath}}" alt="anh dai dien"> {{fileAvatarName}}</a>
+                                <button icon="pi pi-upload" pButton type="button" (click)="changeAvatar()" class="p-button-help p-ml-2"></button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="p-col-4">
+                    </div>
+                </div>
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Tiểu sử:</span>
                     </div>
@@ -50,7 +67,7 @@
                         <input type="text" pInputText [pKeyFilter]="noSpecial" formControlName="biography">
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span>Ngày sinh:</span>
                     </div>
@@ -59,7 +76,7 @@
                         </p-calendar>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Email:</span>
                     </div>
@@ -70,7 +87,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="email" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span>Điện thoại:</span>
                     </div>

@@ -9,7 +9,7 @@
     <div class="modal-body div-scroll">
         <p-panel #pnl header="Thông tin" [toggleable]="true" [collapsed]="false" styleClass="m-b-10">
             <div class="p-grid-pad p-fluid p-grid-responsive">
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-3">
                         <span class="required">Tên sự kiện:</span>
                     </div>
@@ -20,7 +20,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="name" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-3">
                         <span class="required">Nội dung:</span>
                     </div>
@@ -29,7 +29,7 @@
                     </div>
                     <div class="p-col-3"></div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-3">
                         <span class="required">Từ ngày:</span>
                     </div>
@@ -41,7 +41,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="fromDate" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-3">
                         <span class="required">Đến ngày:</span>
                     </div>
@@ -53,7 +53,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="toDate" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-3">
                         <span class="required">Phương thức giảm giá</span>
                     </div>
@@ -65,7 +65,7 @@
                         <app-validation-message [entityForm]="entityForm " fieldName="chooseDiscount" [validationMessages]="validation_messages "></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid" *ngIf="isHiddenAmount">
+                <div style="align-items: center;" class="p-field p-grid" *ngIf="isHiddenAmount">
                     <div class="p-col-3 ">
                         <span class="required ">Giảm giá theo giá:</span>
                     </div>
@@ -76,7 +76,7 @@
                         <app-validation-message [entityForm]="entityForm " fieldName="discountAmount" [validationMessages]="validation_messages "></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid" *ngIf="isHiddenPercent">
+                <div style="align-items: center;" class="p-field p-grid" *ngIf="isHiddenPercent">
                     <div class="p-col-3 ">
                         <span class="required ">Giảm giá theo %:</span>
                     </div>
@@ -87,7 +87,7 @@
                         <app-validation-message [entityForm]="entityForm " fieldName="discountPercent" [validationMessages]="validation_messages "></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-3">
                         <span class="required">Trạng thái</span>
                     </div>

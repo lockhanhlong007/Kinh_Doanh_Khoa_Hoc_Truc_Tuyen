@@ -179,7 +179,10 @@
                     }
                 }
                 else {
-                    $("#announcementList").html('<li><span class="manage-o__text-2 u-c-silver" style="line-height: 1.3; text-align: justify">Không có thông báo chưa đọc</span></li>');
+                    $("#totalAnnouncement").text(0);
+                    render += '<li style="text-align: center; align-items: center;"><span class="description-title u-c-silver" style="text-align:center;align-items: center; line-height: 1.9; text-align: justify; font-size: 12px; font-weight: 600">Không có thông báo chưa đọc</span></li>';
+                    render += $("#announcement-tag-template").html();
+                    $("#announcementList").html(render);
                 }
             },
             error: function (status) {

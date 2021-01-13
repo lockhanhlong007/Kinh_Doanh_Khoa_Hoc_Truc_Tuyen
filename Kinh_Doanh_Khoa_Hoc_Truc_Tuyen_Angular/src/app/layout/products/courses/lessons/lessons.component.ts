@@ -43,7 +43,7 @@ export class LessonsComponent implements OnInit, OnDestroy {
     this.loadData();
   }
   checkChanged(res) {
-    return res.findIndex(x => x.status === true);
+    return res.findIndex(x => x.status === 1);
   }
   loadData(selectedId = null) {
     this.blockedPanel = true;

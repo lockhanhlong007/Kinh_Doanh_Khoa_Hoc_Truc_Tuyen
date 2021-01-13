@@ -129,23 +129,25 @@ export class CoursesDetailComponent implements OnInit, OnDestroy {
     }
 
   }
-  public deleteAttachment() {
-    this.blockedPanel = true;
-    this.subscription.add(this.coursesService.deleteAttachment(this.entityId)
-      .subscribe((res: any) => {
-        console.log('Delete nek1: ' + res);
-        console.log('StatusCode Delete nek2: ' + res.StatusCode);
-        console.log('status Delete nek3: ' + res.status);
-        if (res.StatusCode === 200) {
-          this.notificationService.showSuccess(MessageConstants.Delete_Ok);
-          this.fileName = '';
-          this.filePath = '';
-        }
-        setTimeout(() => { this.blockedPanel = false; }, 1000);
-      }, error => {
-        this.notificationService.showError(MessageConstants.Delete_Failed);
-        setTimeout(() => { this.blockedPanel = false; }, 1000);
-      }));
+  public changeAttachment() {
+    this.fileName = '';
+    this.filePath = '';
+    // this.blockedPanel = true;
+    // this.subscription.add(this.coursesService.deleteAttachment(this.entityId)
+    //   .subscribe((res: any) => {
+    //     console.log('Delete nek1: ' + res);
+    //     console.log('StatusCode Delete nek2: ' + res.StatusCode);
+    //     console.log('status Delete nek3: ' + res.status);
+    //     if (res.StatusCode === 200) {
+    //       this.notificationService.showSuccess(MessageConstants.Delete_Ok);
+    //       this.fileName = '';
+    //       this.filePath = '';
+    //     }
+    //     setTimeout(() => { this.blockedPanel = false; }, 1000);
+    //   }, error => {
+    //     this.notificationService.showError(MessageConstants.Delete_Failed);
+    //     setTimeout(() => { this.blockedPanel = false; }, 1000);
+    //   }));
   }
   goBackToList() {
     this.router.navigateByUrl('/products/courses');

@@ -12,7 +12,7 @@
         </p-header>
         <form class="form-horizontal form-label-left" novalidate [formGroup]="entityForm" (ngSubmit)="saveChange()">
             <div class="p-grid-pad p-fluid p-grid-responsive">
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Tên Khóa Học:</span>
                     </div>
@@ -23,7 +23,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="name" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Danh mục:</span>
                     </div>
@@ -35,24 +35,24 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="categoryId" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Ảnh:</span>
                     </div>
                     <div class="p-col-7">
                         <p-fileUpload *ngIf="this.filePath === ''" [showUploadButton]="false" (onRemove)="removeAttachments($event)" (onSelect)="selectAttachments($event)" [showCancelButton]="false" accept="image/*" maxFileSize="1000000000">
                         </p-fileUpload>
-                        <ul *ngIf="this.filePath !== ''">
-                            <li>
+                        <ul style="padding: 0; margin: 0;" *ngIf="this.filePath !== ''">
+                            <li style="list-style: none; display: flex; align-items: center;">
                                 <a href="{{backendApiUrl + filePath}}">{{fileName}}</a>
-                                <button icon="pi pi-trash" pButton type="button" (click)="deleteAttachment()" class="p-button-danger p-ml-2"></button>
+                                <button icon="pi pi-upload" pButton type="button" (click)="changeAttachment()" class="p-button-help p-ml-2"></button>
                             </li>
                         </ul>
                     </div>
                     <div class="p-col-3">
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Giá:</span>
                     </div>
@@ -63,7 +63,7 @@
                         <app-validation-message [entityForm]="entityForm" fieldName="price" [validationMessages]="validation_messages"></app-validation-message>
                     </div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Mô tả:</span>
                     </div>
@@ -72,7 +72,7 @@
                     </div>
                     <div class="p-col-3"></div>
                 </div>
-                <div class="p-field p-grid">
+                <div style="align-items: center;" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Nội dung:</span>
                     </div>
@@ -82,7 +82,7 @@
                     <div class="p-col-3">
                     </div>
                 </div>
-                <div *ngIf="role !=='Teacher'" class="p-field p-grid">
+                <div style="align-items: center;" *ngIf="role !=='Teacher'" class="p-field p-grid">
                     <div class="p-col-2">
                         <span class="required">Status</span>
                     </div>

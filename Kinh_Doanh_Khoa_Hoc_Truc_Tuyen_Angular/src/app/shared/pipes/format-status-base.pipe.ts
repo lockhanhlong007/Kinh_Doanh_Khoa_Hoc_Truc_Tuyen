@@ -6,10 +6,12 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class FormatStatusBasePipe implements PipeTransform {
 
   transform(value: any): any {
-    if (value === true) {
+    if (value === 1) {
       return 'Duyệt';
-    } else {
+    } else if (value === 0) {
       return 'Chưa Duyệt';
+    } else {
+      return 'Không duyệt';
     }
   }
 

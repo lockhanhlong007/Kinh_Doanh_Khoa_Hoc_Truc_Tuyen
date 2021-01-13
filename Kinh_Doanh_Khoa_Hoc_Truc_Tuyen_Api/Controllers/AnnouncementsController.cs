@@ -92,7 +92,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     announceViewModel.UserFullName = user.Name;
                 }
                 var announceUser = _khoaHocDbContext.AnnouncementUsers
-                    .FirstOrDefault(x => x.AnnouncementId == announcement.Id);
+                    .FirstOrDefault(x => x.AnnouncementId == announcement.Id && x.UserId == Guid.Parse(userId));
                 if (announceUser != null)
                 {
                     announceViewModel.TmpHasRead = announceUser.HasRead;
@@ -118,7 +118,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> MarkAsRead(AnnouncementMarkReadRequest request)
         {
             var result = false;
-            var announce = await _khoaHocDbContext.AnnouncementUsers.AsNoTracking().FirstOrDefaultAsync(_ => _.AnnouncementId == Guid.Parse(request.AnnounceId) && _.UserId == Guid.Parse(request.UserId));
+            var announce = await _khoaHocDbContext.AnnouncementUsers.AsNoTracking().FirstOrDefaultAsync(_ =>
+                _.AnnouncementId == Guid.Parse(request.AnnounceId) && _.UserId == Guid.Parse(request.UserId));
             if (announce != null)
             {
                 if (announce.HasRead == false)

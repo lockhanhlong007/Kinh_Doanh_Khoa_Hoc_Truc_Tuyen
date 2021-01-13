@@ -224,14 +224,19 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     model.PaymentMethod = PaymentMethod.PaymentGateway;
                     model.OrderDetails = listOrderDetails;
                     var result = await _apiClient.PostAsync<OrderCreateRequest, OrderViewModel>($"/api/orders/create", model);
-                    var exportBill = await _apiClient.PostAsync<OrderViewModel, ApiResponse>($"/api/orders/export-excel", result);
-                    var path = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.Message;
+                    var exportBill = await _apiClient.PostAsync<OrderViewModel, ResultFileResponse>($"/api/orders/export-excel", result);
+                    var pathExcel = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.FileExcel;
+                    var pathPdf = _configuration["BaseAddress"] + "/attachments/export-files/" + exportBill.FilePdf;
+                    var responseFile = new ResultFileResponse()
+                    {
+                        FileExcel = pathExcel,
+                        FilePdf = pathPdf
+                    };
                     HttpContext.Session.Remove(SystemConstants.CartSession);
-                    HttpContext.Session.Set(SystemConstants.AttachmentSession, path);
+                    HttpContext.Session.Set(SystemConstants.AttachmentSession, responseFile);
                     HttpContext.Session.Set(SystemConstants.EmailSession, user.Email);
                     //Get Config Info
-                    string vnp_Returnurl = _configuration["VnPaySettings:vnp_Returnurl"]; //URL nhan ket qua tra ve 
-                    //string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
+                    string vnp_ReturnUrl = _configuration["VnPaySettings:vnp_ReturnUrl"]; //URL nhan ket qua tra ve 
                     string vnp_Url = _configuration["VnPaySettings:vnp_Url"]; //URL thanh toan cua VNPAY 
                     string vnp_TmnCode = _configuration["VnPaySettings:vnp_TmnCode"]; //Ma website
                     string vnp_HashSecret = _configuration["VnPaySettings:vnp_HashSecret"]; //Chuoi bi mat
@@ -247,7 +252,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     vnpay.AddRequestData("vnp_OrderInfo", result.Message);
                     vnpay.AddRequestData("vnp_OrderType", "insurance"); //default value: other
                     vnpay.AddRequestData("vnp_Amount", (result.Total * 100).ToString());
-                    vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
+                    vnpay.AddRequestData("vnp_ReturnUrl", vnp_ReturnUrl);
                     vnpay.AddRequestData("vnp_IpAddr", ip);
                     vnpay.AddRequestData("vnp_CreateDate", result.CreationTime.ToString("yyyyMMddHHmmss"));
                     vnpay.AddRequestData("vnp_BankCode", "NCB");

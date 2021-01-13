@@ -97,13 +97,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> PostCourse([FromForm] CourseCreateRequest request)
         {
-            var dbCourse = await _khoaHocDbContext.Courses.FindAsync(request.Id);
+            var dbCourse = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (dbCourse != null)
             {
                 _logger.LogError($"Course with id {request.Id} is existed.");
                 return BadRequest(new ApiBadRequestResponse($"Đã tồn tại khóa học này với id: {request.Id}"));
             }
-
+            if (request.Image == null)
+            {
+                _logger.LogError($"Bạn phải thêm hình ảnh cho khóa học.");
+                return BadRequest(new ApiBadRequestResponse($"Bạn phải thêm hình ảnh cho khóa học."));
+            }
             var course = new Course
             {
                 Name = request.Name,
@@ -120,10 +124,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 var fileName = $"{originalFileName.Substring(0, originalFileName.LastIndexOf('.'))}{Path.GetExtension(originalFileName)}";
                 await _storageService.SaveFileAsync(request.Image.OpenReadStream(), fileName, "images");
                 course.Image = "images/" + fileName;
-            }
-            else
-            {
-                course.Image = "images/defaultAvatar.png";
             }
             await _khoaHocDbContext.Courses.AddAsync(course);
             var result = await _khoaHocDbContext.SaveChangesAsync();
@@ -171,7 +171,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpGet("related-courses/{id}")]
         public async Task<IActionResult> GetRelatedCourses(int id)
         {
-            var course = await _khoaHocDbContext.Courses.FindAsync(id);
+            var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == id);
             if (course == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {id}"));
@@ -203,20 +203,24 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("filter")]
-        public async Task<IActionResult> GetCoursesPaging(string filter, int pageIndex, int pageSize)
+        public IActionResult GetCoursesPaging(string filter, int pageIndex, int pageSize)
         {
-            var query = _khoaHocDbContext.Courses.Include(x => x.Category).OrderByDescending(x => x.Status).AsQueryable();
+           
+            var query = _khoaHocDbContext.Courses.Include(x => x.Category).AsNoTracking().AsEnumerable();
+           
             if (User != null && User.IsInRole("Teacher"))
             {
                 query = query.Where(x => x.CreatedUserName == User.GetUserName());
             }
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()));
+                query = query.Where(x =>
+                    x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower()
+                        .Contains(filter.convertToUnSign().ToLower()));
             }
-
-            var totalRecords = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new CourseViewModel
+            var data = query.ToList();
+            var totalRecords = data.Count();
+            var items = data.OrderByDescending(x => x.Status).Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(_ => new CourseViewModel
             {
                 Id = _.Id,
                 Name = _.Name,
@@ -227,7 +231,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 Content = _.Content,
                 Price = _.Price,
                 CategoryName = _.Category.Name
-            }).ToListAsync();
+            }).ToList();
             var pagination = new Pagination<CourseViewModel>
             {
                 Items = items,
@@ -251,7 +255,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 DynamicParameters parameters = new DynamicParameters();
                 parameters.Add("@categoryId", categoryId);
-                var category =  await _khoaHocDbContext.Categories.FindAsync(categoryId);
+                var category =  await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == categoryId);
                 data = category.ParentId == null
                     ? (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryParentId", parameters, null, 120,
                         CommandType.StoredProcedure)).ToList()
@@ -263,13 +267,25 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 data = (await conn.QueryAsync<CourseViewModel>("ListCourses", null, null, 120,
                     CommandType.StoredProcedure)).ToList();
             }
-            var query = data.AsQueryable();
+            var query = data.AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
+                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) ||
+                                         x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
             }
-
-            foreach (var item in query)
+            if (priceMin != null && priceMax != null)
+            {
+                query = query.Where(x => x.SortPrice >= priceMin && x.SortPrice <= priceMax);
+            }
+            query = sortBy switch
+            {
+                "name" => query.OrderByDescending(x => x.Name),
+                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
+                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
+                _ => query.OrderByDescending(x => x.CreationTime)
+            };
+            data = query.ToList();
+            foreach (var item in data)
             {
                 if (item.DiscountPercent > 0)
                 {
@@ -285,19 +301,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     item.SortPrice = item.Price;
                 }
             }
-            if (priceMin != null && priceMax != null)
-            {
-                query = query.Where(x => x.SortPrice >= priceMin && x.SortPrice <= priceMax);
-            }
-            query = sortBy switch
-            {
-                "name" => query.OrderByDescending(x => x.Name),
-                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
-                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
-                _ => query.OrderByDescending(x => x.CreationTime)
-            };
-            var totalRecords = query.Count();
-            var courses = query.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(c => new CourseViewModel()
+            var totalRecords = data.Count();
+            var courses = data.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(c => new CourseViewModel()
             {
                 Name = c.Name.formatData(20),
                 Status = c.Status,
@@ -337,7 +342,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 DynamicParameters parameters = new DynamicParameters();
                 parameters.Add("@categoryId", categoryId);
-                var category = await _khoaHocDbContext.Categories.FindAsync(categoryId);
+                var category = await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == categoryId);
                 data = category.ParentId == null
                     ? (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryParentId", parameters, null, 120,
                         CommandType.StoredProcedure)).ToList()
@@ -349,13 +354,25 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 data = (await conn.QueryAsync<CourseViewModel>("ListCourses", null, null, 120,
                     CommandType.StoredProcedure)).ToList();
             }
-            var query = data.AsQueryable();
+            var query = data.AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
+                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) ||
+                                         x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
             }
-
-            foreach (var item in query)
+            if (priceMin != null && priceMax != null)
+            {
+                query = query.Where(x => x.SortPrice >= priceMin && x.SortPrice <= priceMax);
+            }
+            query = sortBy switch
+            {
+                "name" => query.OrderByDescending(x => x.Name),
+                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
+                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
+                _ => query.OrderByDescending(x => x.CreationTime)
+            };
+            data = query.ToList();
+            foreach (var item in data)
             {
                 if (item.DiscountPercent > 0)
                 {
@@ -371,18 +388,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     item.SortPrice = item.Price;
                 }
             }
-            if (priceMin != null && priceMax != null)
-            {
-                query = query.Where(x => x.SortPrice >= priceMin && x.SortPrice <= priceMax);
-            }
-            query = sortBy switch
-            {
-                "name" => query.OrderByDescending(x => x.Name),
-                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
-                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
-                _ => query.OrderByDescending(x => x.CreationTime)
-            };
-            var courses = query.Select(c => new CourseViewModel()
+            var courses = data.Select(c => new CourseViewModel()
             {
                 Name = c.Name,
                 Status = c.Status,
@@ -408,7 +414,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> PutCourse([FromForm] CourseCreateRequest request)
         {
-            var course = await _khoaHocDbContext.Courses.FindAsync(request.Id);
+            var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (course == null)
             {
                 _logger.LogError($"Cannot found course with id {request.Id}");
@@ -487,7 +493,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var lstAnnouncement = new List<AnnouncementToUserViewModel>();
             foreach (var id in input)
             {
-                var course = await _khoaHocDbContext.Courses.FindAsync(id);
+                var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == id);
                 if (course == null)
                 {
                     _logger.LogError($"Cannot found course with id {id}");
@@ -547,7 +553,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var id in input)
             {
-                var course = await _khoaHocDbContext.Courses.FindAsync(id);
+                var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == id);
                 if (course == null)
                 {
                     _logger.LogError($"Cannot found Course with id {id}");
@@ -558,7 +564,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 {
                     foreach (var item in activeCourse)
                     {
-                        var check = await _khoaHocDbContext.OrderDetails.FindAsync(item.Id);
+                        var check = await _khoaHocDbContext.OrderDetails.FirstOrDefaultAsync(x => x.ActiveCourseId.Equals(item.Id));
                         if (check != null)
                         {
                             _logger.LogError($"Không thể xóa khóa học này với id là {item.Id}");
@@ -593,7 +599,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.Update)]
         public async Task<IActionResult> GetCourseUsers(int id)
         {
-            var courses = await _khoaHocDbContext.Courses.FindAsync(id);
+            var courses = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == id);
             if (courses == null)
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {id}"));
             var activateCourses = _khoaHocDbContext.ActivateCourses.Include(x => x.AppUser)
@@ -615,10 +621,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.Update)]
         public async Task<IActionResult> PostCourseUsers(int coursesId, List<string> request)
         {
-            var courses = await _khoaHocDbContext.Courses.FindAsync(coursesId);
+            var courses = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == coursesId);
             if (courses == null)
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
-            foreach (var activeCourse in request.Select(id => new ActivateCourse() { UserId = Guid.Parse(id), CourseId = coursesId, Status = false }))
+            foreach (var activeCourse in request.Select(id => new ActivateCourse() { UserId = Guid.Parse(id), CourseId = coursesId, Status = true, Id = Guid.NewGuid()}))
             {
                 await _khoaHocDbContext.ActivateCourses.AddAsync(activeCourse);
             }
@@ -633,7 +639,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> RemoveCourseUsers(int coursesId, List<string> request)
         {
 
-            var courses = await _khoaHocDbContext.Courses.FindAsync(coursesId);
+            var courses = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == coursesId);
             if (courses == null)
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
             foreach (var id in request)
@@ -652,7 +658,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PutActiveCourses (int coursesId, List<string> input)
         {
-            var courses = await _khoaHocDbContext.Courses.FindAsync(coursesId);
+            var courses = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == coursesId);
             if (courses == null)
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
             foreach (var id in input)
@@ -675,7 +681,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse("Update kích hoạt khóa học thất bại"));
         }
 
-
         [HttpGet("check-active-courses/user-{userId}")]
         public IActionResult GetActiveCourses(string userId)
         {
@@ -693,7 +698,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             return Ok(result);
         }
-
 
         [HttpPut("user-active-course")]
         public async Task<IActionResult> PutActiveCourseForUser(ActiveCourseRequest request)
@@ -806,7 +810,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpDelete("{id}/image")]
         public async Task<IActionResult> DeleteAttachment(int id)
         {
-            var course = await _khoaHocDbContext.Courses.FindAsync(id);
+            var course = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == id);
             if (course == null)
                 return BadRequest(new ApiBadRequestResponse($"Không thể tìm thấy khóa học với id {id}"));
             course.Image = "";

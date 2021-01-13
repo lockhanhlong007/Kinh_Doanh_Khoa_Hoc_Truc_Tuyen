@@ -35,7 +35,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetById(string id)
         {
-            var result = await _khoaHocDbContext.Functions.FindAsync(id);
+            var result = await _khoaHocDbContext.Functions.FirstOrDefaultAsync(x => x.Id == id);
             if (result == null)
             {
                 _logger.LogError($"Cannot found function with id {id}");
@@ -76,7 +76,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> PostFunction([FromBody] FunctionCreateRequest request)
         {
 
-            var dbFunction = await _khoaHocDbContext.Functions.FindAsync(request.Id);
+            var dbFunction = await _khoaHocDbContext.Functions.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (dbFunction != null)
             {
                  _logger.LogError($"Function with id {request.Id} is existed.");
@@ -152,7 +152,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PutFunction(string id, [FromBody] FunctionCreateRequest request)
         {
-            var function = await _khoaHocDbContext.Functions.FindAsync(id);
+            var function = await _khoaHocDbContext.Functions.FirstOrDefaultAsync(x => x.Id == id);
             if (function == null)
             {
                 _logger.LogError($"Cannot found function with id {id}");
@@ -180,7 +180,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var id in ids)
             {
-                var function = await _khoaHocDbContext.Functions.FindAsync(id);
+                var function = await _khoaHocDbContext.Functions.FirstOrDefaultAsync(x => x.Id.Equals(id));
                 if (function == null)
                 {
                     _logger.LogError($"Cannot found function with id {id}");
@@ -240,7 +240,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var commandId in request.CommandIds)
             {
-                var check = await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, functionId);
+                var check = await _khoaHocDbContext.CommandInFunctions.FirstOrDefaultAsync(x => x.FunctionId.Equals(functionId) && x.CommandId.Equals(commandId) );
                 if (check != null)
                 {
                     _logger.LogError("This command has been existed in function");
@@ -260,7 +260,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 {
                     foreach (var commandId in request.CommandIds)
                     {
-                        if (await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, function.Id) == null)
+                        if (await _khoaHocDbContext.CommandInFunctions.FirstOrDefaultAsync(x => x.FunctionId.Equals(function.Id) && x.CommandId.Equals(commandId)) == null)
                         {
                             await _khoaHocDbContext.CommandInFunctions.AddAsync(new CommandInFunction()
                             {
@@ -287,7 +287,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
             foreach (var commandId in request.CommandIds)
             {
-                var entity = await _khoaHocDbContext.CommandInFunctions.FindAsync(commandId, functionId);
+                var entity = await _khoaHocDbContext.CommandInFunctions.FirstOrDefaultAsync(x => x.FunctionId.Equals(functionId) && x.CommandId.Equals(commandId));
                 if (entity == null)
                     return BadRequest(new ApiBadRequestResponse("Command này không có trong function này"));
                 _khoaHocDbContext.CommandInFunctions.Remove(entity);

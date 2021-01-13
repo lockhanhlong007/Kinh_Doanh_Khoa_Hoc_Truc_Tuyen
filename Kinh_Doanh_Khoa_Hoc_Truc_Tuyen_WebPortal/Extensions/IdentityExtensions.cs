@@ -9,28 +9,28 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
                 .Claims
-                .SingleOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+                .FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
             return claim?.Value;
         }
         public static string GetUserName(this ClaimsPrincipal claimsPrincipal)
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
                 .Claims
-                .SingleOrDefault(x => x.Type == ClaimTypes.Name);
+                .FirstOrDefault(x => x.Type == ClaimTypes.Name);
             return claim?.Value;
         }
         public static string GetFullName(this ClaimsPrincipal claimsPrincipal)
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
                 .Claims
-                .SingleOrDefault(x => x.Type == "FullName");
+                .FirstOrDefault(x => x.Type == "FullName");
             return claim?.Value;
         }
         public static string GetRole(this ClaimsPrincipal claimsPrincipal)
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
                 .Claims
-                .SingleOrDefault(x => x.Type == ClaimTypes.Role);
+                .FirstOrDefault(x => x.Type == ClaimTypes.Role);
             return claim?.Value;
         }
 
@@ -38,7 +38,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
                 .Claims
-                .SingleOrDefault(x => x.Type == ClaimTypes.Email);
+                .FirstOrDefault(x => x.Type == ClaimTypes.Email);
             return claim?.Value;
         }
 
@@ -46,7 +46,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
                 .Claims
-                .SingleOrDefault(x => x.Type == "Avatar");
+                .FirstOrDefault(x => x.Type == "Avatar");
             return claim?.Value;
         }
 
@@ -54,7 +54,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
         {
             var claim = ((ClaimsIdentity)claimsPrincipal.Identity)
                 .Claims
-                .SingleOrDefault(x => x.Type == "access_token");
+                .FirstOrDefault(x => x.Type == "access_token");
             return claim?.Value;
         }
     }

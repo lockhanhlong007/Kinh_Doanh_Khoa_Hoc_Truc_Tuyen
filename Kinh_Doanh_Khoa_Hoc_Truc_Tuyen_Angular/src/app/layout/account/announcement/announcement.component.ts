@@ -74,7 +74,7 @@ export class AnnouncementComponent implements OnInit, OnDestroy {
     this.blockedPanel = true;
     const entity = new AnnouncementMarkReadRequest();
     entity.announceId = this.selectedItems.id;
-    entity.userId = this.selectedItems.userId;
+    entity.userId = this.userId;
     this.subscription.add(this.announcementService.updateMaskAsRead(entity).subscribe(() => {
       this.notificationService.showSuccess(MessageConstants.Updated_Ok);
       this.loadData();

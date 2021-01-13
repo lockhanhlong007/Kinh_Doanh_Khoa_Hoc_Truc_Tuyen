@@ -1,4 +1,4 @@
-// When the window has finished loading create our google map below
+﻿// When the window has finished loading create our google map below
 google.maps.event.addDomListener(window, 'load', init);
 
 function init() {
@@ -9,7 +9,7 @@ function init() {
         zoom: 12,
         scrollwheel: false,
         // The latitude and longitude to center the map (always required)
-        center: new google.maps.LatLng(37.393322, -122.023780),
+        center: new google.maps.LatLng(10.806137, 106.62884)
     };
     // Get the HTML DOM element that will contain your map
     // We are using a div with id="map" seen below in the <body>
@@ -18,7 +18,11 @@ function init() {
     var map = new google.maps.Map(mapElement, mapOptions);
     // Let's also add a marker while we're at it
     var marker = new google.maps.Marker({
-        position: new google.maps.LatLng(37.393322, -122.023780),
-        map: map,
+        position: new google.maps.LatLng(10.806137, 106.62884),
+        map: map
     });
+    var infowindow = new google.maps.InfoWindow({
+        content: "140 Lê Trọng Tấn, Tây Thạnh, Tân Phú, Thành phố Hồ Chí Minh"
+    });
+
 }

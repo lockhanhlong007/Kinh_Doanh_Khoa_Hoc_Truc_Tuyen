@@ -16,7 +16,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
 
         public string GetFileUrl(string fileName)
         {
-            return fileName == "" ? "" : $"/{UserContentFolderName}/{fileName}";
+            return string.IsNullOrEmpty(fileName) ? "" : $"/{UserContentFolderName}/{fileName}";
         }
 
         public async Task SaveFileAsync(Stream mediaBinaryStream, string fileName, string folder)

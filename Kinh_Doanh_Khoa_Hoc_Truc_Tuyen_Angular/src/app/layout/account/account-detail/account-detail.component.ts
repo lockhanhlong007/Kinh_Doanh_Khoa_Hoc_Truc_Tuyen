@@ -135,7 +135,9 @@ export class AccountDetailComponent implements OnInit, OnDestroy {
         this.selectedAvatar.splice(this.selectedAvatar.findIndex(item => item.name === $event.file.name), 1);
       }
     }
-    public deleteAvatar() {
+    public changeAvatar() {
+      this.fileAvatarName = '';
+      this.fileAvatarPath = '';
       this.blockedPanel = true;
       this.subscription.add(this.usersService.deleteAvatar(this.userId)
         .subscribe((res: any) => {

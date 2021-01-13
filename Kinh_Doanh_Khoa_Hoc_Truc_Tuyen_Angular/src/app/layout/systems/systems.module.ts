@@ -30,6 +30,11 @@ import { TreeTableModule } from 'primeng/treetable';
 import { DropdownModule } from 'primeng/dropdown';
 import { FunctionsDetailComponent } from './functions/functions-detail/functions-detail.component';
 import { SharedPipesModule } from './../../shared/pipes/shared-pipes.module';
+import { EditorModule } from 'primeng/editor';
+import { FileUploadModule } from 'primeng/fileupload';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextareaModule } from 'primeng/inputtextarea';
+import { RadioButtonModule } from 'primeng/radiobutton';
 
 
 
@@ -54,6 +59,7 @@ import { SharedPipesModule } from './../../shared/pipes/shared-pipes.module';
     PaginatorModule,
     BlockUIModule,
     InputTextModule,
+    FileUploadModule,
     ProgressSpinnerModule,
     ValidationMessageModule,
     FormsModule,
@@ -64,7 +70,11 @@ import { SharedPipesModule } from './../../shared/pipes/shared-pipes.module';
     MessageModule,
     MessagesModule,
     TreeTableModule,
+    InputNumberModule,
     DropdownModule,
+    InputTextareaModule,
+    RadioButtonModule,
+    EditorModule,
     SharedPipesModule,
     ModalModule.forRoot()
   ],
