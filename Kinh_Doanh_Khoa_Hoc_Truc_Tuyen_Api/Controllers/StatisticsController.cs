@@ -1,22 +1,19 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -25,9 +22,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class StatisticsController : ControllerBase
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<StatisticsController> _logger;
+
         public readonly UserManager<AppUser> _userManager;
+
         private readonly IConfiguration _configuration;
+
         public StatisticsController(EKhoaHocDbContext khoaHocDbContext, ILogger<StatisticsController> logger, UserManager<AppUser> userManager, IConfiguration configuration)
         {
             _khoaHocDbContext = khoaHocDbContext;
@@ -85,7 +86,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 dateFrom = monthDayAgo.ToString("yyyy/MM/dd");
                 dateTo = now.ToString("yyyy/MM/dd");
             }
-            
 
             await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             if (conn.State == ConnectionState.Closed)
@@ -98,9 +98,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var result = await conn.QueryAsync<RevenueViewModel>("GetRevenueDaily", dynamicParameters, null, 120, CommandType.StoredProcedure);
             return Ok(result.ToList());
         }
+
         [HttpGet("count-sales-daily")]
         [ClaimRequirement(FunctionConstant.Revenue, CommandConstant.View)]
-        public async Task<IActionResult> GetCountSalesDaily(int key, string dateFrom,string dateTo)
+        public async Task<IActionResult> GetCountSalesDaily(int key, string dateFrom, string dateTo)
         {
             if (key == 1)
             {

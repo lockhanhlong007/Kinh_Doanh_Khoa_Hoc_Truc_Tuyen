@@ -7,6 +7,5 @@
         public int SortOrder { get; set; }
 
         public int? ParentId { get; set; }
-
     }
 }

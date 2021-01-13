@@ -1,9 +1,6 @@
-﻿using IdentityServer4.Models;
-using System;
+﻿using IdentityServer4;
+using IdentityServer4.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using IdentityServer4;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
 {
@@ -16,7 +13,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
         public static IEnumerable<Client> Clients =>
             new Client[]
             {
-
                 new Client
                 {
                     ClientId = "client_api",

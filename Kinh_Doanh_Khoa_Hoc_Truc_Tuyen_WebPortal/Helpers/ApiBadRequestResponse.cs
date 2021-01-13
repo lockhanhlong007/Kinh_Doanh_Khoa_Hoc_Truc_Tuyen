@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
 {
@@ -18,7 +18,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
         {
             if (!modelState.IsValid)
             {
-                throw  new ArgumentException("ModelState must be invalid", nameof(modelState));
+                throw new ArgumentException("ModelState must be invalid", nameof(modelState));
             }
 
             Errors = modelState.SelectMany(x => x.Value.Errors).Select(x => x.ErrorMessage).ToArray();
@@ -27,7 +27,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
         public ApiBadRequestResponse(IdentityResult identityResult) : base(400)
         {
             Errors = identityResult.Errors.Select(x => x.Code + " - " + x.Description).ToArray();
-
         }
     }
 }

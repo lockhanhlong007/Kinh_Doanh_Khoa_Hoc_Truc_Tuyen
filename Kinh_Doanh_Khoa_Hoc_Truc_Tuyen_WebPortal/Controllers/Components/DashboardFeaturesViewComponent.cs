@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Models;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers.Components
 {
     public class DashboardFeaturesViewComponent : ViewComponent
     {
         private readonly IBaseApiClient _apiClient;
+
         public DashboardFeaturesViewComponent(IBaseApiClient apiClient)
         {
             _apiClient = apiClient;
@@ -24,7 +23,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers.Components
             var data = new DashboardFeaturesViewModel();
             var userId = ((ClaimsIdentity)User.Identity)?.Claims
                 .SingleOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-            var fullName = ((ClaimsIdentity) User.Identity)?
+            var fullName = ((ClaimsIdentity)User.Identity)?
                 .Claims
                 .SingleOrDefault(x => x.Type == "FullName")
                 ?.Value;
@@ -36,8 +35,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers.Components
             data.FullName = fullName;
             return View(data);
         }
-
-
-
     }
 }

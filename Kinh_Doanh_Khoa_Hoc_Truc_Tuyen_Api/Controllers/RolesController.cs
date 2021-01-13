@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
@@ -10,11 +6,14 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -145,11 +144,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 _logger.LogError("Cannot delete role: Admin");
                 return BadRequest(new ApiBadRequestResponse($"Không thể xóa quyền: Admin"));
-
             }
             foreach (var id in ids)
             {
-
                 var role = await _roleManager.FindByIdAsync(id);
                 if (role == null)
                 {
@@ -175,7 +172,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _logger.LogError("Delete role failed");
                     return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
                 }
-            } 
+            }
             return Ok();
         }
 
@@ -209,7 +206,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _khoaHocDbContext.Permissions.RemoveRange(existingPermissions);
                 }
                 await _khoaHocDbContext.AddRangeAsync(newPermissions);
-                var result =  await _khoaHocDbContext.SaveChangesAsync();
+                var result = await _khoaHocDbContext.SaveChangesAsync();
                 if (result > 0)
                 {
                     return NoContent();

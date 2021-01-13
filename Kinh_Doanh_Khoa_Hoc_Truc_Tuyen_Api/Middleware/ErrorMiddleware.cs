@@ -1,15 +1,16 @@
-﻿using System;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Middleware
 {
     public class ErrorMiddleware
     {
         private readonly RequestDelegate _next;
+
         private readonly ILogger<ErrorMiddleware> _logger;
 
         public ErrorMiddleware(RequestDelegate next, ILogger<ErrorMiddleware> logger)

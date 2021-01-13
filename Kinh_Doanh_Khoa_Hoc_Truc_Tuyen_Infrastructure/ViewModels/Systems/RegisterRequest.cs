@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
 {
@@ -8,7 +8,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems
     {
         [Display(Name = "Họ Và Tên")]
         public string Name { get; set; }
-
 
         [Display(Name = "Ngày sinh")]
         [DataType(DataType.Date)]

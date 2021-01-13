@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
@@ -11,10 +6,13 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -24,11 +22,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class FunctionsController : ControllerBase
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private readonly ILogger<FunctionsController> _logger;
+
         public FunctionsController(EKhoaHocDbContext khoaHocDbContext, ILogger<FunctionsController> logger)
         {
             _khoaHocDbContext = khoaHocDbContext;
-            _logger = logger ?? throw  new ArgumentException(nameof(logger));
+            _logger = logger ?? throw new ArgumentException(nameof(logger));
         }
 
         [HttpGet("{id}")]
@@ -53,7 +53,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             });
         }
 
-
         [HttpGet("{functionId}/parents")]
         [ClaimRequirement(FunctionConstant.Function, CommandConstant.View)]
         public async Task<IActionResult> GetFunctionsByParentId(string functionId)
@@ -75,11 +74,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ValidationFilter]
         public async Task<IActionResult> PostFunction([FromBody] FunctionCreateRequest request)
         {
-
             var dbFunction = await _khoaHocDbContext.Functions.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (dbFunction != null)
             {
-                 _logger.LogError($"Function with id {request.Id} is existed.");
+                _logger.LogError($"Function with id {request.Id} is existed.");
                 return BadRequest(new ApiBadRequestResponse($"Function này đã tồn tại với id {request.Id}"));
             }
 
@@ -204,7 +202,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _logger.LogError("Delete function failed");
                     return BadRequest(new ApiBadRequestResponse("Delete thất bại"));
                 }
-
             }
             return Ok();
         }
@@ -240,7 +237,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         {
             foreach (var commandId in request.CommandIds)
             {
-                var check = await _khoaHocDbContext.CommandInFunctions.FirstOrDefaultAsync(x => x.FunctionId.Equals(functionId) && x.CommandId.Equals(commandId) );
+                var check = await _khoaHocDbContext.CommandInFunctions.FirstOrDefaultAsync(x => x.FunctionId.Equals(functionId) && x.CommandId.Equals(commandId));
                 if (check != null)
                 {
                     _logger.LogError("This command has been existed in function");
@@ -284,7 +281,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Function, CommandConstant.Delete)]
         public async Task<IActionResult> DeleteCommandToFunction(string functionId, CommandAssignRequest request)
         {
-
             foreach (var commandId in request.CommandIds)
             {
                 var entity = await _khoaHocDbContext.CommandInFunctions.FirstOrDefaultAsync(x => x.FunctionId.Equals(functionId) && x.CommandId.Equals(commandId));
@@ -302,6 +298,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             _logger.LogError("Delete command to function failed");
             return BadRequest(new ApiBadRequestResponse("Xóa command trong function thất bại"));
         }
-
     }
 }

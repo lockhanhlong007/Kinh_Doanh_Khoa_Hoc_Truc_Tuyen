@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers
 {
     public static class ConvertNumberToString
     {
         public static readonly string[] MNumText = { "Không", "Một", "Hai", "Ba", "Bốn", "Năm", "Sáu", "Bảy", "Tám", "Chín" };
+
         private static string DocHangChuc(double so, bool daydu)
         {
             string chuoi = "";
@@ -46,6 +44,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers
             }
             return chuoi;
         }
+
         private static string DocHangTram(double so, bool daydu)
         {
             string chuoi;
@@ -64,6 +63,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers
             }
             return chuoi;
         }
+
         private static string DocHangTrieu(double so, bool daydu)
         {
             string chuoi = "";
@@ -91,6 +91,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers
             }
             return chuoi;
         }
+
         public static string ChuyenSoSangChuoi(this double so)
         {
             if (so == 0)

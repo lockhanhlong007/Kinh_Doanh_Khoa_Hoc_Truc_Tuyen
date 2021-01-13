@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Interfaces;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Interfaces;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 {
@@ -20,6 +18,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         public string Message { set; get; }
 
         public DateTime CreationTime { get; set; }
+
         public DateTime? LastModificationTime { get; set; }
     }
 }

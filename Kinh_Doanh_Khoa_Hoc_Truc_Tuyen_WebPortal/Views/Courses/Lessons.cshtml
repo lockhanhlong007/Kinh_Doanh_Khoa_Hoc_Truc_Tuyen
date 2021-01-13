@@ -4,7 +4,7 @@
     var env = "https://localhost:44342";
 }
 @section Scripts{
-    <script src="~/assets/js/custom/customLesson.js" asp-append-version="true"></script>
+    <script src="~/assets/js/custom/customLesson.min.js" asp-append-version="true"></script>
     <script>
         var products = new LessonJquery();
         products.initialize();
@@ -174,7 +174,6 @@
                                                     </form>
                                                 </div>
                                             </div>
-
                                         </div>
                                         <!--====== End - Tab 2 ======-->
                                     </div>
@@ -214,7 +213,6 @@
                 <span class="review-o__name" style="font-size: 16px; margin-right: 10px">
                    <a class="comment-reply-link" href="#" data-commentid="{{id}}"> <i class="fas fa-reply" style="color: #ff4500;"></i></a>
                 </span>
-
             </div>
         </div>
         <p class="review-o__text" style="text-align: justify; align-items: center">{{content}}</p>
@@ -225,10 +223,8 @@
      {{{childrenHtml}}}
     </div>
     <!-- End Children Comment-->
-
 </div>
 <!-- End Parent Comment-->
-
 </script>
 <script id="tmpl_reply_comment" type="x-tmpl-mustache">
 <div class="u-s-m-y-30">

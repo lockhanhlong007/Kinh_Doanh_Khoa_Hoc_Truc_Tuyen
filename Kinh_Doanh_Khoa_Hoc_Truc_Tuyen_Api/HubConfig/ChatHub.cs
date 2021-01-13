@@ -1,18 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Net.Http.Headers;
+using System;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.HubConfig
 {
     public class ChatHub : Hub
     {
-
         private static readonly ConnectionMapping<string> Connections = new ConnectionMapping<string>();
 
         public async Task SendToUserAsync(string userId, AnnouncementViewModel message)

@@ -15,7 +15,7 @@
     }
 }
 @section Scripts{
-    <script src="~/assets/js/custom/customCourseDetail.js" asp-append-version="true"></script>
+    <script src="~/assets/js/custom/customCourseDetail.min.js" asp-append-version="true"></script>
     <script>
         var products = new CourseJquery();
         products.initialize();
@@ -399,7 +399,6 @@
                                             <ul class="product-o__action-list">
                                                 <li>
 
-           
                                                     <a class="add-product-in-cart" data-status="@courseViewModel.Status" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
                                                     @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
                                                 </li>
@@ -418,7 +417,6 @@
                                             </ul>
                                         </div>
                                     }
-
                                 </div>
 
                                 <span class="product-o__category">
@@ -488,7 +486,6 @@
                 <span class="review-o__name" style="font-size: 16px; margin-right: 10px">
                    <a class="comment-reply-link" href="#" data-commentid="{{id}}"> <i class="fas fa-reply" style="color: #ff4500;"></i></a>
                 </span>
-
             </div>
         </div>
         <p class="review-o__text" style="text-align: justify; align-items: center">{{content}}</p>
@@ -499,10 +496,8 @@
      {{{childrenHtml}}}
     </div>
     <!-- End Children Comment-->
-
 </div>
 <!-- End Parent Comment-->
-
 </script>
 <script id="tmpl_reply_comment" type="x-tmpl-mustache">
 <div class="u-s-m-y-30">

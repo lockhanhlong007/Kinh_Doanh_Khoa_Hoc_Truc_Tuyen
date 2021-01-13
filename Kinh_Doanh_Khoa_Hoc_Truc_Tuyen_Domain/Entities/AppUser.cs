@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 {
@@ -12,7 +11,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         {
         }
 
-        public AppUser(Guid id, string userName, string email, string phoneNumber,DateTime dob)
+        public AppUser(Guid id, string userName, string email, string phoneNumber, DateTime dob)
         {
             Id = id;
             UserName = userName;
@@ -20,6 +19,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
             PhoneNumber = phoneNumber;
             Dob = dob;
         }
+
         public AppUser(Guid id, string userName, string email, string phoneNumber, DateTime dob, string biography)
         {
             Id = id;
@@ -29,6 +29,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
             Dob = dob;
             Biography = biography;
         }
+
         public string Name { get; set; }
 
         public string Avatar { get; set; }
@@ -46,7 +47,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         public List<Comment> Comments { get; set; }
 
         public List<Announcement> Announcements { get; set; }
-
 
         public List<ActivateCourse> ActivateCourses { get; set; }
     }

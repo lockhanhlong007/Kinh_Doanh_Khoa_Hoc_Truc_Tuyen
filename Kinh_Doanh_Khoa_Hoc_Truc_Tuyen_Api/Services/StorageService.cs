@@ -1,12 +1,13 @@
-﻿using System.IO;
+﻿using Microsoft.AspNetCore.Hosting;
+using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
 {
     public class StorageService : IStorageService
     {
         private readonly string _userContentFolder;
+
         private const string UserContentFolderName = "attachments";
 
         public StorageService(IWebHostEnvironment webHostEnvironment)

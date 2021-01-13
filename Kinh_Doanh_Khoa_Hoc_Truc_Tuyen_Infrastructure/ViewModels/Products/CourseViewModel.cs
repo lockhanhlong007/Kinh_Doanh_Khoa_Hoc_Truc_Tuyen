@@ -1,7 +1,5 @@
-﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 {
@@ -30,6 +28,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public int Status { get; set; }
 
         public int CategoryId { get; set; }
+
         public string CategoryName { get; set; }
 
         public long? SortPrice { get; set; }

@@ -4,13 +4,13 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
-using Microsoft.AspNetCore.Http;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
 {
     public class VnPayLibrary
     {
         private SortedList<String, String> _requestData = new SortedList<String, String>(new VnPayCompare());
+
         private SortedList<String, String> _responseData = new SortedList<String, String>(new VnPayCompare());
 
         public void AddRequestData(string key, string value)
@@ -80,7 +80,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
             return data.ToString();
         }
 
-        #endregion
+        #endregion Request
 
         #region Response process
 
@@ -90,9 +90,9 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
             string myChecksum = Utils.Sha256(secretKey + rspRaw);
             return myChecksum.Equals(inputHash, StringComparison.InvariantCultureIgnoreCase);
         }
+
         private string GetResponseRaw()
         {
-
             StringBuilder data = new StringBuilder();
             if (_responseData.ContainsKey("vnp_SecureHashType"))
             {
@@ -117,7 +117,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
             return data.ToString();
         }
 
-        #endregion
+        #endregion Response process
     }
 
     public class Utils
@@ -128,7 +128,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
             ASCIIEncoding enCoder = new ASCIIEncoding();
             byte[] valueByteArr = enCoder.GetBytes(sInput);
             byte[] hashArray = null;
-            // Encrypt Input string 
+            // Encrypt Input string
             algorithmType = new MD5CryptoServiceProvider();
             hashArray = algorithmType.ComputeHash(valueByteArr);
             //Convert byte hash to HEX
@@ -139,14 +139,15 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
             }
             return sb.ToString();
         }
+
         public static string Sha256(string data)
         {
             using (var sha256Hash = SHA256.Create())
             {
-                // ComputeHash - returns byte array  
+                // ComputeHash - returns byte array
                 var bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(data));
 
-                // Convert byte array to a string   
+                // Convert byte array to a string
                 var builder = new StringBuilder();
                 foreach (var t in bytes)
                 {
@@ -155,6 +156,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Helpers
                 return builder.ToString();
             }
         }
+
         //public static string GetIpAddress()
         //{
         //    string ipAddress;

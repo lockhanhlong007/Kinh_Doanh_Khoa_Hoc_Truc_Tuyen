@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
@@ -11,11 +7,13 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -24,14 +22,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class PromotionsController : ControllerBase
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<PromotionsController> _logger;
+
         private readonly IStorageService _storageService;
+
         public PromotionsController(EKhoaHocDbContext khoaHocDbContext, ILogger<PromotionsController> logger, IStorageService storageService)
         {
             _khoaHocDbContext = khoaHocDbContext;
             _logger = logger;
             _storageService = storageService;
         }
+
         [HttpGet("{id}")]
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.View)]
         public async Task<IActionResult> GetById(int id)
@@ -114,7 +116,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     FromDate = _.FromDate.ToString("dd/MM/yyyy"),
                     ToDate = _.ToDate.ToString("dd/MM/yyyy"),
                     ApplyForAll = false,
-                    DiscountAmount = (int?) _.DiscountAmount,
+                    DiscountAmount = (int?)_.DiscountAmount,
                     DiscountPercent = _.DiscountPercent,
                     Content = _.Content
                 }).ToList();
@@ -218,8 +220,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (promotion == null)
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {promotionId}"));
             var existingPromotion = _khoaHocDbContext.Promotions.Include(x => x.PromotionInCourses)
-                .Where(x => x.ToDate >= promotion.FromDate　&& x.Id != promotionId).ToList();
-            foreach (var promotionCourses in request.Select(id => new PromotionInCourse() {CourseId = id, PromotionId = promotionId}))
+                .Where(x => x.ToDate >= promotion.FromDate && x.Id != promotionId).ToList();
+            foreach (var promotionCourses in request.Select(id => new PromotionInCourse() { CourseId = id, PromotionId = promotionId }))
             {
                 if (existingPromotion.Any(x => x.PromotionInCourses.Any(pic => pic.CourseId == promotionCourses.CourseId)))
                 {
@@ -271,12 +273,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(pagination);
         }
 
-
         [HttpPost("{promotionId}/courses/delete-multi-items")]
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.Update)]
         public async Task<IActionResult> RemovePromotionInCourses(int promotionId, List<int> request)
         {
-
             var promotion = await _khoaHocDbContext.Promotions.FirstOrDefaultAsync(x => x.Id == promotionId);
             if (promotion == null)
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy sự kiện với id {promotionId}"));
@@ -292,6 +292,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return Ok();
             return BadRequest(new ApiBadRequestResponse("Xóa thất bại"));
         }
-
     }
 }

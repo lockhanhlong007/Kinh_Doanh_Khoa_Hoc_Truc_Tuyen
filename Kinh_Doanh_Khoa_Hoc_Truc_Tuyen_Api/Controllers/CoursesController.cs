@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using Dapper;
-using IdentityServer4.Extensions;
+﻿using Dapper;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Claims;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Extensions;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Filter;
@@ -15,20 +6,23 @@ using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Helpers;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Enums;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
-using ILogger = Serilog.ILogger;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -37,9 +31,13 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly EKhoaHocDbContext _khoaHocDbContext;
+
         private ILogger<CoursesController> _logger;
+
         public readonly UserManager<AppUser> _userManager;
+
         private readonly IStorageService _storageService;
+
         private readonly IConfiguration _configuration;
 
         public CoursesController(EKhoaHocDbContext khoaHocDbContext, ILogger<CoursesController> logger, UserManager<AppUser> userManager, IStorageService storageService, IConfiguration configuration)
@@ -65,7 +63,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             if (result == null)
             {
                 _logger.LogError($"Cannot found Course with id {id}");
-                return  NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {id}"));
+                return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id {id}"));
             }
 
             var countStudent = _khoaHocDbContext.ActivateCourses.Include(x => x.AppUser).Count(x => x.CourseId == id && x.AppUser.UserName != result.CreatedUserName && x.Status);
@@ -88,7 +86,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 CreatedName = result.CreatedName,
                 CountStudent = countStudent
             });
-
         }
 
         [HttpPost]
@@ -205,9 +202,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpGet("filter")]
         public IActionResult GetCoursesPaging(string filter, int pageIndex, int pageSize)
         {
-           
             var query = _khoaHocDbContext.Courses.Include(x => x.Category).AsNoTracking().AsEnumerable();
-           
+
             if (User != null && User.IsInRole("Teacher"))
             {
                 query = query.Where(x => x.CreatedUserName == User.GetUserName());
@@ -255,7 +251,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 DynamicParameters parameters = new DynamicParameters();
                 parameters.Add("@categoryId", categoryId);
-                var category =  await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == categoryId);
+                var category = await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == categoryId);
                 data = category.ParentId == null
                     ? (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryParentId", parameters, null, 120,
                         CommandType.StoredProcedure)).ToList()
@@ -294,7 +290,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 else if (item.DiscountAmount > 0)
                 {
                     item.SortPrice = item.DiscountAmount;
-
                 }
                 else
                 {
@@ -381,7 +376,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 else if (item.DiscountAmount > 0)
                 {
                     item.SortPrice = item.DiscountAmount;
-
                 }
                 else
                 {
@@ -610,7 +604,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     PhoneNumber = u.AppUser.PhoneNumber,
                     Name = u.AppUser.Name,
                     Dob = u.AppUser.Dob,
-                    Id = u.UserId.Value ,
+                    Id = u.UserId.Value,
                     Avatar = u.AppUser.Avatar ?? "/img/defaultAvatar.png",
                     Biography = u.AppUser.Biography
                 });
@@ -624,7 +618,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             var courses = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == coursesId);
             if (courses == null)
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
-            foreach (var activeCourse in request.Select(id => new ActivateCourse() { UserId = Guid.Parse(id), CourseId = coursesId, Status = true, Id = Guid.NewGuid()}))
+            foreach (var activeCourse in request.Select(id => new ActivateCourse() { UserId = Guid.Parse(id), CourseId = coursesId, Status = true, Id = Guid.NewGuid() }))
             {
                 await _khoaHocDbContext.ActivateCourses.AddAsync(activeCourse);
             }
@@ -638,7 +632,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [ClaimRequirement(FunctionConstant.Promotions, CommandConstant.Update)]
         public async Task<IActionResult> RemoveCourseUsers(int coursesId, List<string> request)
         {
-
             var courses = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == coursesId);
             if (courses == null)
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy khóa học với id: {coursesId}"));
@@ -656,7 +649,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpPut("{coursesId}/users/active")]
         [ClaimRequirement(FunctionConstant.Courses, CommandConstant.Update)]
         [ValidationFilter]
-        public async Task<IActionResult> PutActiveCourses (int coursesId, List<string> input)
+        public async Task<IActionResult> PutActiveCourses(int coursesId, List<string> input)
         {
             var courses = await _khoaHocDbContext.Courses.FirstOrDefaultAsync(x => x.Id == coursesId);
             if (courses == null)
@@ -702,7 +695,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         [HttpPut("user-active-course")]
         public async Task<IActionResult> PutActiveCourseForUser(ActiveCourseRequest request)
         {
-
             var key = _khoaHocDbContext.ActivateCourses.FirstOrDefault(x =>
                 x.Id == Guid.Parse(request.Code));
             if (key == null)
@@ -804,7 +796,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
 
             return BadRequest("Không thể tạo mã kích hoạt");
-
         }
 
         [HttpDelete("{id}/image")]

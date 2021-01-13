@@ -1,20 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
+﻿using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Systems;
 using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Services.Implements;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Threading.Tasks;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 {
     public class ContactController : Controller
     {
         private readonly IBaseApiClient _apiClient;
+
         private readonly IConfiguration _configuration;
+
         private readonly IEmailSender _emailSender;
+
         private readonly IViewRenderService _viewRenderService;
 
         public ContactController(IBaseApiClient apiClient, IConfiguration configuration, IEmailSender emailSender, IViewRenderService viewRenderService)
@@ -24,7 +25,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             _emailSender = emailSender;
             _viewRenderService = viewRenderService;
         }
-
 
         [HttpGet("contact.html")]
         public IActionResult Index()
@@ -52,7 +52,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                 return View();
             }
         }
-
 
         [HttpGet("about.html")]
         public IActionResult About()

@@ -23,7 +23,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
 
         public int Id { get; set; }
 
-
         public PaymentMethod PaymentMethod { set; get; }
 
         public Guid? UserId { set; get; }
@@ -37,7 +36,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.Entities
         public string Email { get; set; }
 
         public string PhoneNumber { get; set; }
-
 
         public string Message { get; set; }
 

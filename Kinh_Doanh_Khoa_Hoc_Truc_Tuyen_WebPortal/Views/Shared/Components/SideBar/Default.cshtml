@@ -1,6 +1,5 @@
 ﻿@using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Extensions
 @model List<CategoryViewModel>
-
 <header class="header--style-1">
 <input type="hidden" id="hid_check_auth" value="@User.Identity.IsAuthenticated" />
     <!--====== Nav 1 ======-->
@@ -20,8 +19,6 @@
                 <form action="/courses.html" method="get" class="main-form">
 
                     <label for="main-search"></label>
-                    
-
 
                     <input class="input-text input-text--border-radius input-text--style-1" type="text" name="filter" id="main-search" placeholder="Search">
 
@@ -50,7 +47,7 @@
                                     </a>
 
                                     <!--====== Dropdown ======-->
-                                   
+
                                     <span class="js-menu-toggle"></span>
                                     <ul id="announcementList" style="width: 500px;right: 55px;padding: 0; margin: 0">
                                     </ul>
@@ -74,14 +71,13 @@
                                         </li>
                                     </script>
                                     <script id="announcement-tag-template" type="x-tmpl-mustache">
-                                              <li style="text-align:center;align-items: center;">
-                                                 <a href="/manage-orders.html">
-                                                     <span class="description-title" style="text-align:center;align-items: center; line-height: 1.9; text-align: justify; font-size: 12px; font-weight: 600">
-                                                         Xem Tất Cả
-                                                     </span>
-                                                 </a>
-                                             </li>
-
+                                         <li style="text-align:center;align-items: center;">
+                                            <a href="/my-announcements.html">
+                                                <span class="description-title" style="text-align:center;align-items: center; line-height: 1.9; text-align: justify; font-size: 12px; font-weight: 600">
+                                                    Xem Tất Cả
+                                                </span>
+                                            </a>
+                                        </li>
                                     </script>
                                 </li>
                                 <li class="has-dropdown" data-tooltip="tooltip" data-placement="left" title="@User.Identity.Name">

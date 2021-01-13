@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 {
@@ -14,6 +13,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public string EntityType { get; set; }
 
         public Guid UserId { get; set; }
+
         public string OwnerUser { get; set; }
 
         public int? ReplyId { get; set; }
@@ -21,7 +21,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
         public DateTime CreationTime { get; set; }
 
         public DateTime? LastModificationTime { get; set; }
-        public Pagination<CommentViewModel> Children { get; set; } = new Pagination<CommentViewModel>();
 
+        public Pagination<CommentViewModel> Children { get; set; } = new Pagination<CommentViewModel>();
     }
 }
