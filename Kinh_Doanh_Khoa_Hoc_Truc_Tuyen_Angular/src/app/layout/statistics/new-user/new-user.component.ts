@@ -94,7 +94,7 @@ export class NewUserComponent implements OnInit, OnDestroy {
           labels: this.lstDate,
           datasets: [
               {
-                  label: 'Number Of User',
+                  label: 'Số lượng người dùng đăng ký',
                   data: this.lstCount,
                   backgroundColor: '#9CCC65',
                   borderColor: '#7CB342',
@@ -106,7 +106,7 @@ export class NewUserComponent implements OnInit, OnDestroy {
         labels: this.lstDate,
         datasets: [
             {
-                label: 'Number Of User',
+                label: 'Số lượng người dùng đăng ký',
                 data: this.lstCount,
                 fill: false,
                 borderColor: '#4bc0c0'

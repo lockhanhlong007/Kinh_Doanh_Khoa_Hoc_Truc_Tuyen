@@ -408,7 +408,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             }
             catch (Exception e)
             {
-                ModelState.AddModelError("", "Đăng ký thất bại");
+                ModelState.AddModelError("", "Email hoặc tài khoản đã tồn tại");
                 return View();
             }
         }

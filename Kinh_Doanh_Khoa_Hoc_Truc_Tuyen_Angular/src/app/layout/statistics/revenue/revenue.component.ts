@@ -126,13 +126,13 @@ export class RevenueComponent implements OnInit, OnDestroy {
           labels: this.lstDate,
           datasets: [
               {
-                  label: 'Revenue',
+                  label: 'Doanh thu',
                   data: this.lstRevenue,
                   backgroundColor: '#42A5F5',
                   borderColor: '#1E88E5'
               },
               {
-                  label: 'Profit',
+                  label: 'Lợi nhuận',
                   data: this.lstProfit,
                   backgroundColor: '#9CCC65',
                   borderColor: '#7CB342',
@@ -144,13 +144,13 @@ export class RevenueComponent implements OnInit, OnDestroy {
         labels: this.lstDate,
         datasets: [
             {
-                label: 'Revenue',
+                label: 'Doanh thu',
                 data: this.lstRevenue,
                 fill: false,
                 borderColor: '#4bc0c0'
             },
             {
-                label: 'Profit',
+                label: 'Lợi nhuận',
                 data: this.lstProfit,
                 fill: false,
                 borderColor: '#d10f1f'

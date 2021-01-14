@@ -18,6 +18,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels.Products
 
         public int? ReplyId { get; set; }
 
+        public string ReplyUser { get; set; }
+
         public DateTime CreationTime { get; set; }
 
         public DateTime? LastModificationTime { get; set; }

@@ -103,6 +103,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(request.Content))
+                {
+                    return BadRequest();
+                }
                 request.UserId = User.GetUserId();
                 var result = await _apiClient.PostAsync<CommentCreateRequest, CommentViewModel>(
                     $"/api/comments/courses/{request.EntityId}", request);

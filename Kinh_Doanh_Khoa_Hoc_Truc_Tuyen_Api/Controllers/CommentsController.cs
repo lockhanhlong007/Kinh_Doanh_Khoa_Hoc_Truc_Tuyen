@@ -33,7 +33,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         }
 
         [HttpGet("{entityType}/{entityId}/filter")]
-        public IActionResult GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex, int pageSize)
+        public async Task<IActionResult> GetCommentsPaging(int entityId, string entityType, string filter, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType).AsEnumerable();
             if (!string.IsNullOrEmpty(filter))
@@ -45,19 +45,28 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     x.Content.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
             }
 
-            var data = query.ToList();
-            var totalRecords = data.Count();
-            var items = data.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(x => new CommentViewModel()
+            var lstCommentViewModel = new List<CommentViewModel>();
+            foreach (var comment in query)
             {
-                Id = x.Id,
-                Content = x.Content,
-                CreationTime = x.CreationTime,
-                LastModificationTime = x.LastModificationTime,
-                EntityId = x.EntityId,
-                EntityType = x.EntityType,
-                UserId = x.UserId,
-                OwnerUser = x.AppUser.Name + " (" + x.AppUser.Email + ")"
-            }).ToList();
+                var commentReply = await _khoaHocDbContext.Comments.Include(x => x.AppUser).FirstOrDefaultAsync(x => x.Id == comment.ReplyId);
+                var commentViewModel = new CommentViewModel();
+                commentViewModel.Id = comment.Id;
+                commentViewModel.Content = comment.Content;
+                commentViewModel.CreationTime = comment.CreationTime;
+                commentViewModel.LastModificationTime = comment.LastModificationTime;
+                commentViewModel.EntityId = comment.EntityId;
+                commentViewModel.EntityType = comment.EntityType;
+                commentViewModel.UserId = comment.UserId;
+                commentViewModel.OwnerUser = comment.AppUser.Name + " (" + comment.AppUser.Email + ")";
+                commentViewModel.ReplyId = comment.ReplyId;
+                if (commentReply != null)
+                {
+                    commentViewModel.ReplyUser = commentReply.AppUser.Name + " (" + commentReply.AppUser.Email + ")";
+                }
+                lstCommentViewModel.Add(commentViewModel);
+            }
+            var totalRecords = lstCommentViewModel.Count();
+            var items = lstCommentViewModel.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
             var pagination = new Pagination<CommentViewModel>
             {
                 Items = items,
@@ -193,6 +202,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NotFound(new ApiNotFoundResponse($"Không tìm thấy bình luận với id: {commentId}"));
             }
             var user = await _userManager.FindByIdAsync(comment.UserId.ToString());
+            var userReply = await _khoaHocDbContext.Comments.Include(x => x.AppUser).FirstOrDefaultAsync(x => x.Id == comment.ReplyId);
             var commentViewModel = new CommentViewModel
             {
                 Id = comment.Id,
@@ -203,6 +213,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 EntityType = comment.EntityType,
                 UserId = comment.UserId,
                 OwnerUser = user?.Name + " (" + user?.Email + ")",
+                ReplyId = comment.ReplyId,
+                ReplyUser = userReply != null ? userReply.AppUser.Name + " (" + userReply.AppUser.Email + ")" : ""
             };
             return Ok(commentViewModel);
         }
