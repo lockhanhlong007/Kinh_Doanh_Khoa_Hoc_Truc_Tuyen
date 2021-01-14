@@ -87,8 +87,8 @@
     <p-panel #pnlUsers *ngIf="showActivateCourses">
         <p-header>
             <div class=" p-col-12">
-                <button style="margin-right: 5px;" appPermission appFunction="Courses" appAction="Update" pButton type="button" label="Thêm người dùng" icon="fa fa-plus" *ngIf="selectedItems != null" (click)="addActiveCourse()"></button>
-                <button style="margin-right: 5px;" appPermission appFunction="Courses" appAction="Update" pButton type="button" label="Xóa người dùng" icon="fa fa-remove" class="p-button-danger" *ngIf="selectedUserItems.length> 0" (click)="removeActiveCourse()"></button>
+                <button style="margin-right: 5px;"  appPermission appFunction="Courses" appAction="Approve" pButton type="button" label="Thêm người dùng" icon="fa fa-plus" *ngIf="selectedItems != null" (click)="addActiveCourse()"></button>
+                <button style="margin-right: 5px;"  appPermission appFunction="Courses" appAction="Approve" pButton type="button" label="Xóa người dùng" icon="fa fa-remove" class="p-button-danger" *ngIf="selectedUserItems.length> 0" (click)="removeActiveCourse()"></button>
             </div>
         </p-header>
         <p-table #dt2 [value]="users" [(selection)]="selectedUserItems" [metaKeySelection]="true" [responsive]="true">

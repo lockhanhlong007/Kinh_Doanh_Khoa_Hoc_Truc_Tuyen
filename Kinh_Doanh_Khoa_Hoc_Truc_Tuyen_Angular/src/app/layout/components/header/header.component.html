@@ -22,7 +22,7 @@
                             </div>
                         </div>
                     </a>
-                    <span *ngIf="announcement.length == 0" class="dropdown-item" style="text-align: center; align-items: center;">Không có thông báo chưa đọc</span>
+                    <span *ngIf="!announcement" class="dropdown-item" style="text-align: center; align-items: center;">Không có thông báo chưa đọc</span>
                     <li class="dropdown-divider"></li>
                     <a class="dropdown-item" href="javascript:void(0)" [routerLinkActive]="[ 'router-link-active'] " [routerLink]="['/account/announcement']" style="text-align: center; align-items: center;">
                         {{ 'View All' }}

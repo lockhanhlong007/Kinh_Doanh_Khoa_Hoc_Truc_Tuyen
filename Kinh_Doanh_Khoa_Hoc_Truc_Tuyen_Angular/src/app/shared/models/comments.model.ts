@@ -7,4 +7,6 @@ export class Comments {
     lastModificationTime: string;
     userId: string;
     ownerUser: string;
+    replyId: number;
+    replyUser: string;
 }
