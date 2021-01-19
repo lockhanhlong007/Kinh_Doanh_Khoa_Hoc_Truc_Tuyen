@@ -352,11 +352,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout(string returnUrl = null)
+        public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToLocal(returnUrl);
+            return RedirectToAction(nameof(HomeController.Index), "Home");
         }
 
         [HttpGet]
