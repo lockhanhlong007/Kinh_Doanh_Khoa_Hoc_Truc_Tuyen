@@ -35,6 +35,8 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { BackupRestoreComponent } from './backup-restore/backup-restore.component';
+import { BackupRestoreDetailComponent } from './backup-restore/backup-restore-detail/backup-restore-detail.component';
 
 
 
@@ -47,8 +49,10 @@ import { RadioButtonModule } from 'primeng/radiobutton';
     RolesDetailComponent,
     UsersDetailComponent,
     RolesAssignComponent,
-     FunctionsDetailComponent,
-     CommandsAssignComponent
+    FunctionsDetailComponent,
+    CommandsAssignComponent,
+    BackupRestoreComponent,
+    BackupRestoreDetailComponent
   ],
   imports: [
     CommonModule,

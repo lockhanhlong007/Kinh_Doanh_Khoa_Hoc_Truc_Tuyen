@@ -222,6 +222,7 @@ saveChange() {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
                 }, 1000);
+                this.notificationService.showSuccess(MessageConstants.Created_Ok);
                 this.saved.emit(this.entityForm.value);
              }
             }, error => {

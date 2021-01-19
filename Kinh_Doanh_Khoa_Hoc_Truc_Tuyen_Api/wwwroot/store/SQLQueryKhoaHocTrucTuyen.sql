@@ -1,8 +1,11 @@
 ﻿ SELECT * FROM Courses
  SELECT * FROM Categories
  SELECT * From Lessons
-DBCC CHECKIDENT ('Courses', RESEED, 10) 
- DBCC CHECKIDENT ('Categories', RESEED, 0) 
+DBCC CHECKIDENT ('AnnouncementUsers', RESEED, 0) 
+DBCC CHECKIDENT ('Comments', RESEED, 0) 
+DBCC CHECKIDENT ('Orders', RESEED, 0) 
+DBCC CHECKIDENT ('OrderDetails', RESEED, 0) 
+ DBCC CHECKIDENT ('Categories', RESEED, 91) 
   DBCC CHECKIDENT ('Lessons', RESEED, 0) 
  delete from Lessons
  delete from Courses

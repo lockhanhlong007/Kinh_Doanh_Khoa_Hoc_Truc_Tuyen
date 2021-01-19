@@ -42,11 +42,11 @@
             message: message,
             buttons: {
                 confirm: {
-                    label: "Đồng Ý",
+                    label: "Đồng ý",
                     className: "btn-success"
                 },
                 cancel: {
-                    label: "Từ Chối",
+                    label: "Từ chối",
                     className: "btn-danger"
                 }
             },

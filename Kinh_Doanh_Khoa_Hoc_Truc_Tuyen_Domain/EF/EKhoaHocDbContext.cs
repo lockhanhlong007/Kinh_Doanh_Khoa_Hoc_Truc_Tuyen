@@ -57,9 +57,12 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
             builder.ApplyConfiguration(new ActivateCourseConfiguration());
             builder.ApplyConfiguration(new PromotionInCourseConfiguration());
             builder.ApplyConfiguration(new FeedBackConfiguration());
+            builder.ApplyConfiguration(new ManageFileConfiguration());
             builder.HasSequence("KhoaHocSequence");
             base.OnModelCreating(builder);
         }
+
+        public DbSet<ManageFile> ManageFiles { get; set; }
 
         public DbSet<FeedBack> FeedBacks { get; set; }
 

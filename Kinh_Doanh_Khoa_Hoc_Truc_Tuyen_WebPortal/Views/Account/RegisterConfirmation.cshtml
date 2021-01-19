@@ -1,4 +1,7 @@
-﻿<!--====== Section 1 ======-->
+﻿@{
+    var url = ViewData["ReturnUrl"] ?? "/";
+}
+<!--====== Section 1 ======-->
 <div class="u-s-p-y-30">
 
     <!--====== Section Content ======-->
@@ -44,7 +47,7 @@
                 <div class="col-lg-6 col-md-8 u-s-m-b-30">
                     <div class="l-f-o">
                         <div class="l-f-o__pad-box">
-                            <h1 class="u-s-m-b-30" style="margin: 0;padding: 0;text-align: center; align-items: center; font-size: 14px; line-height: 1.9; color: black">Chúc mừng bạn đã đăng ký thành công! Hãy check email để kích hoạt tài khoản.</h1>
+                            <h1 class="u-s-m-b-30" style="margin: 0;padding: 0;text-align: center; align-items: center; font-size: 14px; line-height: 1.9; color: black">Chúc mừng bạn đã đăng ký thành công! Hãy check email để kích hoạt tài khoản. <a href="@url">Nhấn vào đây để quay về trang trước</a></h1>
                         </div>
                     </div>
                 </div>

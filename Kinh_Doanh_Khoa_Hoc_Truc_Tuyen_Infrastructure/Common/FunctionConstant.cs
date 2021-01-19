@@ -29,5 +29,7 @@
         Function,
 
         Permission,
+
+        BackupRestore,
     }
 }

@@ -17,6 +17,5 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.ViewModels
 
         public string ClientSecret { get; set; }
 
-        public bool RememberMe { get; set; }
     }
 }

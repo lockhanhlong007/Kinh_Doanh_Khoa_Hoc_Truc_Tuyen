@@ -7,12 +7,12 @@
                 </div>
                 <div class="p-col-9">
                     <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="View" pButton type="button" label="Chi Tiết" icon="fa fa-eye" class="p-button-info" *ngIf="selectedItems.length== 1" (click)="showDetailModal()"></button>
-                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Order Canceled" icon="fa fa-times" class="p-button-danger" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 3) == -1" (click)="confirmStatusItems(3)"></button>
-                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Order Returned" icon="fa fa-reply-all" class="p-button-warning" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 2) == -1"
+                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Hủy Đơn" icon="fa fa-times" class="p-button-danger" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 3) == -1" (click)="confirmStatusItems(3)"></button>
+                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Trả Lại Đơn" icon="fa fa-reply-all" class="p-button-warning" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 2) == -1"
                         (click)="confirmStatusItems(2)"></button>
-                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Order In Progress" icon="fa fa-eercast" class="p-button-help" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 1) == -1"
+                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Đang Xử Lý Đơn" icon="fa fa-eercast" class="p-button-help" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 1) == -1"
                         (click)="confirmStatusItems(1)"></button>
-                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Order Completed" icon="fa fa-check" class="p-button-success" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 4) == -1"
+                    <button style="margin-right: 5px;" appPermission appFunction="Orders" appAction="Update" pButton type="button" label="Hoàn Thành Đơn" icon="fa fa-check" class="p-button-success" *ngIf="selectedItems.length > 0 && checkChanged(selectedItems, 4) == -1"
                         (click)="confirmStatusItems(4)"></button>
                 </div>
                 <div class="p-col-3">

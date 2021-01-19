@@ -78,7 +78,7 @@ export class AnnouncementComponent implements OnInit, OnDestroy {
     this.subscription.add(this.announcementService.updateMaskAsRead(entity).subscribe(() => {
       this.notificationService.showSuccess(MessageConstants.Updated_Ok);
       this.loadData();
-      this.selectedItems = [];
+      this.selectedItems = null;
       setTimeout(() => { this.blockedPanel = false; }, 1000);
     }, error => {
       this.notificationService.showError(error);

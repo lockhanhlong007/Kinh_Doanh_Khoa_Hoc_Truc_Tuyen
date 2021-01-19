@@ -108,7 +108,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
         public async Task<IActionResult> GetCommentForHierarchical(int entityId, string entityType, int pageIndex, int pageSize)
         {
             var query = _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().Where(x => x.EntityId == entityId && x.EntityType == entityType && x.ReplyId == null).AsQueryable();
-            var totalRecords = await query.CountAsync();
+            var totalRecords = _khoaHocDbContext.Comments.AsNoTracking().Count(x => x.EntityId == entityId && x.EntityType == entityType);
             var rootComments = await query.OrderByDescending(x => x.CreationTime)
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize).Select(x => new CommentViewModel()
@@ -309,32 +309,26 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return BadRequest(new ApiBadRequestResponse($"Tạo thất bại"));
         }
 
-        [HttpPost("delete-single-comment")]
+        [HttpDelete("delete-single-comment")]
         [ValidationFilter]
         public async Task<IActionResult> DeleteSingleComment(int id)
         {
-            var comment = await _khoaHocDbContext.Comments.Include(x => x.AppUser).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            var comment = await _khoaHocDbContext.Comments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             if (comment == null)
             {
                 return NotFound(new ApiNotFoundResponse($"Không thể tìm thấy bình luận với id: {id}"));
+            }
+            var childrenComment = _khoaHocDbContext.Comments.AsNoTracking().Where(x => x.ReplyId == comment.Id);
+            if (childrenComment.Any())
+            {
+                _khoaHocDbContext.Comments.RemoveRange(childrenComment);
+
             }
             _khoaHocDbContext.Comments.Remove(comment);
             var result = await _khoaHocDbContext.SaveChangesAsync();
             if (result > 0)
             {
-                var commentViewModel = new CommentViewModel()
-                {
-                    Id = comment.Id,
-                    Content = comment.Content,
-                    CreationTime = comment.CreationTime,
-                    LastModificationTime = comment.LastModificationTime,
-                    EntityId = comment.EntityId,
-                    EntityType = comment.EntityType,
-                    UserId = comment.UserId,
-                    OwnerUser = comment.AppUser.Name + " (" + comment.AppUser.Email + ")",
-                    ReplyId = comment.ReplyId
-                };
-                return Ok(commentViewModel);
+                return Ok();
             }
             return BadRequest(new ApiBadRequestResponse($"Xóa bình luận thất bại"));
         }

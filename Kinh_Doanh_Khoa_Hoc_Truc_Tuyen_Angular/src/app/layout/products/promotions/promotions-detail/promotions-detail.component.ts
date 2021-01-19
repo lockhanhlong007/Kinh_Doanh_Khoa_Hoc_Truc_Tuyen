@@ -40,7 +40,7 @@ public saveBtnName: string;
 public closeBtnName: string;
 public vi: any;
 private subscription = new Subscription();
-saved: EventEmitter<any> = new EventEmitter();
+private savedEvent: EventEmitter<any> = new EventEmitter();
 // Validate
 noSpecial: RegExp = /^[^<>*!_~]+$/;
 validation_messages = {
@@ -208,7 +208,7 @@ saveChange() {
                     this.btnDisabled = false;
                     this.blockedPanel = false;
                 }, 1000);
-                this.saved.emit(this.entityForm.value);
+                this.savedEvent.emit(this.entityForm.value);
             }, error => {
                 this.notificationService.showError(error);
                 setTimeout(() => {
@@ -221,7 +221,7 @@ saveChange() {
         this.subscription.add(this.promotionsService.add(promotion)
             .subscribe(() => {
                 this.notificationService.showSuccess(MessageConstants.Created_Ok);
-                this.saved.emit(this.entityForm.value);
+                this.savedEvent.emit(this.entityForm.value);
                 setTimeout(() => {
                     this.btnDisabled = false;
                     this.blockedPanel = false;

@@ -50,12 +50,23 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
         const urlPdf = this.backendApiUrl + '/attachments/export-files/' + response.filePdf;
         window.open(urlPdf);
         const urlExcel = this.backendApiUrl + '/attachments/export-files/' + response.fileExcel;
-        setTimeout(() => { window.open(urlExcel); }, 1000);
+        setTimeout(() => { window.open(urlExcel); }, 2000);
         this.notificationService.showSuccess(MessageConstants.Export_File_Ok);
-        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 2000);
+        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 3000);
 
       }, error => {
         this.notificationService.showError(MessageConstants.Export_File_Failed);
+        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
+      }));
+  }
+  sendEmail() {
+    this.blockedPanel = true;
+    this.subscription.add(this.ordersService.sendEmail(this.res)
+      .subscribe((response: any) => {
+        this.notificationService.showSuccess(MessageConstants.Send_Email_Ok);
+        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
+      }, error => {
+        this.notificationService.showError(error);
         setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
       }));
   }
