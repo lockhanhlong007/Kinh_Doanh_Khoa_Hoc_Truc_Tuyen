@@ -15,7 +15,7 @@
     }
 }
 @section Scripts{
-    <script src="~/assets/js/custom/customCourseDetail.min.js" asp-append-version="true"></script>
+    <script src="~/assets/js/custom/customCourseDetail.js" asp-append-version="true"></script>
     <script>
         var products = new CourseJquery();
         products.initialize();
@@ -24,7 +24,7 @@
 <input type="hidden" id="hid_course_id" value="@Model.CourseViewModel.Id" />
 <input type="hidden" id="hid_current_login_id" value="@user" />
 <input type="hidden" id="hid_current_login_name" value="@User.Identity.Name" />
-<input type="hidden" id="hid_number_of_comments" value="@Model.CommentViewModels.Count" />
+<input type="hidden" id="hid_number_of_comments" value="0" />
 <!--====== Section 1 ======-->
 <div class="u-s-p-t-30">
     <div class="container">
@@ -112,7 +112,7 @@
                     <div class="u-s-m-b-15">
                         <div class="pd-detail__rating gl-rating-style">
                             <span class="pd-detail__review u-s-m-l-4">
-                                <a data-click-scroll="#view-review">@Model.CommentViewModels.Count Bình luận</a>
+                                <a data-click-scroll="#view-review" id="view-review-id">0 Bình luận</a>
                             </span>
                         </div>
                     </div>
@@ -144,7 +144,7 @@
                                         {
                                             <button class="btn btn--e-brand-b-2 add-product-in-cart" data-modal="modal" data-modal-id="#add-to-cart" data-status="@Model.CourseViewModel.Status" data-id="@Model.CourseViewModel.Id" type="button">Thêm vào giỏ</button>
                                         }
-                                        else if(Model.CourseViewModel.Status == 2)
+                                        else if (Model.CourseViewModel.Status == 2)
                                         {
                                             <button class="btn btn--e-brand-b-2 add-product-in-cart" data-modal="modal" data-modal-id="#add-to-cart" data-status="@Model.CourseViewModel.Status" data-id="@Model.CourseViewModel.Id" type="button">Chưa phát hành</button>
 
@@ -189,7 +189,7 @@
                             <li class="nav-item">
                                 <a class="nav-link" id="view-review" data-toggle="tab" href="#pd-rev">
                                     Bình Luận
-                                    <span id="span-count-comments">(@Model.CommentViewModels.Count)</span>
+                                    <span id="span-count-comments">(0)</span>
                                 </a>
                             </li>
                         </ul>
@@ -311,7 +311,7 @@
                                     <div class="u-s-m-b-30">
                                         <div class="pd-tab__rev-score">
                                             <div class="u-s-m-b-8">
-                                                <h2 id="number-comments-non-login">@Model.CommentViewModels.Count Bình Luận</h2>
+                                                <h2 id="number-comments-non-login">0 Bình Luận</h2>
                                             </div>
                                             <div class="u-s-m-b-8">
                                                 <h4><a href="/login.html">Bạn cần đăng nhập để có thể bình luận!</a></h4>
@@ -342,10 +342,12 @@
                                     <form class="pd-tab__rev-f1">
                                         <div class="rev-f1__group">
                                             <div class="u-s-m-b-15">
-                                                <h2 id="number-comments">@Model.CommentViewModels.Count Bình Luận</h2>
+                                                <h2 id="number-comments">0 Bình Luận</h2>
                                             </div>
                                         </div>
-                                        <div class="rev-f1__review" id="comment_list"></div>
+                                        <div class="rev-f1__review" id="comment_list">
+                                        </div>
+
                                         <div class="u-s-m-y-60">
                                             <button class="btn btn--e-brand-shadow" id="comment-pagination" data-page-index="1" style="display:none" type="button">Xem thêm bình luận</button>
                                         </div>
@@ -396,14 +398,14 @@
                                         if (Model.ActiveCoursesViewModels.All(x => x.CourseId != courseViewModel.Id))
                                         {
                                             <div class="product-o__action-wrap">
-                                            <ul class="product-o__action-list">
-                                                <li>
+                                                <ul class="product-o__action-list">
+                                                    <li>
 
-                                                    <a class="add-product-in-cart" data-status="@courseViewModel.Status" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
-                                                    @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
-                                                </li>
-                                            </ul>
-                                        </div>
+                                                        <a class="add-product-in-cart" data-status="@courseViewModel.Status" data-id="@courseViewModel.Id" data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
+                                                        @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         }
                                     }
                                     else
@@ -411,7 +413,7 @@
                                         <div class="product-o__action-wrap">
                                             <ul class="product-o__action-list">
                                                 <li>
-                                                    <a class="add-product-in-cart" data-status="@courseViewModel.Status" data-id="@courseViewModel.Id" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
+                                                    <a class="add-product-in-cart" data-status="@courseViewModel.Status" data-id="@courseViewModel.Id" data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Thêm vào giỏ"><i class="fas fa-plus-circle"></i></a>
                                                     @*<a data-modal="modal" data-modal-id="#add-to-cart" data-tooltip="tooltip" data-placement="top" title="Add to Cart"><i class="fas fa-plus-circle"></i></a>*@
                                                 </li>
                                             </ul>
@@ -462,11 +464,18 @@
 <!--====== End - Section 1 ======-->
 
 <script id="tmpl_children_comments" type="x-tmpl-mustache">
-<div class="review-o u-s-p-t-15 u-s-p-b-30" id="comment-child-{{id}}">
+<div class="review-o u-s-p-t-15 u-s-p-b-30 commentCheck" id="comment-child-{{id}}">
     <div class="review-o__info u-s-m-b-8"  style="display: flex; justify-content: space-between;">
         <div style="width: auto; margin-right: 20px; display: grid">
             <span class="review-o__name">{{ownerUser}}</span>
             <span class="review-o__date" style="margin-bottom: 10px;margin-top: 10px">{{creationTime}}</span>
+        </div>
+        <div style="margin-right: 10px">
+            <span class="review-o__name" style="font-size: 16px; margin-right: 10px">
+                {{#checkUserComment}}
+                <a class="comment-delete-link" style="margin-right: 10px;" href="#" data-commentid="{{id}}"> <i class="fas fa-trash" style="color: #ff4500;"></i></a>
+                {{/checkUserComment}}
+            </span>
         </div>
     </div>
     <p class="review-o__text" style="text-align: justify; align-items: center">{{content}}</p>
@@ -475,7 +484,7 @@
 
 <script id="tmpl_comments" type="x-tmpl-mustache">
 <!-- Parent Comment-->
-<div>
+<div class="commentCheck">
     <div class="review-o">
         <div class="review-o__info u-s-m-b-8" style="display: flex; justify-content: space-between;">
             <div style="width: auto; margin-right: 20px; display: grid">
@@ -484,7 +493,10 @@
             </div>
             <div style="margin-right: 10px">
                 <span class="review-o__name" style="font-size: 16px; margin-right: 10px">
-                   <a class="comment-reply-link" href="#" data-commentid="{{id}}"> <i class="fas fa-reply" style="color: #ff4500;"></i></a>
+                    <a class="comment-reply-link" style="margin-right: 10px;" href="#" data-commentid="{{id}}"> <i class="fas fa-reply" style="color: #ff4500;"></i></a>
+                    {{#checkUserComment}}
+                    <a class="comment-delete-link" style="margin-right: 10px;" href="#" data-commentid="{{id}}"> <i class="fas fa-trash" style="color: #ff4500;"></i></a>
+                    {{/checkUserComment}}
                 </span>
             </div>
         </div>

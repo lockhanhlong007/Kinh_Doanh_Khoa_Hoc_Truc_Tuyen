@@ -26,6 +26,11 @@ export(entity) {
    { headers: this._sharedHeaders }).pipe(catchError(this.handleError));
 }
 
+sendEmail(entity) {
+  return this.http.post(`${environment.ApiUrl}/api/orders/send-email-admin`, entity,
+   { headers: this._sharedHeaders }).pipe(catchError(this.handleError));
+}
+
 getAllPaging(filter, pageIndex, pageSize) {
     return this.http.get<Pagination<Order>>(`${environment.ApiUrl}/api/orders/filter?pageIndex=${pageIndex}&pageSize=${pageSize}&filter=${filter}`,
      { headers: this._sharedHeaders })

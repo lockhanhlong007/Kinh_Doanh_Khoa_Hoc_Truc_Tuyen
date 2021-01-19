@@ -54,6 +54,7 @@
   <ItemGroup>
     <Folder Include="logs\debug\" />
     <Folder Include="wwwroot\attachments\export-files\" />
+    <Folder Include="wwwroot\attachments\backup-restore-files\" />
   </ItemGroup>
 
 

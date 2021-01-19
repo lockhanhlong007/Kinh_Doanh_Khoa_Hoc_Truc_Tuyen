@@ -23,6 +23,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Infrastructure.Common;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -42,14 +45,20 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         private readonly IHubContext<ChatHub> _hubContext;
 
-        public OrdersController(IWebHostEnvironment webHostEnvironment, EKhoaHocDbContext khoaHocDbContext, ILogger<OrdersController> logger, IStorageService storageService, UserManager<AppUser> userManager, IWebHostEnvironment hostingEnvironment, IHubContext<ChatHub> hubContext)
+        private readonly IEmailSender _emailSender;
+
+        private readonly IConfiguration _configuration;
+
+        public OrdersController(IWebHostEnvironment webHostEnvironment, EKhoaHocDbContext khoaHocDbContext, ILogger<OrdersController> logger, IStorageService storageService, UserManager<AppUser> userManager, IWebHostEnvironment hostingEnvironment, IHubContext<ChatHub> hubContext, IEmailSender emailSender, IConfiguration configuration)
         {
             _khoaHocDbContext = khoaHocDbContext;
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentException(nameof(logger));
             _storageService = storageService;
             _userManager = userManager;
             _hostingEnvironment = hostingEnvironment;
             _hubContext = hubContext;
+            _emailSender = emailSender;
+            _configuration = configuration;
         }
 
         [HttpGet("filter")]
@@ -451,6 +460,155 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
         }
 
+
+        [HttpPost("send-email-admin")]
+        public async Task<IActionResult> PostSendEmailOrder(OrderViewModel order)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(order.Email))
+                {
+                    return BadRequest(new ApiBadRequestResponse("Không tìm thấy email để gửi"));
+                }
+                var webRootFolder = _hostingEnvironment.WebRootPath;
+                var resultFile = $"Bill_{order.Name.Replace(" ", "_").convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.xlsx";
+                var resultFilePdf = $"Bill_{order.Name.Replace(" ", "_").convertToUnSign()}_{DateTime.Now:dd-MM-yyyy}_{order.UserId ?? Guid.NewGuid()}.pdf";
+                var date = DateTime.UtcNow.Date;
+                var templateDocument = Path.Combine(webRootFolder, "attachments\\form", "Hoa_Don_Ban_Hang_Le.xlsx");
+                var templateResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFile);
+                var templatePdfResultDocument = Path.Combine(webRootFolder, "attachments\\export-files", resultFilePdf);
+                FileInfo file = new FileInfo(templateResultDocument);
+                if (file.Exists)
+                {
+                    file.Delete();
+                    file = new FileInfo(templateResultDocument);
+                }
+                FileInfo filePdf = new FileInfo(templatePdfResultDocument);
+                if (filePdf.Exists)
+                {
+                    filePdf.Delete();
+                }
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                FileStream templateDocumentStream = new FileStream(templateDocument, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using (ExcelPackage package = new ExcelPackage(templateDocumentStream))
+                {
+                    var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                    if (worksheet == null)
+                    {
+                        throw new Exception("Không kết nối được với file");
+                    }
+                    worksheet.Cells[4, 3].Value = User.GetFullName() ?? "Hệ Thống";
+                    worksheet.Cells[5, 3].Value = order.Name;
+                    worksheet.Cells[6, 3].Value = order.Email;
+                    worksheet.Cells[7, 3].Value = order.PhoneNumber;
+                    worksheet.Cells[8, 3].Value = order.Address;
+                    var stt = 1;
+                    var index = 11;
+                    foreach (var detail in order.OrderDetails)
+                    {
+                        if (index == 21)
+                        {
+                            worksheet.InsertRow(index, order.OrderDetails.Count - stt);
+                        }
+
+                        // Fill Data
+                        worksheet.Cells[index, 1].Value = stt;
+                        worksheet.Cells[index, 2].Value = detail.CourseName;
+                        worksheet.Cells[index, 3].Value = detail.ActiveCourseId;
+                        worksheet.Cells[index, 4].Value = $"{detail.PromotionPrice ?? detail.Price:0,0 VNĐ}";
+
+                        // Bottom
+                        worksheet.Cells[index, 1].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 2].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 3].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 4].Style.Border.Bottom.Style = ExcelBorderStyle.Medium;
+
+                        // Top
+                        worksheet.Cells[index, 1].Style.Border.Top.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 2].Style.Border.Top.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 3].Style.Border.Top.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 4].Style.Border.Top.Style = ExcelBorderStyle.Medium;
+
+                        //Right
+                        worksheet.Cells[index, 1].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 2].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 3].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 4].Style.Border.Right.Style = ExcelBorderStyle.Medium;
+
+                        // Left
+                        worksheet.Cells[index, 1].Style.Border.Left.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 2].Style.Border.Left.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 3].Style.Border.Left.Style = ExcelBorderStyle.Medium;
+                        worksheet.Cells[index, 4].Style.Border.Left.Style = ExcelBorderStyle.Medium;
+
+                        // Horizontal Alignment
+                        worksheet.Cells[index, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        worksheet.Cells[index, 2].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                        worksheet.Cells[index, 3].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        worksheet.Cells[index, 4].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                        // Vertical Alignment
+                        worksheet.Cells[index, 1].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        worksheet.Cells[index, 2].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        worksheet.Cells[index, 3].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                        worksheet.Cells[index, 4].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+
+                        // Font Bold
+                        worksheet.Cells[index, 1].Style.Font.Bold = true;
+                        worksheet.Cells[index, 2].Style.Font.Bold = true;
+                        worksheet.Cells[index, 3].Style.Font.Bold = true;
+                        worksheet.Cells[index, 4].Style.Font.Bold = true;
+
+                        // Update Index
+                        index++;
+                        stt++;
+                    }
+
+                    if (index > 21)
+                    {
+                        worksheet.Cells[index + 1, 4].Value = $"{order.Total:0,0 VNĐ}";
+                        var thanhTien = order.Total.ToString();
+                        worksheet.Cells[index + 2, 3].Value = double.Parse(thanhTien ?? "0").ChuyenSoSangChuoi();
+                        worksheet.Cells[index + 2, 3].Style.Font.Bold = true;
+                        worksheet.Cells[index + 4, 3].Value =
+                            $"Ngày {date.Day} tháng {date.Month} năm {date.Year}";
+                    }
+                    else
+                    {
+                        worksheet.Cells[23, 4].Value = $"{order.Total:0,0 VNĐ}";
+                        var thanhTien = order.Total.ToString();
+                        worksheet.Cells[24, 3].Value = double.Parse(thanhTien ?? "0").ChuyenSoSangChuoi();
+                        worksheet.Cells[24, 3].Style.Font.Bold = true;
+                        worksheet.Cells[26, 3].Value =
+                            $"Ngày {date.Day} tháng {date.Month} năm {date.Year}";
+                    }
+
+                    package.SaveAs(file);
+                    Workbook workbook = new Workbook();
+                    //Load excel file
+                    workbook.LoadFromFile(templateResultDocument);
+                    //Save excel file to pdf file.
+                    workbook.SaveToFile(templatePdfResultDocument, FileFormat.PDF);
+                }
+                var pathExcel = _configuration["BaseAddress"] + "/attachments/export-files/" + resultFile;
+                var pathPdf = _configuration["BaseAddress"] + "/attachments/export-files/" + resultFilePdf;
+                var resultFileRes = new ResultFileResponse()
+                {
+                    FileExcel = pathExcel,
+                    FilePdf = pathPdf
+                };
+                HttpContext.Session.Set(SystemConstants.AttachmentSession, resultFileRes);
+                await _emailSender.SendEmailAsync(order.Email, "Hóa Đơn Từ Website Khóa Học Trực Tuyến", "Đây là hóa đơn mua hàng của bạn");
+                HttpContext.Session.Remove(SystemConstants.AttachmentSession);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
         [HttpGet("{id}")]
         public IActionResult GetDetail(int id)
         {
@@ -691,8 +849,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 announcement.UserId = Guid.Parse(User.GetUserId());
             }
+
+            var message = string.IsNullOrEmpty(request.Message) ? "" : request.Message.formatData(30);
             announcement.Status = 1;
-            announcement.Content = $"Bạn có 1 đơn hàng mới từ {request.Name} với tin nhắn: {request.Message.formatData(30)}";
+            announcement.Content = $"Bạn có 1 đơn hàng mới từ {request.Name} với tin nhắn: {message}";
             announcement.Title = "Thông báo đơn hàng mới";
             announcement.Id = announceId;
             announcement.EntityId = order.Id.ToString();

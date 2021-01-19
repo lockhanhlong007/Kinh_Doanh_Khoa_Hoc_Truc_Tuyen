@@ -189,11 +189,18 @@
 </div>
 
 <script id="tmpl_children_comments" type="x-tmpl-mustache">
-<div class="review-o u-s-p-t-15 u-s-p-b-30" id="comment-child-{{id}}">
+<div class="review-o u-s-p-t-15 u-s-p-b-30 commentCheck" id="comment-child-{{id}}">
     <div class="review-o__info u-s-m-b-8" style="display: flex; justify-content: space-between;">
         <div style="width: auto; margin-right: 20px; display: grid">
             <span class="review-o__name">{{ownerUser}}</span>
             <span class="review-o__date" style="margin-bottom: 10px;margin-top: 10px">{{creationTime}}</span>
+        </div>
+        <div style="margin-right: 10px">
+            <span class="review-o__name" style="font-size: 16px; margin-right: 10px">
+                {{#checkUserComment}}
+                <a class="comment-delete-link" style="margin-right: 10px;" href="#" data-commentid="{{id}}"> <i class="fas fa-trash" style="color: #ff4500;"></i></a>
+                {{/checkUserComment}}
+            </span>
         </div>
     </div>
     <p class="review-o__text" style="text-align: justify; align-items: center">{{content}}</p>
@@ -202,7 +209,7 @@
 
 <script id="tmpl_comments" type="x-tmpl-mustache">
 <!-- Parent Comment-->
-<div>
+<div class="commentCheck">
     <div class="review-o">
         <div class="review-o__info u-s-m-b-8" style="display: flex; justify-content: space-between;">
             <div style="width: auto; margin-right: 20px; display: grid">
@@ -212,6 +219,9 @@
             <div style="margin-right: 10px">
                 <span class="review-o__name" style="font-size: 16px; margin-right: 10px">
                    <a class="comment-reply-link" href="#" data-commentid="{{id}}"> <i class="fas fa-reply" style="color: #ff4500;"></i></a>
+                 {{#checkUserComment}}
+                   <a class="comment-delete-link" style="margin-right: 10px;" href="#" data-commentid="{{id}}"> <i class="fas fa-trash" style="color: #ff4500;"></i></a>
+                 {{/checkUserComment}}
                 </span>
             </div>
         </div>

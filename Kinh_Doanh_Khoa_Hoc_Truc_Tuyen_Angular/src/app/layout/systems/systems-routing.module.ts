@@ -5,6 +5,7 @@ import { UsersComponent } from './users/users.component';
 import { RolesComponent } from './roles/roles.component';
 import { PermissionsComponent } from './permissions/permissions.component';
 import { AuthGuard } from '../../shared';
+import { BackupRestoreComponent } from './backup-restore/backup-restore.component';
 
 const routes: Routes = [
     {
@@ -44,6 +45,14 @@ const routes: Routes = [
         component: PermissionsComponent,
         data: {
             functionCode: 'Permission'
+        },
+        canActivate: [AuthGuard]
+    },
+    {
+        path: 'manage-files',
+        component: BackupRestoreComponent,
+        data: {
+            functionCode: 'BackupRestore'
         },
         canActivate: [AuthGuard]
     }

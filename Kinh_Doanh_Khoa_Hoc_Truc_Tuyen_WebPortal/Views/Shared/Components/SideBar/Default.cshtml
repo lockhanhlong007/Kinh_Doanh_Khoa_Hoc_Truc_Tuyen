@@ -114,11 +114,11 @@
                             {
                                 <li data-tooltip="tooltip" data-placement="left" title="Đăng nhập">
 
-                                    <a href="/login.html"><i class="fas fa-user-tie"></i></a>
+                                    <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-user-tie"></i></a>
                                 </li>
                                 <li data-tooltip="tooltip" data-placement="left" title="Đăng ký">
 
-                                    <a href="/register.html"><i class="fas fa-user-plus"></i></a>
+                                    <a asp-controller="Account" asp-action="Register" asp-route-returnUrl="@Context.Request.Path"><i class="fas fa-user-plus"></i></a>
                                 </li>
                             }
                         </ul>

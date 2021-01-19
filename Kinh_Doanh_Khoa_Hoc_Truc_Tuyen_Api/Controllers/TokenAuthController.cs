@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 {
@@ -19,22 +20,21 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
 
         private readonly UserManager<AppUser> _userManager;
 
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly IConfiguration _configuration;
 
-        public TokenAuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHttpClientFactory httpClientFactory)
+        public TokenAuthController(UserManager<AppUser> userManager, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
 
-        [HttpPost("Logout")]
-        public async Task<IActionResult> Logout()
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult TestEnv()
         {
-            await _signInManager.SignOutAsync();
-            return Ok();
+            return Ok(_configuration["TestEnv:Name"]);
         }
-
         [HttpPost("Authenticate")]
         [AllowAnonymous]
         public async Task<IActionResult> Authenticate(LoginViewModel model)
@@ -44,7 +44,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 return NotFound(new ApiNotFoundResponse("Username không tồn tại"));
             var serverClient = _httpClientFactory.CreateClient();
 
-            var discoveryDocument = await serverClient.GetDiscoveryDocumentAsync("https://localhost:44342/");
+            var discoveryDocument = await serverClient.GetDiscoveryDocumentAsync(_configuration["Authorization:AuthorityUrl"]);
 
             var tokenResponse = await serverClient.RequestPasswordTokenAsync(
                 new PasswordTokenRequest

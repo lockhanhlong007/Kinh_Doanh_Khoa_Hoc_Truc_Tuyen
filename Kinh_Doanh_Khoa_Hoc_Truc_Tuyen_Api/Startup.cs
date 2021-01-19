@@ -20,6 +20,8 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 {
@@ -30,7 +32,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -58,7 +60,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                 options.Password.RequireUppercase = false;
                 options.User.RequireUniqueEmail = true;
             });
-
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+            });
             services.AddIdentityServer(options =>
                 {
                     options.Events.RaiseErrorEvents = true;
@@ -80,7 +85,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
             }).AddJwtBearer(o =>
             {
                 o.SaveToken = true;
-                o.Authority = "https://localhost:44342/";
+                o.Authority = Configuration["Authorization:AuthorityUrl"];
                 o.RequireHttpsMetadata = false;
                 o.Audience = "api.khoahoc";
                 /* This block was missing */
@@ -100,8 +105,10 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     }
                 };
             });
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddTransient<IProfileService, IdentityProfileService>();
             services.AddTransient<IStorageService, StorageService>();
+            services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IViewRenderService, ViewRenderService>();
             services.AddAuthorization(options =>
             {
@@ -205,6 +212,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 
             app.UseAuthorization();
 
+            app.UseSession();
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 

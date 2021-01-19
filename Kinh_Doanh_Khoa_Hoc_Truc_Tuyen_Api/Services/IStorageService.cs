@@ -12,5 +12,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Services
         Task DeleteFileAsync(string fileName);
 
         string GetFileRoot(string fileName, string folder);
+
+        Task RenameFileFolderAsync(string newFileName, string oldFileName, string folder);
+
+        string GetFileDirectory(string folder, string fileName);
+
+        Task DeleteFileFolderAsync(string fileName, string folder);
     }
 }

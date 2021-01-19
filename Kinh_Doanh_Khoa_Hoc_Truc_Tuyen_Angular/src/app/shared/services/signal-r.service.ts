@@ -44,7 +44,7 @@ export class SignalRService extends BaseService {
       console.log('connected');
     } catch (err) {
       console.log(err);
-    //  setTimeout(() => this.start(), 5000);
+      setTimeout(() => this.start(), 10000);
     }
   }
 
