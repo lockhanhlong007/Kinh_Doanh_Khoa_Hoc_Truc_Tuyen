@@ -64,7 +64,7 @@ export class OrdersDetailComponent implements OnInit, OnDestroy {
     this.subscription.add(this.ordersService.sendEmail(this.res)
       .subscribe((response: any) => {
         this.notificationService.showSuccess(MessageConstants.Send_Email_Ok);
-        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
+        setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 2000);
       }, error => {
         this.notificationService.showError(error);
         setTimeout(() => { this.blockedPanel = false; this.btnDisabled = false; }, 1000);
