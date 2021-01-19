@@ -41,7 +41,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             _emailSender = emailSender;
         }
 
-
         [HttpGet]
         [Route("my-profile.html")]
         public async Task<IActionResult> AccountDetail()
