@@ -80,7 +80,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 _logger.LogError($"Function with id {request.Id} is existed.");
                 return BadRequest(new ApiBadRequestResponse($"Function này đã tồn tại với id {request.Id}"));
             }
-
+            if (request.ParentId.Equals("DashBoard"))
+            {
+                _logger.LogError($"Bạn không thể thêm function con cho trang chủ.");
+                return BadRequest(new ApiBadRequestResponse($"Bạn không thể thêm function con cho trang chủ"));
+            }
             var function = new Function
             {
                 Name = request.Name,

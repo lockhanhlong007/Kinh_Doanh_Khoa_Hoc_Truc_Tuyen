@@ -12,3 +12,4 @@ export * from './statistics.service';
 export * from './promotions.service';
 export * from './announcement.service';
 export * from './signal-r.service';
+export * from './manage-files.service';

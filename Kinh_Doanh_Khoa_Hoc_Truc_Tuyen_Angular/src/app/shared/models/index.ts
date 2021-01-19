@@ -25,3 +25,5 @@ export * from './announcement-mark-read-request.model';
 export * from './announcement-user.model';
 export * from './announcement.model';
 export * from './announcement-create-request.model';
+export * from './manage-file.model';
+export * from './manage-file-create-request.model';

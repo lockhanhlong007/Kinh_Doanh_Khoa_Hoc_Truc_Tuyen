@@ -31,4 +31,7 @@ export class MessageConstants {
     public static Send_Notification_OK = 'Gửi thông báo thành công';
     public static Send_Notification_Failed = 'Gửi thông báo thất bại';
     public static Reset_Password_OK = 'Khôi phục mật khẩu thành công';
+    public static Restore_Ok = 'Phục hồi dữ liệu thành công';
+    public static Send_Email_Ok = 'Gửi email thành công';
+    public static Confirm_Restore_Backup = 'Bạn có chắc muốn khôi phục dữ liệu bằng bản sao lưu này?';
 }

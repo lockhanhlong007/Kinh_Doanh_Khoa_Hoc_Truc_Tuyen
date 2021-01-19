@@ -32,7 +32,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             courseCatalog.PriceMin = priceMin;
             courseCatalog.Filter = filter;
             courseCatalog.CategoryViewModels = await _apiClient.GetListAsync<CategoryViewModel>($"/api/categories/side-bar");
-            courseCatalog.Data = await _apiClient.GetAsync<Pagination<CourseViewModel>>($"/api/courses/client-filter?categoryId={categoryId}" + $"&pageIndex={page}" + $"&pageSize={pageSize}" + $"&priceMin={priceMin}" + $"&priceMax={priceMax}" + $"&sortBy={sortBy}" + $"&filter={filter}");
+            //courseCatalog.Data = await _apiClient.GetAsync<Pagination<CourseViewModel>>($"/api/courses/client-filter?categoryId={categoryId}" + $"&pageIndex={page}" + $"&pageSize={pageSize}" + $"&priceMin={priceMin}" + $"&priceMax={priceMax}" + $"&sortBy={sortBy}" + $"&filter={filter}");
+            courseCatalog.Data = await _apiClient.PostAsync<CourseClientViewModelRequest,Pagination<CourseViewModel>>($"/api/courses/client-filter", 
+                new CourseClientViewModelRequest
+                {
+                    PageSize = pageSize.Value,
+                    PriceMax = priceMax,
+                    Filter = filter,
+                    PriceMin = priceMin,
+                    PageIndex = page,
+                    CategoryId = categoryId,
+                    SortBy = sortBy
+                }, false);
             if (User.Identity.IsAuthenticated)
             {
                 courseCatalog.ActiveCoursesViewModels = await _apiClient.GetListAsync<ActiveCoursesViewModel>($"/api/courses/check-active-courses/user-{User.GetUserId()}");
@@ -47,7 +58,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             var detail = new CourseDetailClientViewModel();
             detail.CourseViewModel = await _apiClient.GetAsync<CourseViewModel>($"/api/courses/{id}");
             detail.LessonViewModels = await _apiClient.GetListAsync<LessonViewModel>($"/api/lessons/course-{id}");
-            detail.CommentViewModels = await _apiClient.GetListAsync<CommentViewModel>($"/api/comments/courses/client?entityId={id}&entityType=courses");
             detail.RelatedCourses = await _apiClient.GetListAsync<CourseViewModel>($"/api/courses/related-courses/{id}");
             detail.UserViewModel = await _apiClient.GetAsync<UserViewModel>($"/api/users/course-{id}");
             if (User.Identity.IsAuthenticated)
@@ -135,7 +145,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> DeleteComment(int id)
         {
             try

@@ -59,7 +59,6 @@ export class LoginComponent implements OnInit {
        client.clientId = 'client_angular';
        client.clientSecret = 'secret';
        client.scope = 'openid email profile api.khoahoc';
-       client.rememberMe = false;
        this.auThenService.login(client).subscribe(res => {
         this.auThenService.saveToken(res.accessToken);
         window.location.href = this.returnUrl;

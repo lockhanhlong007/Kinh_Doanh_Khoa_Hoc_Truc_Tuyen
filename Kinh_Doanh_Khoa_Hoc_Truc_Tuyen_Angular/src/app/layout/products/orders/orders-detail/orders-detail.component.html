@@ -109,6 +109,7 @@
     </p-panel>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-info"  appPermission appFunction="Orders" appAction="ExportExcel" (click)="export()">Xuất File</button>
+    <button type="button" class="btn btn-primary" appPermission appFunction="Orders" appAction="ExportExcel" (click)="sendEmail()">Gửi Email</button>
+    <button type="button" class="btn btn-info" appPermission appFunction="Orders" appAction="ExportExcel" (click)="export()">Xuất File</button>
     <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">Đóng</button>
 </div>

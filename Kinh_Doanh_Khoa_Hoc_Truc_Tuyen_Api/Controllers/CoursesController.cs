@@ -210,9 +210,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             }
             if (!string.IsNullOrEmpty(filter))
             {
-                query = query.Where(x =>
-                    x.Name.ToLower().Contains(filter.ToLower()) || x.Name.convertToUnSign().ToLower()
-                        .Contains(filter.convertToUnSign().ToLower()));
+                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) ||
+                                         x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
             }
             var data = query.ToList();
             var totalRecords = data.Count();
@@ -238,8 +237,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             return Ok(pagination);
         }
 
-        [HttpGet("client-filter")]
-        public async Task<IActionResult> GetCoursesPagingForClient(int? categoryId, long? priceMin, long? priceMax, string sortBy, string filter, int pageIndex, int pageSize)
+        [HttpPost("client-filter")]
+        public async Task<IActionResult> GetCoursesPagingForClient(CourseClientViewModelRequest request)
         {
             List<CourseViewModel> data;
             await using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
@@ -247,11 +246,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 await conn.OpenAsync();
             }
-            if (categoryId != null)
+            if (request.CategoryId != null)
             {
                 DynamicParameters parameters = new DynamicParameters();
-                parameters.Add("@categoryId", categoryId);
-                var category = await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == categoryId);
+                parameters.Add("@categoryId", request.CategoryId);
+                var category = await _khoaHocDbContext.Categories.FirstOrDefaultAsync(x => x.Id == request.CategoryId);
                 data = category.ParentId == null
                     ? (await conn.QueryAsync<CourseViewModel>("ListCoursesByCategoryParentId", parameters, null, 120,
                         CommandType.StoredProcedure)).ToList()
@@ -264,16 +263,16 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     CommandType.StoredProcedure)).ToList();
             }
             var query = data.AsEnumerable();
-            if (!string.IsNullOrEmpty(filter))
+            if (!string.IsNullOrEmpty(request.Filter))
             {
-                query = query.Where(x => x.Name.ToLower().Contains(filter.ToLower()) ||
-                                         x.Name.convertToUnSign().ToLower().Contains(filter.convertToUnSign().ToLower()));
+                query = query.Where(x => x.Name.ToLower().Contains(request.Filter.ToLower()) ||
+                                         x.Name.convertToUnSign().ToLower().Contains(request.Filter.convertToUnSign().ToLower()));
             }
-            if (priceMin != null && priceMax != null)
+            if (request.PriceMin != null && request.PriceMax != null)
             {
-                query = query.Where(x => x.SortPrice >= priceMin && x.SortPrice <= priceMax);
+                query = query.Where(x => x.SortPrice >= request.PriceMin && x.SortPrice <= request.PriceMax);
             }
-            query = sortBy switch
+            query = request.SortBy switch
             {
                 "name" => query.OrderByDescending(x => x.Name),
                 "price_low_to_high" => query.OrderBy(x => x.SortPrice),
@@ -297,7 +296,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 }
             }
             var totalRecords = data.Count();
-            var courses = data.Skip((pageIndex - 1) * pageSize).Take(pageSize).Select(c => new CourseViewModel()
+            var courses = data.Skip((request.PageIndex - 1) * request.PageSize).Take(request.PageSize).Select(c => new CourseViewModel()
             {
                 Name = c.Name.formatData(20),
                 Status = c.Status,
@@ -318,8 +317,8 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
             {
                 Items = courses,
                 TotalRecords = totalRecords,
-                PageSize = pageSize,
-                PageIndex = pageIndex
+                PageSize = request.PageSize,
+                PageIndex = request.PageIndex
             };
             return Ok(pagination);
         }

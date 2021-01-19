@@ -551,13 +551,11 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     _khoaHocDbContext.Announcements.RemoveRange(announcements);
                     _khoaHocDbContext.AnnouncementUsers.RemoveRange(announcementUsers);
                 }
-                var roles = _roleManager.Roles;
-                foreach (var role in roles)
+
+                var comments = _khoaHocDbContext.Comments.Where(x => x.UserId.Equals(user.Id));
+                if (comments.Any())
                 {
-                    if (await _userManager.IsInRoleAsync(user, role.Name))
-                    {
-                        await _userManager.RemoveFromRoleAsync(user, role.Name);
-                    }
+                    _khoaHocDbContext.RemoveRange(comments);
                 }
                 var result = await _userManager.DeleteAsync(user);
                 if (!result.Succeeded)

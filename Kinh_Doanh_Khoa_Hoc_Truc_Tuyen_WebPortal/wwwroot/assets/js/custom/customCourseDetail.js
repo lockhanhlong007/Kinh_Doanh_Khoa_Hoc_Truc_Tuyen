@@ -9,6 +9,7 @@
         $("#comment-form").submit(function (e) {
             e.preventDefault(); // avoid to execute the actual submit of the form.
             var form = $(this);
+            var userIdAuth = $("#hid_current_login_id").val();
             var url = form.attr("action");
             $.post(url, form.serialize()).done(function (response) {
 
@@ -16,7 +17,8 @@
                 var newComment = Mustache.render(template, {
                     content: response.content,
                     creationTime: moment(response.creationTime).fromNow(),
-                    ownerUser: response.ownerUser
+                    ownerUser: response.ownerUser,
+                    checkUserComment: userIdAuth === response.userId ? true : false
                 });
                 $("#reviewer-text").val("");
                 $("#comment_list").prepend(newComment);
@@ -24,6 +26,7 @@
                 var valueData = parseInt($("#hid_number_of_comments").val());
                 var countNonLogin = valueData + 1;
                 var numberOfCommentsNonLogin = countNonLogin + " Bình Luận";
+                $("#view-review-id").text(countNonLogin + " Bình luận");
                 $("#number-comments-non-login").text(numberOfCommentsNonLogin);
                 $("#number-comments").text(numberOfCommentsNonLogin);
                 $("#span-count-comments").text("(" + countNonLogin + ")");
@@ -32,13 +35,14 @@
         });
 
         //Binding reply comment event
-        $("body").on("click", ".comment-reply-link", function (e) {
+        $("body").on("click", ".comment-reply-link" , function (e) {
             e.preventDefault();
             if ($("#hid_current_login_id").val() === "") {
                 window.location.href = "/login.html";
             } else {
                 var commentId = $(this).data("commentid");
                 var template = $("#tmpl_reply_comment").html();
+                var userIdAuth = $("#hid_current_login_id").val();
                 var htmlComment = Mustache.render(template, {
                     commentId: commentId
                 });
@@ -54,7 +58,8 @@
                             id: response.id,
                             content: response.content,
                             creationTime: moment(response.creationTime).fromNow(),
-                            ownerUser: response.ownerUser
+                            ownerUser: response.ownerUser,
+                            checkUserComment: userIdAuth === response.userId ? true : false
                         });
 
                         //Reset reply comment
@@ -68,6 +73,7 @@
                         var valueData = parseInt($("#hid_number_of_comments").val());
                         var countNonLogin = valueData + 1;
                         var numberOfCommentsNonLogin = countNonLogin + " Bình Luận";
+                        $("#view-review-id").text(countNonLogin + " Bình luận");
                         $("#number-comments-non-login").text(numberOfCommentsNonLogin);
                         $("#number-comments").text(numberOfCommentsNonLogin);
                         $("#span-count-comments").text("(" + countNonLogin + ")");
@@ -75,8 +81,62 @@
                     });
                 });
             }
-           
-          
+        });
+
+        $("body").on("click", ".comment-delete-link", function (e) {
+            e.preventDefault();
+            var commentId = $(this).data("commentid");
+            var commentRemove = $(this).closest(".commentCheck");
+            var courseId = parseInt($("#hid_course_id").val());
+            client_app.confirm("Bạn có chắc muốn xóa bình luận này?", function ()
+            {
+                $.ajax
+                ({
+                    type: "POST",
+                    url: "/Courses/DeleteComment",
+                    data: {
+                        id: commentId
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        client_app.startLoading();
+                    },
+                    success: function (response) {
+                       
+                        $.ajax({
+                            type: "GET",
+                            url: "/Courses/GetCommentById",
+                            dataType: "json",
+                            data: {
+                                id: courseId,
+                                pageIndex: 1,
+                                entityType: "courses"
+                            },
+                            success: function (response) {
+                                //Update number of comment
+                                var countNonLogin = response.totalRecords;
+                                var numberOfCommentsNonLogin = countNonLogin + " Bình Luận";
+                                $("#view-review-id").text(countNonLogin + " Bình luận");
+                                $("#number-comments-non-login").text(numberOfCommentsNonLogin);
+                                $("#number-comments").text(numberOfCommentsNonLogin);
+                                $("#span-count-comments").text("(" + countNonLogin + ")");
+                                $("#hid_number_of_comments").val(countNonLogin);
+                                commentRemove.remove();
+                            }
+                        });
+
+                            client_app.notify("Xóa Thành Công", "success");
+                        client_app.stopLoading();
+                    },
+                    error: function (status) {
+                        console.log("Có lỗi xảy ra");
+                        client_app.notify("Xóa Thành Công", "success");
+                        client_app.stopLoading();
+                    }
+                });
+            });
+
+
         });
 
         $("body").on("click", "#comment-pagination", function (e) {
@@ -103,12 +163,21 @@
         if (pageIndex === undefined) {
              pageIndex = 1;
         }
-        $.get("/Courses/GetCommentById?id=" + id + "&pageIndex=" + pageIndex + "&entityType=courses").done(function (response, statusText, xhr) {
-            if (xhr.status === 200) {
+        $.ajax({
+            type: "GET",
+            url: "/Courses/GetCommentById",
+            dataType: "json",
+            data: {
+                id: id,
+                pageIndex: pageIndex,
+                entityType: "courses"
+            },
+            success: function (response) {
                 var template = $("#tmpl_comments").html();
                 var childrenTemplate = $("#tmpl_children_comments").html();
                 if (response && response.items) {
                     var html = "";
+                    var userIdAuth = $("#hid_current_login_id").val();
                     $.each(response.items, function (index, item) {
                         var childrenHtml = "";
                         if (item.children && item.children.items) {
@@ -117,7 +186,8 @@
                                     content: childItem.content,
                                     creationTime: moment(childItem.creationTime).fromNow(),
                                     ownerUser: childItem.ownerUser,
-                                    id: childItem.id
+                                    id: childItem.id,
+                                    checkUserComment: userIdAuth === childItem.userId ? true : false
                                 });
                             });
                             
@@ -133,9 +203,20 @@
                             content: item.content,
                             creationTime: moment(item.creationTime).fromNow(),
                             ownerUser: item.ownerUser,
-                            id: item.id
-                        });
+                            id: item.id,
+                            checkUserComment: userIdAuth === item.userId ? true : false
                     });
+                    
+                        
+                    });
+                    //Update number of comment
+                    var countNonLogin = response.totalRecords;
+                    var numberOfCommentsNonLogin = countNonLogin + " Bình Luận";
+                    $("#view-review-id").text(countNonLogin + " Bình luận");
+                    $("#number-comments-non-login").text(numberOfCommentsNonLogin);
+                    $("#number-comments").text(numberOfCommentsNonLogin);
+                    $("#span-count-comments").text("(" + countNonLogin + ")");
+                    $("#hid_number_of_comments").val(countNonLogin);
                     $("#comment_list").append(html);
                     if (response.pageIndex < response.pageCount) {
                         $("#comment-pagination").show();
@@ -151,33 +232,42 @@
 
     function loadRepliedComments(id, rootCommentId, pageIndex) {
         if (pageIndex === undefined) pageIndex = 1;
-        $.get("/Courses/GetRepliedCommentById?id=" + id + "&pageIndex=" + pageIndex + "&rootCommentId=" + rootCommentId + "&entityType=courses").done(function (response, statusText, xhr) {
-            if (xhr.status === 200) {
+
+        $.ajax({
+            type: "GET",
+            url: "/Courses/GetRepliedCommentById",
+            dataType: "json",
+            data: {
+                id: id,
+                pageIndex: pageIndex,
+                entityType: "courses",
+                rootCommentId: rootCommentId
+            },
+            success: function (response) {
+                var userIdAuth = $("#hid_current_login_id").val();
                 var childrenTemplate = $("#tmpl_children_comments").html();
                 if (response && response.items) {
                     var html = "";
-                    $.each(response.items, function (index, item) {
-                        html += Mustache.render(childrenTemplate, {
-                            content: item.content,
-                            creationTime: moment(item.creationTime).fromNow(),
-                            ownerUser: item.ownerUser,
-                            id: item.id
+                    $.each(response.items,
+                        function(index, item) {
+                            html += Mustache.render(childrenTemplate,
+                                {
+                                    content: item.content,
+                                    creationTime: moment(item.creationTime).fromNow(),
+                                    ownerUser: item.ownerUser,
+                                    id: item.id,
+                                    checkUserComment: userIdAuth === response.userId ? true : false
+                                });
                         });
-                    });
                     $("#children_comments_" + rootCommentId).prepend(html);
                     if (response.pageIndex < response.pageCount) {
                         $("#replied-comment-pagination-" + rootCommentId).show();
-                    }
-                    else {
+                    } else {
                         $("#replied-comment-pagination-" + rootCommentId).hide();
                     }
-
                 }
             }
         });
+
     }
-
-
-
-
 }

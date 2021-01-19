@@ -36,6 +36,7 @@ public keyword = '';
  public showRoleAssign = false;
  public totalUserRoleRecords: number;
  private subscription = new Subscription();
+
  constructor(
   private modalService: BsModalService,
   private usersService: UsersService,
@@ -121,7 +122,6 @@ public keyword = '';
       this.bsModalRef.hide();
       this.loadData();
       this.selectedItems = [];
-      this.notificationService.showSuccess(MessageConstants.Created_Ok);
     }));
   }
   showEditModal() {
@@ -138,8 +138,6 @@ public keyword = '';
         class: 'modal-lg',
         backdrop: 'static'
       });
-
-
       this.subscription.add(this.bsModalRef.content.saved.subscribe((response) => {
       this.bsModalRef.hide();
       this.loadData(response.id);

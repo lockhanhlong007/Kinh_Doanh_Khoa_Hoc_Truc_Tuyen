@@ -314,7 +314,6 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_WebPortal.Controllers
                     Scope = _configuration["Authorization:Scope"],
                     Password = request.Password,
                     UserName = request.UserName,
-                    RememberMe = request.RememberMe
                 };
                 var result = await _apiClient.PostAsync<LoginViewModel, TokenResponseFromServer>($"/api/TokenAuth/Authenticate", loginViewModel, false);
                 var principal = ValidateToken(result);
