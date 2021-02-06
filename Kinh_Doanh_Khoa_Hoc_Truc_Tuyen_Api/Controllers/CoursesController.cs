@@ -268,19 +268,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                 query = query.Where(x => x.Name.ToLower().Contains(request.Filter.ToLower()) ||
                                          x.Name.convertToUnSign().ToLower().Contains(request.Filter.convertToUnSign().ToLower()));
             }
-            if (request.PriceMin != null && request.PriceMax != null)
-            {
-                query = query.Where(x => x.SortPrice >= request.PriceMin && x.SortPrice <= request.PriceMax);
-            }
-            query = request.SortBy switch
-            {
-                "name" => query.OrderByDescending(x => x.Name),
-                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
-                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
-                _ => query.OrderByDescending(x => x.CreationTime)
-            };
-            data = query.ToList();
-            foreach (var item in data)
+            foreach (var item in query)
             {
                 if (item.DiscountPercent > 0)
                 {
@@ -295,6 +283,18 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.Controllers
                     item.SortPrice = item.Price;
                 }
             }
+            if (request.PriceMin != null && request.PriceMax != null)
+            {
+                query = query.Where(x => x.SortPrice >= request.PriceMin && x.SortPrice <= request.PriceMax);
+            }
+            query = request.SortBy switch
+            {
+                "name" => query.OrderByDescending(x => x.Name),
+                "price_low_to_high" => query.OrderBy(x => x.SortPrice),
+                "price_high_to_low" => query.OrderByDescending(x => x.SortPrice),
+                _ => query.OrderByDescending(x => x.CreationTime)
+            };
+            data = query.ToList();
             var totalRecords = data.Count();
             var courses = data.Skip((request.PageIndex - 1) * request.PageSize).Take(request.PageSize).Select(c => new CourseViewModel()
             {
