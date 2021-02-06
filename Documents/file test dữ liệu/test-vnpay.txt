@@ -1,4 +1,6 @@
 https://testkhol.zendesk.com/chat/agent#widget/forms
+userName: long0072017@gmail.com
+password: Computer140
 
 Thẻ test: Thẻ thành công
 Ngân hàng	NCB
@@ -30,3 +32,7 @@ Ngân hàng: NCB
 Số thẻ: 9704194841945513
 Tên chủ thẻ:NGUYEN VAN A
 Ngày phát hành:07/15
+
+http://long0072017-001-site1.itempurl.com/swagger
+
+http://www.kholdemo.somee.com/
