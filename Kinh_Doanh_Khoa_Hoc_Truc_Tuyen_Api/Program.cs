@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
 {
