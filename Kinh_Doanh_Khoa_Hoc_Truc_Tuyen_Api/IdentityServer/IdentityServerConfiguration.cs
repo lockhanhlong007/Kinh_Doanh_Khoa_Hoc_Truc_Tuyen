@@ -10,6 +10,14 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api.IdentityServer
 
         public static IEnumerable<ApiResource> Apis => new ApiResource[] { new ApiResource("api.khoahoc", "Khóa Học Trực Tuyến Api") };
 
+        public static IEnumerable<ApiScope> Scopes =>
+            new ApiScope[]
+            {
+                new ApiScope("api.khoahoc", "Khóa Học Trực Tuyến Api")
+            };
+
+
+
         public static IEnumerable<Client> Clients =>
             new Client[]
             {

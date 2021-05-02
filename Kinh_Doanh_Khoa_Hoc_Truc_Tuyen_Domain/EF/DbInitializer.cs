@@ -59,7 +59,7 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Domain.EF
             #endregion Roles
 
             #region Users
-
+            
             if (!_userManager.Users.Any())
             {
                 var result = await _userManager.CreateAsync(new AppUser

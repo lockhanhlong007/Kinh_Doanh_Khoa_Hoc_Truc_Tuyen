@@ -72,15 +72,17 @@ namespace Kinh_Doanh_Khoa_Hoc_Truc_Tuyen_Api
                     options.Events.RaiseSuccessEvents = true;
                 })
                .AddInMemoryApiResources(IdentityServerConfiguration.Apis)
+               .AddInMemoryApiScopes(IdentityServerConfiguration.Scopes)
                .AddInMemoryClients(IdentityServerConfiguration.Clients)
                .AddInMemoryIdentityResources(IdentityServerConfiguration.Ids)
                .AddProfileService<IdentityProfileService>()
                .AddAspNetIdentity<AppUser>()
                .AddDeveloperSigningCredential();
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
             {
